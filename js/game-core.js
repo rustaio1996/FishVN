@@ -1,5 +1,5 @@
       // Configuration for Backend API Server
-      const API_BASE = "http://localhost:5000"; // Đổi thành URL production khi deploy (Ví dụ: https://api-fishvn.onrender.com)
+      const API_BASE = "https://fishvn.onrender.com"; // Địa chỉ API Render online chính thức của bạn
 
       // Hàm sinh/lấy mã ID tài khoản của người chơi
       function getPlayerId() {
