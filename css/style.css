@@ -1,4 +1,4 @@
-﻿* {
+* {
 
         box-sizing: border-box;
 
@@ -1443,6 +1443,80 @@
 
         border-left: 3px solid;
 
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+      }
+
+      .fish-card:hover {
+
+        transform: translateY(-2px);
+
+      }
+
+      /* Glow effect and keyframes for rare fish cards */
+
+      .fish-card[data-rarity="Huyền Thoại"] {
+
+        --rarity-glow-color: rgba(255, 152, 0, 0.35);
+
+        animation: glow-pulse 2.5s infinite alternate;
+
+        border: 1px solid rgba(255, 152, 0, 0.2) !important;
+
+        border-left-width: 4px !important;
+
+      }
+
+      .fish-card[data-rarity="Thần Thoại"] {
+
+        --rarity-glow-color: rgba(224, 64, 251, 0.35);
+
+        animation: glow-pulse 2.5s infinite alternate;
+
+        border: 1px solid rgba(224, 64, 251, 0.2) !important;
+
+        border-left-width: 4px !important;
+
+      }
+
+      .fish-card[data-rarity="Tối Cao"] {
+
+        --rarity-glow-color: rgba(255, 23, 68, 0.35);
+
+        animation: glow-pulse 2.5s infinite alternate;
+
+        border: 1px solid rgba(255, 23, 68, 0.2) !important;
+
+        border-left-width: 4px !important;
+
+      }
+
+      .fish-card[data-rarity="Vô Tri"] {
+
+        --rarity-glow-color: rgba(0, 229, 255, 0.4);
+
+        animation: glow-pulse 2.5s infinite alternate;
+
+        border: 1px solid rgba(0, 229, 255, 0.25) !important;
+
+        border-left-width: 4px !important;
+
+      }
+
+      @keyframes glow-pulse {
+
+        0% {
+
+          box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+
+        }
+
+        100% {
+
+          box-shadow: 0 0 14px var(--rarity-glow-color);
+
+        }
+
       }
 
       .rarity-badge {
@@ -1905,7 +1979,7 @@
 
         .game-container {
 
-          max-width: 960px;
+          max-width: 1280px;
 
           transition: max-width 0.3s ease;
 
@@ -1956,6 +2030,26 @@
           position: sticky;
 
           top: 15px;
+
+        }
+
+
+
+        .inventory-panel,
+
+        .shop-container {
+
+          display: flex !important;
+
+          flex-direction: column !important;
+
+        }
+
+
+
+        .inventory-collapsible {
+
+          max-height: 650px !important;
 
         }
 
@@ -5753,4 +5847,17 @@
 
       .btn-copy-stk:active {
         transform: translateY(1px);
+      }
+
+      
+      /* ===== GAME LOADING OVERLAY ANIMATIONS ===== */
+      @keyframes loading-bounce {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(-12px); }
+      }
+
+      @keyframes loading-progress {
+        0% { transform: translateX(-100%); }
+        50% { transform: translateX(0); }
+        100% { transform: translateX(100%); }
       }

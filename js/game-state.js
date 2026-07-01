@@ -44,6 +44,11 @@ let gameState = "idle";
       let currentTitle = "Dân Chơi Hệ Cần Cỏ";
 
       let currentWeather = "Bình Thường";
+      let catchModalThreshold = localStorage.getItem("catchModalThreshold") || "Thần Thoại";
+      if (localStorage.getItem("catchModalThreshold") === "Hiếm" || !localStorage.getItem("catchModalThreshold")) {
+        localStorage.setItem("catchModalThreshold", "Thần Thoại");
+        catchModalThreshold = "Thần Thoại";
+      }
       let fishInventory = {
         Rác: 0,
         "Phế Liệu": 0,

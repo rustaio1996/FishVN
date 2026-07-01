@@ -110,13 +110,20 @@
         }
       };
 
+      window.showLoadingOverlay = function(text = "Đang tải dữ liệu trò chơi...") {
+        const overlay = document.getElementById("gameLoadingOverlay");
+        const textEl = document.getElementById("loadingOverlayText");
+        if (textEl) textEl.innerText = text;
+        if (overlay) overlay.style.display = "flex";
+      };
+
+      window.hideLoadingOverlay = function() {
+        const overlay = document.getElementById("gameLoadingOverlay");
+        if (overlay) overlay.style.display = "none";
+      };
+
       window.syncCloudSave = async () => {
-        const syncBtn = document.getElementById("btnSyncCloud");
-        if (syncBtn) {
-          syncBtn.innerText = "Đang đồng bộ...";
-          syncBtn.disabled = true;
-        }
-        
+        showLoadingOverlay("Đang đồng bộ lưu trữ đám mây...");
         try {
           const keys = ["fish_game_state", "fish_game_achievements", "fish_game_karma_wl", "fish_game_gacha_double", "fish_game_equipped_ach"];
           for (const key of keys) {
@@ -137,10 +144,7 @@
         } catch (e) {
           alert("Đồng bộ thất bại: " + e.message);
         } finally {
-          if (syncBtn) {
-            syncBtn.innerText = "🔄 Đồng Bộ Ngay";
-            syncBtn.disabled = false;
-          }
+          hideLoadingOverlay();
         }
       };
 
@@ -836,6 +840,141 @@
 
         const w = canvas.width;
         const h = canvas.height;
+        
+        let activePixelEvent = null;
+        let lastPixelEventTime = 0;
+
+        function triggerRandomPixelEvent(t) {
+          const events = ["ufo", "kraken", "submarine", "meteor"];
+          const selected = events[Math.floor(Math.random() * events.length)];
+          activePixelEvent = {
+            type: selected,
+            startedAt: t,
+            duration: selected === "ufo" ? 6000 : selected === "kraken" ? 5000 : selected === "submarine" ? 5000 : 3000
+          };
+          lastPixelEventTime = t;
+
+          if (selected === "ufo") {
+            addLog("🛸 [BIẾN CỐ] Đĩa bay người ngoài hành tinh cố gắng hút trộm cá trong kho! Nhưng thất bại vì cá quá nặng và bốc mùi...", "warning");
+          } else if (selected === "kraken") {
+            addLog("🐙 [BIẾN CỐ] Thủy quái Kraken ngoi lên vẫy chào ngư ông. Sóng đánh dữ dội suýt lật thuyền!", "warning");
+          } else if (selected === "submarine") {
+            addLog("⚓ [BIẾN CỐ] Tàu ngầm thám hiểm đi lạc nhô lên thăm dò địa bàn câu cá của bạn.", "info");
+          } else if (selected === "meteor") {
+            addLog("☄️ [BIẾN CỐ] Một mảnh thiên thạch nhỏ rơi sát mạn thuyền bốc khói nghi ngút. Suýt chút nữa là có món ngư ông nướng!", "warning");
+          }
+        }
+
+        function drawPixelEvents(t) {
+          if (!activePixelEvent) return;
+          const age = t - activePixelEvent.startedAt;
+          if (age > activePixelEvent.duration) {
+            activePixelEvent = null;
+            return;
+          }
+
+          if (activePixelEvent.type === "ufo") {
+            let ux = 75;
+            let uy = 15;
+            if (age < 1500) {
+              const p = age / 1500;
+              ux = -30 + Math.round(p * 105);
+              uy = -20 + Math.round(p * 35);
+            } else if (age > 4500) {
+              const p = (age - 4500) / 1500;
+              ux = 75 + Math.round(p * 150);
+              uy = 15 - Math.round(p * 35);
+            }
+
+            if (age >= 1500 && age <= 4500) {
+              // Blocky, stepped pixel-art UFO tractor beam
+              ctx.fillStyle = "rgba(255, 235, 59, 0.16)";
+              rect(ux + 2, uy + 6, 16, 4);
+              rect(ux - 1, uy + 10, 22, 6);
+              rect(ux - 4, uy + 16, 28, 8);
+              rect(ux - 8, uy + 24, 36, 46);
+            }
+
+            rect(ux, uy, 20, 6, "#7f8c8d");
+            rect(ux + 6, uy - 5, 8, 5, "#00e5ff");
+            
+            const flash = Math.floor(t / 250) % 2 === 0;
+            rect(ux + 2, uy + 6, 2, 2, flash ? "#ff1744" : "#00ff87");
+            rect(ux + 9, uy + 6, 2, 2, flash ? "#00ff87" : "#ff1744");
+            rect(ux + 16, uy + 6, 2, 2, flash ? "#ff1744" : "#00ff87");
+
+          } else if (activePixelEvent.type === "kraken") {
+            let ty = 90;
+            if (age < 1000) {
+              const p = age / 1000;
+              ty = 90 - Math.round(p * 25);
+            } else if (age > 4000) {
+              const p = (age - 4000) / 1000;
+              ty = 65 + Math.round(p * 25);
+            } else {
+              ty = 65;
+            }
+
+            const waveX = Math.round(Math.sin(t * 0.008) * 5);
+            const kx = 120 + waveX;
+
+            // Draw Kraken tentacle with distinct stepped rectangles (Pixel Art)
+            rect(kx - 3, ty, 6, 4, "#7b1fa2");
+            rect(kx - 4, ty + 4, 8, 4, "#7b1fa2");
+            rect(kx - 4, ty + 8, 9, 6, "#6a1b9a");
+            rect(kx - 3, ty + 14, 10, 8, "#6a1b9a");
+            rect(kx - 2, ty + 22, 11, 35, "#4a148c");
+
+            // Suction cups
+            rect(kx - 1, ty + 2, 2, 2, "#e040fb");
+            rect(kx - 2, ty + 8, 2, 2, "#e040fb");
+            rect(kx - 2, ty + 15, 2, 2, "#e040fb");
+            rect(kx - 1, ty + 23, 3, 2, "#e040fb");
+            rect(kx - 1, ty + 30, 3, 2, "#e040fb");
+
+          } else if (activePixelEvent.type === "submarine") {
+            let sy = 95;
+            if (age < 1000) {
+              const p = age / 1000;
+              sy = 95 - Math.round(p * 15);
+            } else if (age > 4000) {
+              const p = (age - 4000) / 1000;
+              sy = 80 + Math.round(p * 15);
+            } else {
+              sy = 80;
+            }
+
+            const sx = 210;
+            
+            rect(sx, sy, 24, 10, "#fbc02d");
+            rect(sx + 8, sy - 6, 8, 6, "#fbc02d");
+            rect(sx + 11, sy - 12, 2, 6, "#78909c");
+            rect(sx + 11, sy - 12, 4, 2, "#78909c");
+            rect(sx + 16, sy + 3, 3, 3, "#00e5ff"); // Cabin Window
+            
+            const propState = Math.floor(t / 80) % 2 === 0;
+            rect(sx - 2, sy + 2, 2, propState ? 6 : 2, "#ffb300");
+
+          } else if (activePixelEvent.type === "meteor") {
+            const mx = 185;
+            const my = -10;
+            if (age < 1000) {
+              const p = age / 1000;
+              const curX = mx + Math.round(p * 20);
+              const curY = my + Math.round(p * 80);
+              rect(curX, curY, 6, 6, "#ff5722");
+              rect(curX - 4, curY - 4, 4, 4, "#ffc107");
+            } else if (age >= 1000 && age < 2000) {
+              const pSplash = (age - 1000) / 1000;
+              const dx = Math.round(pSplash * 12);
+              const dy = Math.round(pSplash * 15);
+              rect(205 - dx, 70 - dy, 2, 2, "#e8fbff");
+              rect(208 + dx, 70 - dy, 2, 2, "#e8fbff");
+              rect(206, 70 - Math.round(dy * 1.4), 2, 2, "#d6f4ff");
+            }
+          }
+        }
+
         const fishSchool = [
           { x: 12, y: 82, speed: 0.28, color: "#ff6b8a", fin: "#ffd166", size: 1 },
           { x: 118, y: 100, speed: 0.2, color: "#51d7ff", fin: "#b6ffb0", size: 0.82 },
@@ -860,63 +999,317 @@
         }
 
         function drawFish(x, y, color, fin, size = 1, flip = false) {
-          const s = size;
+          const px = Math.max(1, Math.round(size * 1.5));
           const dir = flip ? -1 : 1;
-          poly([
-            [x - dir * 11 * s, y],
-            [x - dir * 5 * s, y - 5 * s],
-            [x + dir * 8 * s, y - 4 * s],
-            [x + dir * 13 * s, y],
-            [x + dir * 8 * s, y + 4 * s],
-            [x - dir * 5 * s, y + 5 * s],
-          ], color);
-          poly([
-            [x - dir * 11 * s, y],
-            [x - dir * 18 * s, y - 5 * s],
-            [x - dir * 17 * s, y + 5 * s],
-          ], fin);
-          rect(x + dir * 6 * s, y - 2 * s, 2 * s, 2 * s, "#09111f");
-          rect(x - dir * 2 * s, y - 6 * s, 7 * s, 2 * s, fin);
+
+          // 12x7 retro pixel fish grid layout
+          // 0: empty, 1: body (color), 2: fin (fin), 3: eye (#050c18)
+          const grid = [
+            [0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0], // y = -3
+            [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0], // y = -2
+            [2, 2, 0, 1, 1, 1, 1, 1, 3, 1, 0, 0], // y = -1
+            [2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 0], // y = 0
+            [2, 2, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0], // y = 1
+            [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0], // y = 2
+            [0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0]  // y = 3
+          ];
+
+          for (let row = 0; row < 7; row++) {
+            const dy = (row - 3) * px;
+            for (let col = 0; col < 12; col++) {
+              const val = grid[row][col];
+              if (val === 0) continue;
+
+              const dx = (col - 6) * px * dir;
+              let c = color;
+              if (val === 2) c = fin;
+              else if (val === 3) c = "#050c18";
+
+              rect(x + dx, y + dy, px, px, c);
+            }
+          }
+        }
+
+        function drawRain(t) {
+          if (currentWeather !== "Bão Táp" || currentZone === "hang_ca") return;
+          for (let i = 0; i < 25; i++) {
+            const rx = (i * 28 + t * 0.45) % w;
+            const ry = (i * 12 + t * 0.75) % (h - 20);
+            ctx.strokeStyle = "rgba(174, 219, 255, 0.35)";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(rx, ry);
+            ctx.lineTo(rx - 3, ry + 9);
+            ctx.stroke();
+          }
+        }
+
+        function drawLightning(t) {
+          if (currentWeather !== "Bão Táp" || currentZone === "hang_ca") return;
+          if (Math.sin(t * 0.002) > 0.97) {
+            ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
+            ctx.fillRect(0, 0, w, h);
+          }
+        }
+
+        function drawFog(t) {
+          if (currentWeather !== "Sương Mù" || currentZone === "hang_ca") return;
+          for (let i = 0; i < 2; i++) {
+            ctx.fillStyle = "rgba(240, 244, 248, 0.22)";
+            const shift = (t * 0.04 * (i + 1)) % w;
+            rect(0 - shift, 50 + i * 5, w, 4, "rgba(240, 244, 248, 0.2)");
+            rect(shift, 53 + i * 4, w, 5, "rgba(240, 244, 248, 0.16)");
+          }
+        }
+
+        function drawEclipseParticles(t) {
+          if (currentWeather !== "Nhật Thực" || currentZone === "hang_ca") return;
+          for (let i = 0; i < 15; i++) {
+            const sx = (i * 47) % w;
+            const sy = (i * 23) % 48;
+            const alpha = 0.3 + 0.5 * Math.abs(Math.sin(t * 0.002 + i));
+            rect(sx, sy, 2, 2, "rgba(224, 180, 255, " + alpha + ")");
+          }
         }
 
         function drawSky(t) {
-          rect(0, 0, w, h, "#65c7e8");
-          rect(0, 0, w, 20, "#8ee6ff");
-          rect(0, 20, w, 28, "#5ab7de");
-          rect(0, 48, w, 10, "#2d8fc8");
-          rect(248, 18, 18, 18, "#ffd75d");
-          rect(252, 14, 10, 26, "rgba(255, 235, 141, 0.32)");
-          rect(244, 22, 26, 10, "rgba(255, 235, 141, 0.32)");
+          if (currentZone === "hang_ca") {
+            // Cave ceiling bands
+            rect(0, 0, w, 16, "#0f172a");
+            rect(0, 16, w, 20, "#131c2e");
+            rect(0, 36, w, 22, "#1e293b");
+
+            // Cave ceiling stalactites
+            poly([[10, 0], [25, 0], [17, 24]], "#334155");
+            poly([[60, 0], [80, 0], [70, 36]], "#475569");
+            poly([[140, 0], [158, 0], [149, 20]], "#334155");
+            poly([[210, 0], [235, 0], [222, 30]], "#475569");
+            poly([[270, 0], [292, 0], [281, 38]], "#1e293b");
+            return;
+          }
+
+          // Sky color bands
+          if (currentWeather === "Bão Táp") {
+            rect(0, 0, w, 16, "#475569");
+            rect(0, 16, w, 20, "#334155");
+            rect(0, 36, w, 12, "#1e293b");
+            rect(0, 48, w, 10, "#0f172a");
+          } else if (currentWeather === "Sương Mù") {
+            rect(0, 0, w, 16, "#eceff1");
+            rect(0, 16, w, 20, "#cfd8dc");
+            rect(0, 36, w, 12, "#b0bec5");
+            rect(0, 48, w, 10, "#90a4ae");
+          } else if (currentWeather === "Nhật Thực") {
+            rect(0, 0, w, 16, "#2e0854");
+            rect(0, 16, w, 20, "#1a0033");
+            rect(0, 36, w, 12, "#0d001a");
+            rect(0, 48, w, 10, "#030008");
+          } else {
+            // Normal
+            rect(0, 0, w, 16, "#7dd3fc");
+            rect(0, 16, w, 20, "#38bdf8");
+            rect(0, 36, w, 12, "#0284c7");
+            rect(0, 48, w, 10, "#0369a1");
+          }
+
+          const oldAlpha = ctx.globalAlpha;
+          if (currentWeather === "Sương Mù") {
+            ctx.globalAlpha = 0.35;
+          }
+
+          if (currentWeather === "Nhật Thực") {
+            // Blocky Solar Corona / Eclipse
+            const rOffset = Math.floor((Math.sin(t * 0.005) * 2) + 2); // 0 to 4
+            ctx.fillStyle = "rgba(224, 140, 255, 0.2)";
+            rect(240 - rOffset, 20 - rOffset, 34 + rOffset * 2, 14 + rOffset * 2);
+            rect(248 - rOffset, 12 - rOffset, 18 + rOffset * 2, 30 + rOffset * 2);
+            
+            ctx.fillStyle = "rgba(171, 71, 188, 0.4)";
+            rect(244 - Math.floor(rOffset * 0.5), 23 - Math.floor(rOffset * 0.5), 26 + Math.floor(rOffset), 8 + Math.floor(rOffset));
+            rect(251 - Math.floor(rOffset * 0.5), 16 - Math.floor(rOffset * 0.5), 12 + Math.floor(rOffset), 22 + Math.floor(rOffset));
+            
+            // Inner black disk
+            rect(248, 18, 18, 18, "#020008");
+          } else if (currentWeather === "Bão Táp") {
+            poly([[254, 8], [260, 8], [253, 18], [261, 18], [249, 32], [253, 21], [247, 21]], "#ffeb3b");
+          } else {
+            // Normal Sun (Blocky Cross Glow)
+            ctx.fillStyle = "rgba(255, 235, 141, 0.15)";
+            rect(240, 26, 34, 2);
+            rect(256, 10, 2, 34);
+            rect(244, 22, 26, 10);
+            rect(252, 14, 10, 26);
+            
+            ctx.fillStyle = "rgba(255, 235, 141, 0.35)";
+            rect(246, 20, 22, 14);
+            rect(250, 16, 14, 22);
+
+            rect(248, 18, 18, 18, "#ffd75d");
+          }
+
+          let cloudCol1 = "#e8fbff";
+          let cloudCol2 = "#f7ffff";
+          let cloudCol3 = "#d6f4ff";
+          if (currentWeather === "Bão Táp") {
+            cloudCol1 = "#5a6268";
+            cloudCol2 = "#778087";
+            cloudCol3 = "#495057";
+          } else if (currentWeather === "Nhật Thực") {
+            cloudCol1 = "#4a154b";
+            cloudCol2 = "#6b116c";
+            cloudCol3 = "#2d0a2e";
+          }
 
           for (let i = 0; i < 3; i++) {
             const cx = ((t * 0.008 * (i + 1) + i * 92) % 390) - 58;
             const cy = 17 + i * 10;
-            rect(cx, cy, 22, 6, "#e8fbff");
-            rect(cx + 8, cy - 5, 16, 6, "#f7ffff");
-            rect(cx + 24, cy + 2, 16, 5, "#d6f4ff");
+            rect(cx, cy, 22, 6, cloudCol1);
+            rect(cx + 8, cy - 5, 16, 6, cloudCol2);
+            rect(cx + 24, cy + 2, 16, 5, cloudCol3);
           }
 
-          poly([[0, 54], [32, 33], [70, 54]], "#286b98");
-          poly([[38, 54], [84, 25], [132, 54]], "#397fa8");
-          poly([[112, 54], [166, 30], [230, 54]], "#2e6f9e");
+          ctx.globalAlpha = oldAlpha;
+
+          // 3D mountains split light/dark shading
+          let mnt1L = "#3a80b0", mnt1D = "#245d82";
+          let mnt2L = "#4c95bf", mnt2D = "#307299";
+          let mnt3L = "#3d84b2", mnt3D = "#286287";
+
+          if (currentZone === "ho_nuoc") {
+            mnt1L = "#1c6b4a"; mnt1D = "#104a32";
+            mnt2L = "#28855d"; mnt2D = "#176142";
+            mnt3L = "#227752"; mnt3D = "#135439";
+          } else if (currentZone === "khu_bi_mat") {
+            mnt1L = "#7b1fa2"; mnt1D = "#4a148c";
+            mnt2L = "#8e24aa"; mnt2D = "#5e1080";
+            mnt3L = "#6a1b9a"; mnt3D = "#3e0a60";
+          } else if (currentZone === "suoi_doc") {
+            mnt1L = "#3d6d3d"; mnt1D = "#264926";
+            mnt2L = "#4c854c"; mnt2D = "#305e30";
+            mnt3L = "#447744"; mnt3D = "#2b522b";
+          } else if (currentZone === "bien_sau") {
+            mnt1L = "#34495e"; mnt1D = "#202b38";
+            mnt2L = "#3d566e"; mnt2D = "#263747";
+            mnt3L = "#374d63"; mnt3D = "#233140";
+          } else if (currentZone === "dam_lay") {
+            mnt1L = "#5d4037"; mnt1D = "#3e2723";
+            mnt2L = "#6d4c41"; mnt2D = "#4e342e";
+            mnt3L = "#5d433b"; mnt3D = "#3c2925";
+          }
+
+          if (currentWeather === "Sương Mù") {
+            ctx.globalAlpha = 0.45;
+          }
+
+          // Draw Mountains with split shading
+          poly([[0, 54], [32, 33], [32, 54]], mnt1L);
+          poly([[32, 54], [32, 33], [70, 54]], mnt1D);
+
+          poly([[38, 54], [84, 25], [84, 54]], mnt2L);
+          poly([[84, 54], [84, 25], [132, 54]], mnt2D);
+
+          poly([[112, 54], [166, 30], [166, 54]], mnt3L);
+          poly([[166, 54], [166, 30], [230, 54]], mnt3D);
+
+          ctx.globalAlpha = oldAlpha;
+
+          if (currentZone === "ho_nuoc") {
+            rect(200, 42, 2, 14, "#c0392b");
+            rect(208, 42, 2, 14, "#c0392b");
+            rect(198, 41, 14, 2, "#c0392b");
+            rect(196, 39, 18, 2, "#1a1a1a");
+          } else if (currentZone === "khu_bi_mat") {
+            poly([[32, 33], [30, 26], [34, 26]], "#00e5ff");
+            poly([[84, 25], [81, 15], [87, 15]], "#ff3df2");
+            poly([[166, 30], [164, 22], [168, 22]], "#00e5ff");
+          } else if (currentZone === "suoi_doc") {
+            rect(0, 50, 15, 6, "#7f8c8d");
+            rect(15, 50, 2, 6, "#34495e");
+            const drip = 4 + Math.floor((t * 0.005) % 6);
+            rect(15, 53, 2, drip, "#7beb34");
+          } else if (currentZone === "dam_lay") {
+            rect(260, 47, 1, 10, "#556b2f");
+            rect(260, 44, 1, 3, "#8b5a2b");
+            rect(265, 50, 1, 7, "#556b2f");
+            rect(265, 48, 1, 2, "#8b5a2b");
+          }
         }
 
         function drawWater(t) {
-          rect(0, 58, w, 70, "#1464a5");
-          rect(0, 58, w, 12, "#1f8bd0");
-          rect(0, 94, w, 34, "#0a376d");
+          let waterCol1, waterCol2, waterCol3;
+          let shimmerCol = "rgba(185, 248, 255, 0.55)";
+          let shimmerSubCol = "rgba(107, 210, 245, 0.45)";
+
+          if (currentZone === "ho_nuoc") {
+            waterCol1 = "#2ecc71";
+            waterCol2 = "#1abc9c";
+            waterCol3 = "#116d5b";
+          } else if (currentZone === "khu_bi_mat") {
+            waterCol1 = "#7b1fa2";
+            waterCol2 = "#4a148c";
+            waterCol3 = "#1c003a";
+            shimmerCol = "rgba(255, 118, 238, 0.6)";
+            shimmerSubCol = "rgba(224, 140, 255, 0.5)";
+          } else if (currentZone === "suoi_doc") {
+            waterCol1 = "#a3e635";
+            waterCol2 = "#27ae60";
+            waterCol3 = "#0f3a1f";
+            shimmerCol = "rgba(198, 255, 110, 0.6)";
+            shimmerSubCol = "rgba(139, 255, 102, 0.5)";
+          } else if (currentZone === "bien_sau") {
+            waterCol1 = "#1d4ed8";
+            waterCol2 = "#0f172a";
+            waterCol3 = "#020617";
+          } else if (currentZone === "dam_lay") {
+            waterCol1 = "#78350f";
+            waterCol2 = "#451a03";
+            waterCol3 = "#170500";
+            shimmerCol = "rgba(185, 175, 120, 0.5)";
+            shimmerSubCol = "rgba(150, 130, 90, 0.4)";
+          } else if (currentZone === "hang_ca") {
+            waterCol1 = "#1e293b";
+            waterCol2 = "#0f172a";
+            waterCol3 = "#020617";
+            shimmerCol = "rgba(150, 230, 255, 0.45)";
+            shimmerSubCol = "rgba(100, 180, 220, 0.35)";
+          } else {
+            waterCol1 = "#38bdf8";
+            waterCol2 = "#0284c7";
+            waterCol3 = "#0c4a6e";
+          }
+
+          // Draw distinct flat water bands (y: 58-70, 70-94, 94-128)
+          rect(0, 58, w, 12, waterCol1);
+          rect(0, 70, w, 24, waterCol2);
+          rect(0, 94, w, h - 94, waterCol3);
+
+          // Draw reflection shadow under the boat using 2 dashed blocky rectangles
+          const isKraken = activePixelEvent && activePixelEvent.type === "kraken";
+          const isDeepSea = currentZone === "bien_sau";
+          const bobFreq = isDeepSea ? 0.012 : isKraken ? 0.018 : 0.006;
+          const bobAmp = isDeepSea ? 4 : isKraken ? 5 : 2;
+          const bob = Math.round(Math.sin(t * bobFreq) * bobAmp);
+          
+          rect(28, 62 + bob, 64, 2, "rgba(0, 0, 0, 0.25)");
+          rect(36, 64 + bob, 48, 2, "rgba(0, 0, 0, 0.16)");
+
+          const shiftFreq = isDeepSea ? 0.05 : 0.025;
+          const shimmerSpacing = isDeepSea ? 45 : 38;
 
           for (let y = 66; y < 122; y += 14) {
-            const shift = Math.floor((t * 0.025 + y * 2) % 38);
-            for (let x = -40 + shift; x < w; x += 38) {
-              rect(x, y, 12, 3, "rgba(185, 248, 255, 0.55)");
-              rect(x + 18, y + 5, 10, 2, "rgba(107, 210, 245, 0.45)");
+            const shift = Math.floor((t * shiftFreq + y * 2) % shimmerSpacing);
+            for (let x = -40 + shift; x < w; x += shimmerSpacing) {
+              rect(x, y, isDeepSea ? 16 : 12, 3, shimmerCol);
+              rect(x + 18, y + 5, isDeepSea ? 12 : 10, 2, shimmerSubCol);
             }
           }
         }
 
         function drawBoatAndFisher(t) {
-          const bob = Math.round(Math.sin(t * 0.006) * 2);
+          const isDeepSea = currentZone === "bien_sau";
+          const bobFreq = isDeepSea ? 0.012 : 0.006;
+          const bobAmp = isDeepSea ? 4 : 2;
+          const bob = Math.round(Math.sin(t * bobFreq) * bobAmp);
           const reel = pixelCanvasMode === "reeling" || pixelCanvasMode === "casting";
           const bite = pixelCanvasMode === "bite";
           const pull = reel ? Math.round(Math.sin(t * 0.035) * 2) : 0;
@@ -970,7 +1363,21 @@
             fish.x += fish.speed;
             if (fish.x > w + 32) fish.x = -32;
             const swimY = fish.y + Math.round(Math.sin(t * 0.006 + index) * 3);
-            drawFish(fish.x, swimY, fish.color, fish.fin, fish.size, false);
+            
+            let fColor = fish.color;
+            let fFin = fish.fin;
+            if (currentZone === "suoi_doc") {
+              fColor = index % 2 === 0 ? "#7beb34" : "#ffeb3b";
+              fFin = "#27ae60";
+            } else if (currentZone === "khu_bi_mat") {
+              fColor = index % 2 === 0 ? "#ff007f" : "#00f0ff";
+              fFin = "#7b1fa2";
+            } else if (currentZone === "hang_ca") {
+              fColor = "#eceff1";
+              fFin = "#b0bec5";
+            }
+            
+            drawFish(fish.x, swimY, fColor, fFin, fish.size, false);
           });
         }
 
@@ -1000,11 +1407,23 @@
 
         function frame(t) {
           ctx.clearRect(0, 0, w, h);
+          
+          if (!activePixelEvent && t - lastPixelEventTime > 45000 + Math.random() * 15000) {
+            triggerRandomPixelEvent(t);
+          }
+
           drawSky(t);
           drawWater(t);
           drawFishSchool(t);
           drawBoatAndFisher(t);
           drawCatch(t);
+          
+          drawEclipseParticles(t);
+          drawFog(t);
+          drawRain(t);
+          drawLightning(t);
+          drawPixelEvents(t);
+          
           requestAnimationFrame(frame);
         }
 
@@ -1942,13 +2361,87 @@
         if (cloudInput) {
           cloudInput.value = getPlayerId();
         }
+        const select = document.getElementById("catchModalSelect");
+        if (select) {
+          select.value = localStorage.getItem("catchModalThreshold") || "Hiếm";
+        }
       }
 
       function closeSettings() {
-
         document.getElementById("desktopSettingsModal").style.display = "none";
-
       }
+
+      window.setCatchModalThreshold = function(val) {
+        localStorage.setItem("catchModalThreshold", val);
+        catchModalThreshold = val;
+      };
+
+      window.closeCatchModal = function() {
+        const modal = document.getElementById("catchRevealModal");
+        if (modal) modal.style.display = "none";
+        saveGameState();
+      };
+
+      window.showCatchModal = function(fish, stars) {
+        const modal = document.getElementById("catchRevealModal");
+        if (!modal) return;
+
+        const titleEl = document.getElementById("catchModalTitle");
+        let titleText = "🎉 CÂU ĐƯỢC CÁ XỊN!";
+        if (fish.rarity === "Tối Cao") {
+          titleText = "🌈 SIÊU PHẨM TỐI CAO XUẤT HIỆN!";
+        } else if (fish.rarity === "Vô Tri") {
+          titleText = "🌌 TIẾP CẬN ĐẤNG VÔ TRI!";
+        } else if (fish.rarity === "Huyền Thoại" || fish.rarity === "Thần Thoại") {
+          titleText = "🏆 CÂU ĐƯỢC HUYỀN THOẠI!";
+        }
+        if (titleEl) titleEl.innerText = titleText;
+
+        const zoneEl = document.getElementById("catchModalZone");
+        if (zoneEl && typeof zones !== "undefined" && zones[currentZone]) {
+          zoneEl.innerText = `tại ${zones[currentZone].name}`;
+        }
+
+        const spriteEl = document.getElementById("catchModalSprite");
+        if (spriteEl) {
+          spriteEl.className = "fish-sprite";
+          spriteEl.dataset.rarity = fish.rarity;
+          spriteEl.innerText = fish.emoji;
+        }
+
+        const nameEl = document.getElementById("catchModalName");
+        if (nameEl) {
+          nameEl.innerText = fish.name;
+          nameEl.style.color = fish.color || "#ffffff";
+        }
+
+        const rarityEl = document.getElementById("catchModalRarity");
+        if (rarityEl) {
+          rarityEl.innerText = fish.rarity;
+          rarityEl.style.background = fish.color || "#ff9800";
+          rarityEl.style.color = "#000000";
+        }
+
+        const starsEl = document.getElementById("catchModalStars");
+        if (starsEl) {
+          starsEl.innerText = getStarDisplay(stars);
+          starsEl.style.color = getStarColor(stars);
+        }
+
+        const priceEl = document.getElementById("catchModalPrice");
+        if (priceEl) {
+          const mult = starPriceMultiplier[stars] || 1;
+          const finalPrice = Math.round(fish.price * mult);
+          priceEl.innerText = `💵 ${finalPrice.toLocaleString()}đ`;
+        }
+
+        const expEl = document.getElementById("catchModalExp");
+        if (expEl) {
+          expEl.innerText = `+${fish.exp}`;
+        }
+
+        modal.style.display = "flex";
+      };
 
 
 
@@ -2562,6 +3055,10 @@
 
         let listDiv = document.getElementById("playerInventoryList");
 
+        // Remove empty-text if exists
+        let emptyText = listDiv.querySelector(".empty-text");
+        if (emptyText) emptyText.remove();
+
         // Create a map of existing elements for incremental updates - prevents UI lag
 
         let existingMap = {};
@@ -2580,21 +3077,77 @@
 
         if (keys.length === 0) {
 
+          // Clear remaining elements in list
+          Object.keys(existingMap).forEach(key => existingMap[key].remove());
+
           listDiv.innerHTML = '<div class="empty-text">🎒 Túi rỗng tuếch, chưa có con cá bựa nào...</div>';
 
           return;
 
         }
 
+        // Get filter values from UI (defaults if not loaded yet)
+        const filterRarity = document.getElementById("invFilterRarity") ? document.getElementById("invFilterRarity").value : "all";
+        const filterStars = document.getElementById("invFilterStars") ? document.getElementById("invFilterStars").value : "all";
+        const sortOrder = document.getElementById("invSortOrder") ? document.getElementById("invSortOrder").value : "priceDesc";
 
+        // Filter keys
+        let filteredKeys = keys.filter(bagKey => {
+          let item = playerBag[bagKey];
+          if (!item || !item.fish) return false;
 
-        // Track which keys are still in the bag
+          // Rarity filter
+          if (filterRarity !== "all") {
+            const r = item.fish.rarity;
+            if (filterRarity === "trash" && r !== "Rác" && r !== "Phế Liệu") return false;
+            if (filterRarity === "common" && r !== "Thường" && r !== "Bất Ổn") return false;
+            if (filterRarity === "rare" && r !== "Hiếm" && r !== "Siêu Bựa") return false;
+            if (filterRarity === "epic" && r !== "Cực Hiếm" && r !== "Đột Biến") return false;
+            if (filterRarity === "legendary" && r !== "Huyền Thoại" && r !== "Thần Thoại" && r !== "Tối Cao" && r !== "Vô Tri") return false;
+          }
 
-        let activeKeys = new Set();
+          // Stars filter
+          if (filterStars !== "all") {
+            const stars = item.stars || 1;
+            if (String(stars) !== filterStars) return false;
+          }
 
-        keys.forEach((bagKey) => {
+          return true;
+        });
 
-          activeKeys.add(bagKey);
+        if (filteredKeys.length === 0) {
+          // Clean up old cards from DOM
+          Object.keys(existingMap).forEach(key => existingMap[key].remove());
+          listDiv.innerHTML = '<div class="empty-text">🔍 Không tìm thấy con cá nào khớp với bộ lọc...</div>';
+          return;
+        }
+
+        // Sort keys
+        filteredKeys.sort((a, b) => {
+          let itemA = playerBag[a];
+          let itemB = playerBag[b];
+          let priceA = calculateCurrentPrice(itemA.fish, itemA.stars || 1);
+          let priceB = calculateCurrentPrice(itemB.fish, itemB.stars || 1);
+
+          if (sortOrder === "priceDesc") return priceB - priceA;
+          if (sortOrder === "priceAsc") return priceA - priceB;
+          if (sortOrder === "countDesc") return itemB.count - itemA.count;
+
+          if (sortOrder === "rarityDesc") {
+            const order = ["Vô Tri", "Tối Cao", "Thần Thoại", "Huyền Thoại", "Đột Biến", "Cực Hiếm", "Siêu Bựa", "Hiếm", "Bất Ổn", "Thường", "Phế Liệu", "Rác"];
+            return order.indexOf(itemA.fish.rarity) - order.indexOf(itemB.fish.rarity);
+          }
+
+          if (sortOrder === "starsDesc") return (itemB.stars || 1) - (itemA.stars || 1);
+
+          return 0;
+        });
+
+        // Track which keys are active and visible in the DOM
+        let activeKeys = new Set(filteredKeys);
+
+        // Append or update cards in correct sorted order
+        filteredKeys.forEach((bagKey) => {
 
           let item = playerBag[bagKey];
 
@@ -2610,7 +3163,7 @@
 
           let starCol = getStarColor(stars);
 
-          let escapedKey = bagKey.replace(/'/g, "\'");
+          let escapedKey = bagKey.replace(/'/g, "\\'");
 
 
 
@@ -2622,11 +3175,14 @@
 
             let countSpan = card.querySelector(".fish-count");
 
-            if (countSpan) countSpan.innerText = "x" + item.count;
+            if (countSpan) countSpan.innerText = "(x" + item.count + ")";
 
             let priceSpan = card.querySelector(".fish-price");
 
-            if (priceSpan) priceSpan.innerText = "💵 " + currentPrice + "đ / con";
+            if (priceSpan) priceSpan.innerText = "Giá xả kho hiện tại: 💵 " + currentPrice + "đ / con";
+
+            // Re-append to ensure it matches the sorted DOM order
+            listDiv.appendChild(card);
 
           } else {
 
@@ -2637,9 +3193,12 @@
             card.className = "fish-card";
 
             card.dataset.bagKey = bagKey;
+
             card.dataset.rarity = fish.rarity;
 
             card.style.borderLeftColor = fish.color;
+
+
 
             card.innerHTML = `
 
@@ -2688,6 +3247,148 @@
           }
 
         });
+
+      }
+
+
+
+      function quickSellCategory(category) {
+
+        let text = "";
+
+        let filterFn = null;
+
+
+
+        if (category === 'trash') {
+
+          text = "⚠️ Bạn có chắc chắn muốn bán SẠCH SÀNH SANH toàn bộ Rác & Phế Liệu?";
+
+          filterFn = (r) => r === "Rác" || r === "Phế Liệu";
+
+        } else if (category === 'common') {
+
+          text = "⚠️ Bạn có chắc chắn muốn bán SẠCH SÀNH SANH toàn bộ Cá Thường & Cá Bất Ổn?";
+
+          filterFn = (r) => r === "Thường" || r === "Bất Ổn";
+
+        }
+
+
+
+        if (!filterFn) return;
+
+        if (!confirm(text)) return;
+
+
+
+        let totalGain = 0;
+
+        let soldCount = 0;
+
+        let soldAny = false;
+
+
+
+        for (let bagKey in playerBag) {
+
+          let item = playerBag[bagKey];
+
+          if (item && item.fish && filterFn(item.fish.rarity)) {
+
+            let stars = item.stars || 1;
+
+            let price = calculateCurrentPrice(item.fish, stars);
+
+            totalGain += price * item.count;
+
+            soldCount += item.count;
+
+            soldAny = true;
+
+
+
+            updateMarketOrdersOnSale(item.fish, item.count);
+
+            fishInventory[item.fish.rarity] = Math.max(
+
+              0,
+
+              fishInventory[item.fish.rarity] - item.count
+
+            );
+
+
+
+            delete playerBag[bagKey];
+
+          }
+
+        }
+
+
+
+        if (soldAny) {
+
+          let moneyStolenBonus = 0;
+
+          if (currentPet && currentPet.class === 'money' && Math.random() < 0.4) {
+
+            let pct = 0.15 + Math.random() * 0.15;
+
+            moneyStolenBonus = Math.round(totalGain * pct);
+
+          }
+
+
+
+          gold += (totalGain + moneyStolenBonus);
+
+
+
+          if (moneyStolenBonus > 0) {
+
+            addLog(`💵 <b style="color: #4caf50;">[BÁO TIỀN CƯỚP THÊM]</b> Thừa dịp dọn dẹp túi đồ, bé cưng Báo Tiền đã giật thêm <span style="color:#ffeb3b;">+${moneyStolenBonus}đ</span> vàng lậu từ ví các ngư dân khác!`, "success");
+
+          }
+
+
+
+          updateQuestProgress("sold", soldCount);
+
+          updateQuestProgress("gold", totalGain);
+
+
+
+          goldText.innerText = gold;
+
+
+
+          addLog(
+
+            `💰 <b style="color:#ffea00;">[DỌN DẸP TÚI ĐỒ]</b> Đã bán nhanh ${soldCount} sinh vật thuộc nhóm ${category === 'trash' ? 'Rác/Phế liệu' : 'Thường/Bất ổn'}, thu về <span style="color:#ffeb3b;">+${totalGain}đ</span>!`,
+
+          );
+
+
+
+          eventBus.emit("fishInventoryChanged");
+
+          eventBus.emit("inventoryChanged");
+
+          updateShopButtons();
+
+          saveGameState();
+
+          
+
+          alert(`Đã bán nhanh thành công! Nhận về +${totalGain}đ 💵`);
+
+        } else {
+
+          alert("Không tìm thấy vật phẩm nào phù hợp để bán trong túi đồ!");
+
+        }
 
       }
 
@@ -5839,14 +6540,19 @@
 
 
 
-        // Roll số sao cho cá vừa câu được
-
         let caughtStars = rollFishStars(selectedFish.rarity);
 
         if (caughtStars >= 3) {
-
           triggerCatchFlash(selectedFish.color || getStarColor(caughtStars), caughtStars);
+        }
 
+        if (catchModalThreshold !== "none") {
+          const rarityOrder = ["Rác", "Phế Liệu", "Thường", "Bất Ổn", "Hiếm", "Siêu Bựa", "Cực Hiếm", "Đột Biến", "Huyền Thoại", "Thần Thoại", "Tối Cao", "Vô Tri"];
+          const fishRarityIndex = rarityOrder.indexOf(selectedFish.rarity);
+          const thresholdIndex = rarityOrder.indexOf(catchModalThreshold || "Hiếm");
+          if (fishRarityIndex >= thresholdIndex || caughtStars >= 4) {
+            showCatchModal(selectedFish, caughtStars);
+          }
         }
 
         let bagKey = getBagKey(selectedFish.name, caughtStars);
@@ -8590,6 +9296,7 @@
 
             // Save to database
             (async () => {
+              showLoadingOverlay("Đang thiết lập dữ liệu sao lưu mới...");
               try {
                 await db.save("fish_game_state", gameStateObj);
 
@@ -8613,6 +9320,8 @@
               } catch (err) {
                 alert("❌ Định dạng file lưu không hợp lệ hoặc bị lỗi.");
                 console.error(err);
+              } finally {
+                hideLoadingOverlay();
               }
             })();
 
@@ -9317,43 +10026,50 @@
 
       // KHỞI CHẠY
       async function initGame() {
-        await loadGameState();
+        showLoadingOverlay("Đang tải dữ liệu trò chơi...");
+        try {
+          await loadGameState();
 
-        if (typeof initSeason === 'function') initSeason();
+          if (typeof initSeason === 'function') initSeason();
 
-        beforeRenderUIUpdates();
+          beforeRenderUIUpdates();
 
-        // Khởi chạy vòng lặp thay đổi thời tiết mỗi 180 giây (3 phút)
-        setInterval(changeWeather, 180000);
+          // Khởi chạy vòng lặp thay đổi thời tiết mỗi 180 giây (3 phút)
+          setInterval(changeWeather, 180000);
 
-        document.getElementById("totalSpecies").innerText = fishList.length + "+";
+          document.getElementById("totalSpecies").innerText = fishList.length + "+";
 
-        recalculateLuck();
+          recalculateLuck();
 
-        updateShopTexts();
+          updateShopTexts();
 
-        updateShopButtons();
+          updateShopButtons();
 
-        updateStatsPanel();
+          updateStatsPanel();
 
-        updateEncyclopedia();
+          updateEncyclopedia();
 
-        renderInventoryTab();
+          renderInventoryTab();
 
-        refreshLocalizedGameText();
-        await loadAchievements();
+          refreshLocalizedGameText();
+          await loadAchievements();
 
-        renderZoneButtons();
+          renderZoneButtons();
 
-        // Yêu cầu đặt tên nếu chưa có
-        if (!playerName || playerName === "Ngư Ông Vô Danh") {
-          document.getElementById("nameInputModal").style.display = "flex";
-        } else {
-          document.getElementById("playerNameText").innerText = playerName;
+          // Yêu cầu đặt tên nếu chưa có
+          if (!playerName || playerName === "Ngư Ông Vô Danh") {
+            document.getElementById("nameInputModal").style.display = "flex";
+          } else {
+            document.getElementById("playerNameText").innerText = playerName;
+          }
+
+          selectZone(currentZone);
+          initPixelCanvasScene();
+        } catch (e) {
+          console.error("Lỗi khi khởi chạy game:", e);
+        } finally {
+          hideLoadingOverlay();
         }
-
-        selectZone(currentZone);
-        initPixelCanvasScene();
       }
 
       initGame();

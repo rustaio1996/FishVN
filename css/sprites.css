@@ -267,3 +267,28 @@
   0%, 100% { box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.1); }
   50% { box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.2); }
 }
+
+/* ===== NEW CATCH REVEAL MODAL ANIMATIONS ===== */
+@keyframes catch-ray-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.catch-ray-spin {
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, rgba(255, 152, 0, 0.2) 0%, rgba(255, 152, 0, 0) 70%);
+  background-size: cover;
+  animation: catch-ray-spin 10s linear infinite;
+  z-index: 1;
+}
+
+@keyframes catch-content-pop {
+  0% { transform: scale(0.7); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.catch-reveal-content {
+  animation: catch-content-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
