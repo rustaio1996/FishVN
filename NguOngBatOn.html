@@ -176,20 +176,22 @@
           </div>
         </div>
 
-        <div class="audio-control-panel settings-mt-15" style="border: 1px dashed #4f46e5;">
-          <span class="audio-title" style="color: #a5b4fc;"> ☁️ CLOUD SYNC (MONGODB) </span>
-          <div style="margin: 8px 0; font-size: 12px; color: #9ca3af; text-align: left;">
+        <div class="audio-control-panel settings-mt-15" style="display: flex; flex-direction: column; align-items: stretch; gap: 10px; border: 1px solid #4f46e5; padding: 12px; border-radius: 10px; background-color: #1d1d2e;">
+          <span class="audio-title" style="color: #a5b4fc; margin-bottom: 2px;"> ☁️ CLOUD SYNC (MONGODB) </span>
+          <div style="font-size: 12px; color: #9ca3af; text-align: left; line-height: 1.4;">
             Mã ID tài khoản (Dùng để lưu/tải game trên thiết bị khác):
           </div>
-          <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-            <input type="text" id="cloudPlayerIdInput" readonly style="flex: 1; padding: 6px 10px; background: #18181c; border: 1px solid #3f3f46; color: #a5b4fc; border-radius: 4px; font-size: 13px; font-family: monospace;" />
-            <button type="button" onclick="copyPlayerId()" class="audio-btn" style="padding: 6px 12px; background: #27272a; border: 1px solid #3f3f46; color: #fff; cursor: pointer; min-width: auto; height: auto; margin: 0;">Sao chép</button>
+          <div style="display: flex; gap: 8px; margin-bottom: 4px;">
+            <input type="text" id="cloudPlayerIdInput" readonly style="flex: 1; padding: 8px 12px; background: #13131a; border: 1px solid #3f3f46; color: #a5b4fc; border-radius: 6px; font-size: 13px; font-family: monospace; outline: none;" />
+            <button type="button" onclick="copyPlayerId()" class="audio-btn" style="padding: 8px 16px; background: #27272a; border: 1px solid #4a4a6a; color: #fff; cursor: pointer; border-radius: 6px; margin: 0; font-weight: bold; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#3f3f46'; this.style.borderColor='#6b7280';" onmouseout="this.style.background='#27272a'; this.style.borderColor='#4a4a6a';">
+              Sao chép
+            </button>
           </div>
-          <div class="audio-buttons-container" style="display: flex; gap: 8px; margin-top: 8px;">
-            <button type="button" onclick="changePlayerIdPrompt()" class="audio-btn" style="flex: 1; background: #2e1065; color: #d8b4fe; border: 1px solid #581c87; margin: 0; height: auto;">
+          <div class="audio-buttons-container" style="display: flex; gap: 8px; margin-top: 4px;">
+            <button type="button" onclick="changePlayerIdPrompt()" class="audio-btn" style="flex: 1; padding: 10px; background: #2e1065; color: #d8b4fe; border: 1px solid #581c87; margin: 0; height: auto; border-radius: 6px; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='#4c1d95';" onmouseout="this.style.background='#2e1065';">
               🔑 Đăng nhập ID
             </button>
-            <button type="button" id="btnSyncCloud" onclick="syncCloudSave()" class="audio-btn" style="flex: 1; background: #064e3b; color: #6ee7b7; border: 1px solid #065f46; margin: 0; height: auto;">
+            <button type="button" id="btnSyncCloud" onclick="syncCloudSave()" class="audio-btn" style="flex: 1; padding: 10px; background: #064e3b; color: #6ee7b7; border: 1px solid #065f46; margin: 0; height: auto; border-radius: 6px; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='#065f46';" onmouseout="this.style.background='#064e3b';">
               🔄 Đồng bộ ngay
             </button>
           </div>
