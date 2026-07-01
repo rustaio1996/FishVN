@@ -1,0 +1,269 @@
+/* ===== FISH RARITY SPRITES & VISUAL EFFECTS ===== */
+
+/* Sprite container base */
+.fish-sprite {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  position: relative;
+  vertical-align: middle;
+  margin-right: 4px;
+  font-size: 22px;
+  line-height: 32px;
+  text-align: center;
+  overflow: visible;
+}
+
+/* ===== RARITY GLOW FRAMES ===== */
+.fish-sprite[data-rarity="Rác"],
+.fish-sprite[data-rarity="Phế Liệu"] {
+  background: linear-gradient(135deg, #424242 0%, #616161 100%);
+  box-shadow: 0 0 4px rgba(100, 100, 100, 0.3);
+}
+
+.fish-sprite[data-rarity="Thường"] {
+  background: linear-gradient(135deg, #558b2f 0%, #7cb342 100%);
+  box-shadow: 0 0 6px rgba(124, 179, 66, 0.4);
+}
+
+.fish-sprite[data-rarity="Bất Ổn"] {
+  background: linear-gradient(135deg, #1565c0 0%, #42a5f5 100%);
+  box-shadow: 0 0 8px rgba(66, 165, 245, 0.5);
+}
+
+.fish-sprite[data-rarity="Hiếm"] {
+  background: linear-gradient(135deg, #6a1b9a 0%, #ab47bc 100%);
+  box-shadow: 0 0 10px rgba(171, 71, 188, 0.5);
+  animation: sprite-pulse-rare 2s ease-in-out infinite;
+}
+
+.fish-sprite[data-rarity="Siêu Bựa"] {
+  background: linear-gradient(135deg, #e65100 0%, #ff9800 100%);
+  box-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
+  animation: sprite-pulse-rare 2s ease-in-out infinite;
+}
+
+.fish-sprite[data-rarity="Cực Hiếm"] {
+  background: linear-gradient(135deg, #b71c1c 0%, #ef5350 100%);
+  box-shadow: 0 0 12px rgba(239, 83, 80, 0.6);
+  animation: sprite-pulse-epic 1.5s ease-in-out infinite;
+}
+
+.fish-sprite[data-rarity="Đột Biến"] {
+  background: linear-gradient(135deg, #00695c 0%, #26a69a 50%, #00e676 100%);
+  box-shadow: 0 0 14px rgba(0, 230, 118, 0.6);
+  animation: sprite-pulse-epic 1.5s ease-in-out infinite;
+}
+
+.fish-sprite[data-rarity="Huyền Thoại"] {
+  background: linear-gradient(135deg, #e65100 0%, #ff6d00 30%, #ffd600 70%, #ff6d00 100%);
+  box-shadow: 0 0 18px rgba(255, 214, 0, 0.7);
+  animation: sprite-shimmer 2s linear infinite, sprite-float 3s ease-in-out infinite;
+}
+
+.fish-sprite[data-rarity="Thần Thoại"] {
+  background: linear-gradient(135deg, #880e4f 0%, #e040fb 50%, #ea80fc 100%);
+  box-shadow: 0 0 22px rgba(224, 64, 251, 0.7), 0 0 44px rgba(224, 64, 251, 0.3);
+  animation: sprite-shimmer 1.5s linear infinite, sprite-float 2.5s ease-in-out infinite;
+}
+
+.fish-sprite[data-rarity="Tối Cao"] {
+  background: linear-gradient(135deg, #ff1744 0%, #ff5252 25%, #ffd600 50%, #ff5252 75%, #ff1744 100%);
+  background-size: 200% 200%;
+  box-shadow: 0 0 25px rgba(255, 23, 68, 0.8), 0 0 50px rgba(255, 82, 82, 0.4);
+  animation: sprite-rainbow 2s linear infinite, sprite-float 2s ease-in-out infinite;
+}
+
+.fish-sprite[data-rarity="Vô Tri"] {
+  background: linear-gradient(135deg, #00e5ff 0%, #18ffff 25%, #e040fb 50%, #00e5ff 75%, #18ffff 100%);
+  background-size: 300% 300%;
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.8), 0 0 60px rgba(224, 64, 251, 0.5), inset 0 0 15px rgba(255, 255, 255, 0.3);
+  animation: sprite-cosmic 3s linear infinite, sprite-float 1.8s ease-in-out infinite;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+/* ===== CATCH REVEAL ANIMATIONS ===== */
+
+/* Flash effect when catching high-tier fish */
+.catch-reveal {
+  animation: catch-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.catch-reveal-legendary {
+  animation: catch-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+             legendary-entrance 1s ease-out forwards;
+}
+
+.catch-reveal-supreme {
+  animation: catch-pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+             supreme-entrance 1.2s ease-out forwards;
+}
+
+/* ===== PARTICLE EFFECTS ===== */
+
+.fish-sprite[data-rarity="Tối Cao"]::before,
+.fish-sprite[data-rarity="Vô Tri"]::before {
+  content: '✦';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 10px;
+  color: #ffd600;
+  animation: particle-orbit 2s linear infinite;
+  pointer-events: none;
+}
+
+.fish-sprite[data-rarity="Tối Cao"]::after,
+.fish-sprite[data-rarity="Vô Tri"]::after {
+  content: '✧';
+  position: absolute;
+  bottom: -6px;
+  left: -6px;
+  font-size: 8px;
+  color: #e040fb;
+  animation: particle-orbit 2s linear infinite reverse;
+  pointer-events: none;
+}
+
+/* ===== INVENTORY CARD UPGRADES ===== */
+
+.fish-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fish-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.fish-card[data-rarity="Huyền Thoại"],
+.fish-card[data-rarity="Thần Thoại"],
+.fish-card[data-rarity="Tối Cao"],
+.fish-card[data-rarity="Vô Tri"] {
+  border-left-width: 4px;
+}
+
+.fish-card[data-rarity="Huyền Thoại"] {
+  background: linear-gradient(135deg, rgba(255, 109, 0, 0.08) 0%, rgba(30, 30, 40, 0.95) 100%);
+}
+
+.fish-card[data-rarity="Thần Thoại"] {
+  background: linear-gradient(135deg, rgba(224, 64, 251, 0.08) 0%, rgba(30, 30, 40, 0.95) 100%);
+}
+
+.fish-card[data-rarity="Tối Cao"] {
+  background: linear-gradient(135deg, rgba(255, 23, 68, 0.1) 0%, rgba(30, 30, 40, 0.95) 100%);
+}
+
+.fish-card[data-rarity="Vô Tri"] {
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.1) 0%, rgba(224, 64, 251, 0.05) 50%, rgba(30, 30, 40, 0.95) 100%);
+}
+
+/* ===== ENCYCLOPEDIA UPGRADES ===== */
+
+.fish-card .rarity-badge {
+  transition: transform 0.2s ease;
+}
+
+.fish-card:hover .rarity-badge {
+  transform: scale(1.1);
+}
+
+/* ===== KEYFRAME ANIMATIONS ===== */
+
+@keyframes sprite-pulse-rare {
+  0%, 100% { box-shadow: 0 0 8px currentColor; transform: scale(1); }
+  50% { box-shadow: 0 0 14px currentColor; transform: scale(1.05); }
+}
+
+@keyframes sprite-pulse-epic {
+  0%, 100% { box-shadow: 0 0 10px currentColor; transform: scale(1); }
+  50% { box-shadow: 0 0 20px currentColor; transform: scale(1.08); }
+}
+
+@keyframes sprite-shimmer {
+  0% { filter: brightness(1) hue-rotate(0deg); }
+  50% { filter: brightness(1.3) hue-rotate(15deg); }
+  100% { filter: brightness(1) hue-rotate(0deg); }
+}
+
+@keyframes sprite-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes sprite-rainbow {
+  0% { background-position: 0% 50%; filter: brightness(1); }
+  25% { filter: brightness(1.2); }
+  50% { background-position: 100% 50%; filter: brightness(1.4); }
+  75% { filter: brightness(1.2); }
+  100% { background-position: 0% 50%; filter: brightness(1); }
+}
+
+@keyframes sprite-cosmic {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
+}
+
+@keyframes catch-pop {
+  0% { transform: scale(0) rotate(-15deg); opacity: 0; }
+  60% { transform: scale(1.3) rotate(5deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes legendary-entrance {
+  0% { filter: brightness(3) saturate(2); }
+  100% { filter: brightness(1) saturate(1); }
+}
+
+@keyframes supreme-entrance {
+  0% { filter: brightness(5) saturate(3); }
+  30% { filter: brightness(2) saturate(2); }
+  100% { filter: brightness(1) saturate(1); }
+}
+
+@keyframes particle-orbit {
+  0% { transform: rotate(0deg) translateX(12px) rotate(0deg) scale(1); opacity: 1; }
+  50% { opacity: 0.6; transform: rotate(180deg) translateX(12px) rotate(-180deg) scale(0.7); }
+  100% { transform: rotate(360deg) translateX(12px) rotate(-360deg) scale(1); opacity: 1; }
+}
+
+/* ===== CATCH LOG VISUAL UPGRADE ===== */
+
+.log-entry-legendary {
+  border-left: 3px solid #ffd600;
+  background: linear-gradient(90deg, rgba(255, 214, 0, 0.1) 0%, transparent 100%);
+  padding-left: 8px;
+}
+
+.log-entry-mythical {
+  border-left: 3px solid #e040fb;
+  background: linear-gradient(90deg, rgba(224, 64, 251, 0.1) 0%, transparent 100%);
+  padding-left: 8px;
+}
+
+.log-entry-supreme {
+  border-left: 3px solid #ff1744;
+  background: linear-gradient(90deg, rgba(255, 23, 68, 0.15) 0%, transparent 100%);
+  padding-left: 8px;
+  animation: log-glow-supreme 2s ease-in-out infinite;
+}
+
+.log-entry-votri {
+  border-left: 3px solid #00e5ff;
+  background: linear-gradient(90deg, rgba(0, 229, 255, 0.15) 0%, rgba(224, 64, 251, 0.05) 50%, transparent 100%);
+  padding-left: 8px;
+  animation: log-glow-votri 2s ease-in-out infinite;
+}
+
+@keyframes log-glow-supreme {
+  0%, 100% { box-shadow: inset 0 0 10px rgba(255, 23, 68, 0.1); }
+  50% { box-shadow: inset 0 0 20px rgba(255, 23, 68, 0.2); }
+}
+
+@keyframes log-glow-votri {
+  0%, 100% { box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.1); }
+  50% { box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.2); }
+}

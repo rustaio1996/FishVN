@@ -1,0 +1,487 @@
+.pixel-fishing-scene {
+  position: relative;
+  height: 178px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  border: 3px solid #141423;
+  border-radius: 8px;
+  background: linear-gradient(#5bb7d8 0 44%, #2475a9 44% 46%, #12396d 46% 100%);
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.08), 0 10px 22px rgba(0, 0, 0, 0.35);
+  image-rendering: pixelated;
+}
+
+.pixel-scene-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.pixel-fishing-scene.canvas-ready .pixel-sky,
+.pixel-fishing-scene.canvas-ready .pixel-boat,
+.pixel-fishing-scene.canvas-ready .pixel-water {
+  display: none;
+}
+
+.pixel-fishing-scene *,
+.pixel-fishing-scene *::before,
+.pixel-fishing-scene *::after {
+  image-rendering: pixelated;
+}
+
+.pixel-fishing-scene::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.06) 50%, transparent 50%) 0 0 / 100% 4px,
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 50%, transparent 50%) 0 0 / 4px 100%;
+  mix-blend-mode: soft-light;
+  opacity: 0.55;
+  z-index: 8;
+}
+
+.pixel-sky {
+  position: absolute;
+  inset: 0 0 42%;
+}
+
+.pixel-sun {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  width: 24px;
+  height: 24px;
+  background: #ffd65a;
+  box-shadow: 0 0 0 4px rgba(255, 214, 90, 0.28), 0 0 18px rgba(255, 214, 90, 0.5);
+  animation: pixel-sun-blink 1.4s steps(2, end) infinite;
+}
+
+.pixel-cloud {
+  position: absolute;
+  width: 42px;
+  height: 14px;
+  background: #eaf7ff;
+  box-shadow: 10px -8px 0 #eaf7ff, 22px -4px 0 #d5efff, 34px 0 0 #d5efff;
+  opacity: 0.88;
+  animation: pixel-cloud-drift 18s steps(24, end) infinite;
+}
+
+.pixel-cloud.cloud-a {
+  top: 26px;
+  left: -72px;
+}
+
+.pixel-cloud.cloud-b {
+  top: 54px;
+  left: -118px;
+  transform: scale(0.75);
+  animation-duration: 24s;
+  animation-delay: -7s;
+  opacity: 0.72;
+}
+
+.pixel-stage-label {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  z-index: 9;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: #07131e;
+  text-transform: uppercase;
+}
+
+.pixel-stage-label span {
+  max-width: 48%;
+  padding: 3px 6px;
+  overflow: hidden;
+  border: 2px solid rgba(7, 19, 30, 0.38);
+  background: rgba(239, 250, 255, 0.76);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pixel-boat {
+  position: absolute;
+  left: 34px;
+  bottom: 56px;
+  width: 104px;
+  height: 42px;
+  background:
+    linear-gradient(90deg, transparent 0 10px, #7a3f1c 10px 86px, transparent 86px),
+    linear-gradient(90deg, transparent 0 22px, #512b19 22px 98px, transparent 98px);
+  clip-path: polygon(0 22%, 100% 22%, 83% 100%, 18% 100%);
+  animation: pixel-boat-bob 1.2s steps(3, end) infinite;
+  z-index: 5;
+}
+
+.pixel-fisher {
+  position: absolute;
+  left: 38px;
+  bottom: 24px;
+  width: 30px;
+  height: 44px;
+  animation: pixel-fisher-idle 0.9s steps(2, end) infinite;
+}
+
+.pixel-head {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  width: 14px;
+  height: 14px;
+  background: #f0b073;
+  box-shadow: 10px 4px 0 -4px #5a2b1a;
+}
+
+.pixel-hat {
+  position: absolute;
+  left: 2px;
+  top: 1px;
+  width: 24px;
+  height: 8px;
+  background: #efc35b;
+  box-shadow: 6px -4px 0 #d49a3a;
+}
+
+.pixel-body {
+  position: absolute;
+  left: 7px;
+  top: 23px;
+  width: 16px;
+  height: 18px;
+  background: #174c65;
+  box-shadow: 0 12px 0 -4px #1f263a;
+}
+
+.pixel-arm {
+  position: absolute;
+  left: 20px;
+  top: 24px;
+  width: 16px;
+  height: 5px;
+  background: #f0b073;
+  transform-origin: left center;
+}
+
+.pixel-rod {
+  position: absolute;
+  left: 64px;
+  bottom: 55px;
+  width: 82px;
+  height: 4px;
+  background: #2b1a10;
+  transform: rotate(-23deg);
+  transform-origin: left center;
+  box-shadow: 16px 0 0 #3d2818;
+}
+
+.pixel-line {
+  position: absolute;
+  left: 132px;
+  bottom: 43px;
+  width: 3px;
+  height: 56px;
+  background: rgba(236, 252, 255, 0.84);
+  transform: rotate(6deg);
+  transform-origin: top center;
+}
+
+.pixel-line::after {
+  content: "";
+  position: absolute;
+  left: -4px;
+  bottom: -8px;
+  width: 11px;
+  height: 8px;
+  background: #d8ecff;
+  clip-path: polygon(0 0, 100% 0, 58% 100%, 42% 100%);
+}
+
+.pixel-water {
+  position: absolute;
+  inset: 46% 0 0;
+  overflow: hidden;
+  background: linear-gradient(#1d7fc0 0 26%, #155c9a 26% 62%, #0d376d 62% 100%);
+}
+
+.pixel-wave {
+  position: absolute;
+  left: -70px;
+  right: -70px;
+  height: 8px;
+  background:
+    linear-gradient(90deg, transparent 0 16px, rgba(181, 243, 255, 0.85) 16px 32px, transparent 32px 52px) 0 0 / 52px 8px;
+  animation: pixel-wave-run 2.4s steps(12, end) infinite;
+}
+
+.pixel-wave.wave-a {
+  top: 10px;
+}
+
+.pixel-wave.wave-b {
+  top: 42px;
+  animation-duration: 3.2s;
+  opacity: 0.68;
+}
+
+.pixel-wave.wave-c {
+  top: 72px;
+  animation-duration: 2.8s;
+  opacity: 0.5;
+}
+
+.pixel-fish-swimmer {
+  position: absolute;
+  width: 28px;
+  height: 12px;
+  background: var(--fish-color, #ff6b8a);
+  clip-path: polygon(0 50%, 18% 0, 78% 0, 100% 50%, 78% 100%, 18% 100%);
+  box-shadow: -8px 4px 0 -2px var(--fish-tail, #ffc857), 10px 4px 0 -5px rgba(255, 255, 255, 0.75);
+  animation: pixel-fish-cruise 7s steps(24, end) infinite;
+}
+
+.pixel-fish-swimmer::after {
+  content: "";
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  width: 3px;
+  height: 3px;
+  background: #051120;
+}
+
+.pixel-fish-swimmer.fish-a {
+  --fish-color: #ff6b8a;
+  --fish-tail: #ffd166;
+  left: -38px;
+  top: 34px;
+}
+
+.pixel-fish-swimmer.fish-b {
+  --fish-color: #51d7ff;
+  --fish-tail: #9bff9b;
+  left: -88px;
+  top: 66px;
+  transform: scale(0.72);
+  animation-duration: 9s;
+  animation-delay: -3s;
+}
+
+.pixel-fish-swimmer.fish-c {
+  --fish-color: #b983ff;
+  --fish-tail: #ff8fd1;
+  left: -128px;
+  top: 18px;
+  transform: scale(0.58);
+  animation-duration: 11s;
+  animation-delay: -6s;
+}
+
+.pixel-catch-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 7;
+}
+
+.pixel-catch-fish {
+  position: absolute;
+  left: 58%;
+  bottom: 28px;
+  width: 42px;
+  height: 20px;
+  background: var(--catch-color, #ffdf5d);
+  clip-path: polygon(0 50%, 18% 0, 78% 0, 100% 50%, 78% 100%, 18% 100%);
+  box-shadow:
+    -12px 6px 0 -4px var(--catch-tail, #fff0a1),
+    0 0 0 3px rgba(255, 255, 255, 0.16),
+    0 0 18px var(--catch-glow, rgba(255, 223, 93, 0.7));
+  animation: pixel-catch-pop 0.95s steps(8, end) forwards;
+}
+
+.pixel-catch-fish::before {
+  content: "";
+  position: absolute;
+  right: 7px;
+  top: 7px;
+  width: 4px;
+  height: 4px;
+  background: #06101b;
+}
+
+.pixel-splash {
+  position: absolute;
+  left: 55%;
+  bottom: 20px;
+  width: 58px;
+  height: 24px;
+  border-top: 6px solid rgba(218, 251, 255, 0.9);
+  animation: pixel-splash 0.75s steps(5, end) forwards;
+}
+
+.pixel-escape-splash {
+  position: absolute;
+  left: 60%;
+  bottom: 22px;
+  width: 44px;
+  height: 18px;
+  background:
+    linear-gradient(90deg, transparent 0 8px, #d8fbff 8px 14px, transparent 14px 24px, #d8fbff 24px 30px, transparent 30px);
+  animation: pixel-escape 0.75s steps(6, end) forwards;
+}
+
+.pixel-fishing-scene.is-casting .pixel-fisher,
+.pixel-fishing-scene.is-reeling .pixel-fisher {
+  animation: pixel-fisher-reel 0.28s steps(2, end) infinite;
+}
+
+.pixel-fishing-scene.is-casting .pixel-rod,
+.pixel-fishing-scene.is-reeling .pixel-rod {
+  animation: pixel-rod-cast 0.42s steps(3, end) infinite;
+}
+
+.pixel-fishing-scene.is-waiting .pixel-line {
+  animation: pixel-line-wait 1s steps(3, end) infinite;
+}
+
+.pixel-fishing-scene.is-bite .pixel-line {
+  background: #fff56a;
+  animation: pixel-line-bite 0.16s steps(2, end) infinite;
+}
+
+.pixel-fishing-scene.is-bite .pixel-water {
+  animation: pixel-water-bite 0.2s steps(2, end) infinite;
+}
+
+@keyframes pixel-cloud-drift {
+  to {
+    transform: translateX(700px);
+  }
+}
+
+@keyframes pixel-sun-blink {
+  50% {
+    box-shadow: 0 0 0 7px rgba(255, 214, 90, 0.18), 0 0 12px rgba(255, 214, 90, 0.45);
+  }
+}
+
+@keyframes pixel-boat-bob {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+
+@keyframes pixel-fisher-idle {
+  50% {
+    transform: translateY(2px);
+  }
+}
+
+@keyframes pixel-fisher-reel {
+  50% {
+    transform: translate(-2px, 2px);
+  }
+}
+
+@keyframes pixel-rod-cast {
+  0%, 100% {
+    transform: rotate(-23deg);
+  }
+  50% {
+    transform: rotate(-33deg);
+  }
+}
+
+@keyframes pixel-line-wait {
+  50% {
+    transform: rotate(-2deg);
+    height: 60px;
+  }
+}
+
+@keyframes pixel-line-bite {
+  50% {
+    transform: translateX(5px) rotate(12deg);
+    height: 64px;
+  }
+}
+
+@keyframes pixel-water-bite {
+  50% {
+    filter: brightness(1.18);
+  }
+}
+
+@keyframes pixel-wave-run {
+  to {
+    transform: translateX(52px);
+  }
+}
+
+@keyframes pixel-fish-cruise {
+  from {
+    transform: translateX(-40px);
+  }
+  to {
+    transform: translateX(560px);
+  }
+}
+
+@keyframes pixel-catch-pop {
+  0% {
+    opacity: 0;
+    transform: translate(0, 10px) rotate(0deg) scale(0.75);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-10px, -38px) rotate(-15deg) scale(1);
+  }
+  52% {
+    opacity: 1;
+    transform: translate(-42px, -68px) rotate(18deg) scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-90px, -18px) rotate(-28deg) scale(0.9);
+  }
+}
+
+@keyframes pixel-splash {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.3);
+  }
+  30% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(1.5) translateY(10px);
+  }
+}
+
+@keyframes pixel-escape {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(90px) scale(1.4);
+  }
+}

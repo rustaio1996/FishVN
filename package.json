@@ -1,0 +1,43 @@
+{
+  "name": "ngu-ong-bat-on",
+  "version": "0.3.2",
+  "description": "Ngư Ông Bất Ổn - fishing idle game desktop build",
+  "main": "electron/main.js",
+  "private": true,
+  "author": "Ngu Ong Bat On Team",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win portable",
+    "check:js": "node --check js/modules/i18n.js && node --check js/modules/audio.js && node --check js/modules/time-events.js && node --check js/game-state.js && node --check js/data/world-data.js && node --check js/data/progression-data.js && node --check js/game-core.js && node --check electron/main.js"
+  },
+  "build": {
+    "appId": "com.nguongbaton.game",
+    "productName": "Ngư Ông Bất Ổn - Vá Mùa",
+    "directories": {
+      "buildResources": "build"
+    },
+    "files": [
+      "NguOngBatOn.html",
+      "assets/**/*",
+      "css/**/*",
+      "js/**/*",
+      "build/icon.ico",
+      "build/icon.png",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "icon": "icon.ico",
+      "target": [
+        "portable"
+      ]
+    }
+  },
+  "devDependencies": {
+    "electron": "^31.7.7",
+    "electron-builder": "^24.13.3"
+  },
+  "dependencies": {
+    "react": "^19.2.7"
+  }
+}

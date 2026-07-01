@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ngư Ông Bất Ổn - 130+ Loài Cá</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    >
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/pixel-art.css">
+    <link rel="stylesheet" href="css/sprites.css">
+
+  </head>
+  <body>
+    <!-- Screen flash overlay for high-tier catches -->
+    <div id="catch-flash-overlay"></div>
+
+    <!-- Mobile Status Header (sticky at top) -->
+    <div class="mobile-status-header">
+      <div class="msh-top">
+        <div class="msh-player">
+          <span class="msh-lvl-badge" id="mshLvlText">1</span>
+          <div class="msh-player-details">
+            <span class="msh-name" id="mshNameText">Chưa đặt tên</span>
+            <span class="msh-title" id="mshTitleText">🌱 Tân Binh</span>
+          </div>
+        </div>
+        <div class="msh-gold">
+          💰 <span id="mshGoldText" class="gold-glow">0</span>đ
+        </div>
+        <div class="msh-karma">
+          ☯️ <span id="mshKarmaText">0</span>/100
+        </div>
+      </div>
+      <div class="msh-exp-bar">
+        <div class="msh-exp-fill" id="mshExpBar"></div>
+      </div>
+      <div class="msh-buffs" id="mshBuffList"></div>
+    </div>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <div class="mobile-nav-bar">
+      <div class="nav-item active" id="nav-fishing" onclick="switchMobileTab('fishing')">
+        <span class="nav-icon">🎣</span>
+        <span class="nav-text" data-i18n="nav.fishing">Câu Cá</span>
+      </div>
+      <div class="nav-item" id="nav-bag" onclick="switchMobileTab('bag')">
+        <span class="nav-icon">🎒</span>
+        <span class="nav-text" data-i18n="nav.bag">Hành Trang</span>
+      </div>
+      <div class="nav-item" id="nav-shop" onclick="switchMobileTab('shop')">
+        <span class="nav-icon">🛒</span>
+        <span class="nav-text" data-i18n="nav.shop">Cửa Hàng</span>
+      </div>
+      <div class="nav-item" id="nav-records" onclick="switchMobileTab('records')">
+        <span class="nav-icon">🏆</span>
+        <span class="nav-text" data-i18n="nav.records">Kỷ Lục</span>
+      </div>
+      <div class="nav-item" id="nav-settings" onclick="switchMobileTab('settings')">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-text" data-i18n="nav.settings">Cài Đặt</span>
+      </div>
+    </div>
+
+    <!-- Khai báo danh tính Modal -->
+    <div id="nameInputModal" class="name-modal-overlay">
+      <div class="name-modal-content">
+        <h3 class="modal-title" data-i18n="name.title">🎣 KHAI BÁO DANH TÍNH</h3>
+        <p class="modal-desc" data-i18n="name.desc">
+          Chào mừng cần thủ đến với vùng biển bất ổn! Hãy khai báo danh tính bựa
+          nhất của bạn để bắt đầu hành trình và đặt tên cho file lưu game:
+        </p>
+        <input
+          type="text"
+          id="playerNameInput"
+          placeholder="Nhập tên bựa của bạn..."
+          data-i18n-placeholder="name.placeholder"
+          maxlength="20"
+          class="modal-input"
+        >
+        <button
+          class="btn idle modal-start-btn"
+          type="button"
+          onclick="submitPlayerName()"
+        >
+          <span data-i18n="name.start">Bắt Đầu Hành Trình 🎣</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Cài đặt hệ thống Modal cho Desktop -->
+    <div id="desktopSettingsModal" class="name-modal-overlay">
+      <div class="name-modal-content">
+        <h3 class="modal-title" data-i18n="settings.title">⚙️ CÀI ĐẶT HỆ THỐNG</h3>
+        <div class="audio-control-panel settings-mt-15">
+          <span class="audio-title" data-i18n="settings.required"> 🎮 CẤU HÌNH BẮT BUỘC </span>
+          <div class="audio-buttons-container">
+            <button
+              id="btnToggleSFX"
+              type="button"
+              onclick="toggleSFX()"
+              class="audio-btn audio-btn-sfx"
+            >
+              🔊 SFX: BẬT
+            </button>
+            <button
+              id="btnToggleBGM"
+              type="button"
+              onclick="toggleBGM()"
+              class="audio-btn audio-btn-bgm"
+            >
+              🔇 BGM: TẮT
+            </button>
+            <button
+              id="btnResetGame"
+              type="button"
+              onclick="resetSaveData()"
+              class="audio-btn audio-btn-reset"
+            >
+              <span data-i18n="settings.resetSave">🧹 XÓA SAVE</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="audio-control-panel settings-mt-15">
+
+          <span class="audio-title" data-i18n="settings.languageTitle"> 🌐 NGÔN NGỮ / LANGUAGE </span>
+
+          <label class="settings-language-row">
+
+            <span data-i18n="settings.languageLabel">Ngôn ngữ hiển thị</span>
+
+            <select class="settings-language-select" data-language-select onchange="setLanguage(this.value)">
+
+              <option value="vi">Tiếng Việt</option>
+
+              <option value="en">English</option>
+
+            </select>
+
+          </label>
+
+        </div>
+
+
+
+        <div class="audio-control-panel audio-panel-save">
+          <span class="audio-title" data-i18n="settings.saveTitle"> 💾 LƯU GAME VẬT LÝ </span>
+          <div class="audio-buttons-container">
+            <button
+              type="button"
+              onclick="exportSaveFile()"
+              class="audio-btn audio-btn-export"
+            >
+              <span data-i18n="settings.export">💾 Xuất Save</span>
+            </button>
+            <button
+              type="button"
+              onclick="triggerImportInput()"
+              class="audio-btn audio-btn-import"
+            >
+              <span data-i18n="settings.import">📂 Nhập Save</span>
+            </button>
+            <input
+              type="file"
+              accept=".json"
+              id="importSaveInput"
+              class="hide-input"
+              onchange="importSaveFile(this)"
+              title="Nhập Save File"
+            >
+          </div>
+        </div>
+
+        <div class="audio-control-panel settings-mt-15" style="border: 1px dashed #4f46e5;">
+          <span class="audio-title" style="color: #a5b4fc;"> ☁️ CLOUD SYNC (MONGODB) </span>
+          <div style="margin: 8px 0; font-size: 12px; color: #9ca3af; text-align: left;">
+            Mã ID tài khoản (Dùng để lưu/tải game trên thiết bị khác):
+          </div>
+          <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+            <input type="text" id="cloudPlayerIdInput" readonly style="flex: 1; padding: 6px 10px; background: #18181c; border: 1px solid #3f3f46; color: #a5b4fc; border-radius: 4px; font-size: 13px; font-family: monospace;" />
+            <button type="button" onclick="copyPlayerId()" class="audio-btn" style="padding: 6px 12px; background: #27272a; border: 1px solid #3f3f46; color: #fff; cursor: pointer; min-width: auto; height: auto; margin: 0;">Sao chép</button>
+          </div>
+          <div class="audio-buttons-container" style="display: flex; gap: 8px; margin-top: 8px;">
+            <button type="button" onclick="changePlayerIdPrompt()" class="audio-btn" style="flex: 1; background: #2e1065; color: #d8b4fe; border: 1px solid #581c87; margin: 0; height: auto;">
+              🔑 Đăng nhập ID
+            </button>
+            <button type="button" id="btnSyncCloud" onclick="syncCloudSave()" class="audio-btn" style="flex: 1; background: #064e3b; color: #6ee7b7; border: 1px solid #065f46; margin: 0; height: auto;">
+              🔄 Đồng bộ ngay
+            </button>
+          </div>
+        </div>
+
+
+        <div class="donate-card">
+          <div class="donate-card-title" data-i18n="donate.title">💖 ỦNG HỘ PHÁT TRIỂN 💖</div>
+          <div class="donate-card-body">
+            <div class="donate-creator"><span data-i18n="donate.created_by">Được tạo bởi</span> <b>RusTaio</b> 🗿</div>
+            <div class="donate-message" data-i18n="donate.message">Nếu thấy hay - Donate để có thể phát triển thêm nhé 🥺</div>
+            <div class="donate-bank-info">
+              <div class="bank-row">
+                <span data-i18n="donate.bank_label">🏦 Ngân hàng:</span>
+                <b class="bank-name" data-i18n="donate.bank_name">VCB (Vietcombank)</b>
+              </div>
+              <div class="bank-row">
+                <span data-i18n="donate.stk_label">💳 Số tài khoản:</span>
+                <b class="bank-stk">9911555414</b>
+              </div>
+              <div class="bank-row">
+                <span data-i18n="donate.owner_label">👤 Chủ tài khoản:</span>
+                <b class="bank-owner">NGUYEN TAN PHUOC</b>
+              </div>
+            </div>
+            <button class="btn-copy-stk" type="button" onclick="copyDonateSTK()" data-i18n="donate.copy_btn">
+              📋 Sao Chép Số Tài Khoản 🐸
+            </button>
+          </div>
+        </div>
+
+        <button
+          class="btn idle modal-start-btn settings-close-btn"
+          type="button"
+          onclick="closeSettings()"
+        >
+          <span data-i18n="settings.close">Đóng Cài Đặt ✖️</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="game-container">
+      <button class="settings-toggle-btn" type="button" onclick="openSettings()">
+        <span data-i18n="settings.open">⚙️ Cài Đặt</span>
+      </button>
+      <h1>🎣 Ngư Ông Bất Ổn 🎣</h1>
+
+      <!-- SỰ KIỆN THời GIAN THỰC -->
+      <div class="time-event-panel" id="timeEventPanel">
+        <div class="time-event-header">
+          <span class="time-event-title" data-i18n="timeEvents.title">✨ SỰ KIỆN ĐANG DIỄN RA</span>
+          <span class="time-event-clock" id="timeEventClock"></span>
+        </div>
+        <div class="time-event-list" id="timeEventList">
+          <div class="time-event-empty">
+            <span data-i18n="timeEvents.empty">Không có sự kiện nào... Thời buổi bình thường như bao giờ.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="game-layout">
+        <!-- Sub-tabs for mobile views -->
+        <div class="mobile-sub-tabs" id="mobile-bag-subtabs">
+          <button class="sub-tab-btn active" id="btn-bag-inv" type="button" onclick="selectBagSubTab('bag')" data-i18n="subtab.inventory">🎒 Túi Đồ</button>
+          <button class="sub-tab-btn" id="btn-bag-craft" type="button" onclick="selectBagSubTab('crafting')" data-i18n="subtab.crafting">🍲 Bếp Lẩu</button>
+          <button class="sub-tab-btn" id="btn-bag-pet" type="button" onclick="selectBagSubTab('aquarium')" data-i18n="subtab.pet">🏠 Bể Báo</button>
+        </div>
+
+
+
+        <div class="mobile-sub-tabs" id="mobile-records-subtabs">
+          <button class="sub-tab-btn active" id="btn-rec-quest" type="button" onclick="selectRecordsSubTab('quest')" data-i18n="subtab.quest">🧾 Nhiệm Vụ</button>
+          <button class="sub-tab-btn" id="btn-rec-ency" type="button" onclick="selectRecordsSubTab('encyclopedia')" data-i18n="subtab.encyclopedia">📚 Bách Khoa</button>
+          <button class="sub-tab-btn" id="btn-rec-ach" type="button" onclick="selectRecordsSubTab('achievement')" data-i18n="subtab.achievement">🏆 Thành Tựu</button>
+          <button class="sub-tab-btn" id="btn-rec-help" type="button" onclick="selectRecordsSubTab('help')" data-i18n="subtab.help">❓ Trợ Giúp</button>
+          <button class="sub-tab-btn" id="btn-rec-zone" type="button" onclick="selectRecordsSubTab('zone')" data-i18n="subtab.zone">🗺️ Bản Đồ</button>
+          <button class="sub-tab-btn" id="btn-rec-season" type="button" onclick="selectRecordsSubTab('season')">🏆 Mùa</button>
+        </div>
+
+        <div class="game-left-column">
+
+          <div class="pixel-fishing-scene" id="pixelFishingScene" aria-hidden="true">
+            <canvas id="pixelSceneCanvas" class="pixel-scene-canvas" width="320" height="128"></canvas>
+            <div class="pixel-sky">
+              <div class="pixel-sun"></div>
+              <div class="pixel-cloud cloud-a"></div>
+              <div class="pixel-cloud cloud-b"></div>
+            </div>
+            <div class="pixel-stage-label">
+              <span id="pixelSceneZone">Ao Làng</span>
+              <span id="pixelSceneStatus">Sẵn sàng</span>
+            </div>
+            <div class="pixel-boat">
+              <div class="pixel-fisher">
+                <div class="pixel-head"></div>
+                <div class="pixel-hat"></div>
+                <div class="pixel-body"></div>
+                <div class="pixel-arm"></div>
+              </div>
+              <div class="pixel-rod"></div>
+              <div class="pixel-line"></div>
+            </div>
+            <div class="pixel-water">
+              <div class="pixel-wave wave-a"></div>
+              <div class="pixel-wave wave-b"></div>
+              <div class="pixel-wave wave-c"></div>
+              <div class="pixel-fish-swimmer fish-a"></div>
+              <div class="pixel-fish-swimmer fish-b"></div>
+              <div class="pixel-fish-swimmer fish-c"></div>
+              <div id="pixelCatchLayer" class="pixel-catch-layer"></div>
+            </div>
+          </div>
+          <div class="stats-panel">
+            <!-- Widget Thời tiết -->
+            <div class="weather-widget" id="weatherWidget">
+              <span class="weather-icon">☀️</span>
+              <div class="weather-info-box">
+                <div class="weather-title">Trời Trong Xanh</div>
+                <div class="weather-desc">Thời tiết ôn hòa thích hợp đi câu.</div>
+              </div>
+            </div>
+            <div class="stats-row">
+              <div class="stat-item">
+                <span data-i18n="status.fisher">Ngư Ông:</span>
+                <span id="playerNameText" class="stat-player-name"
+                  >Chưa đặt tên</span
+                >
+              </div>
+            </div>
+            <div class="stats-row">
+              <div class="stat-item"><span data-i18n="status.gold">Vàng:</span> <span id="goldText">0</span>đ</div>
+            </div>
+            <div class="stats-row">
+              <div class="stat-item">
+                <span data-i18n="status.level">Cấp Ngư Ông:</span> <span class="lvl-badge" id="playerLvlText">1</span>
+              </div>
+            </div>
+            <div class="stats-row mt-4">
+              <div class="stat-item">
+                <span data-i18n="status.title">Danh Hiệu:</span>
+                <span id="playerTitleText" class="player-title-text"
+                  >Dân Chơi Hệ Cần Cỏ</span
+                >
+              </div>
+              <div class="stat-item karma-stat">
+                ☯️ Nghiệp: <span id="karmaText">0</span>/100
+              </div>
+            </div>
+            <!-- Equipped Achievement -->
+            <div
+              class="stats-row mt-2 equipped-ach-row"
+              id="equippedAchievementRow"
+            >
+              <div class="stat-item stat-flex-1">
+                🏅 Thành Tựu Đeo:
+                <span id="equippedAchName" class="equipped-ach-name"
+                  >Chưa đeo</span
+                >
+              </div>
+            </div>
+            <div
+              class="stats-row equipped-ach-buff-row"
+              id="equippedAchievementBuffRow"
+            >
+              <div class="stat-item equipped-ach-buff-label">
+                ⚡ Buff:
+                <span id="equippedAchBuffText" class="equipped-ach-buff-val"
+                  >Không</span
+                >
+              </div>
+            </div>
+            <div class="stats-row buff-row" id="buffRow">
+              <div class="stat-item buff-status-stat">
+                🍲 Lẩu Buff: <span id="buffStatusText">Không</span> (<span
+                  id="buffTimeText"
+                  >0</span
+                >s)
+              </div>
+            </div>
+            <div class="stats-row buff-row" id="potionRow">
+              <div class="stat-item buff-status-stat potion-stat-orange">
+                🌶️ Thuốc: <span id="potionStatusText">Bình Nước Siêu Tốc</span> (<span id="potionTimeText">0</span>s)
+              </div>
+            </div>
+            <div class="stats-row buff-row sys-buff-panel" id="sysBuffRow">
+              <div class="sys-buff-heading">
+                🔥 BUFF HỆ THỐNG ĐANG HOẠT ĐỘNG:
+              </div>
+              <div id="sysBuffActiveList" class="sys-buff-list"></div>
+            </div>
+            <div class="mt-6">
+              <div class="stats-row mb-3">
+                <span>EXP:</span>
+                <span
+                  ><span id="expText">0</span>/<span id="expNeededText"
+                    >45</span
+                  ></span
+                >
+              </div>
+              <div class="exp-bar-container">
+                <div class="exp-bar-fill" id="expBar"></div>
+              </div>
+            </div>
+
+            <!-- Collapsible Detailed Stats Section -->
+            <div class="detailed-stats-toggle" onclick="toggleDetailedStats()">
+              📊 Xem Chỉ Số Chi Tiết <span id="detailsToggleIcon">▼</span>
+            </div>
+            <div id="detailedStatsContent">
+
+              <div class="detail-row">
+
+                🍀 May Mắn Tổng: <span id="statLuckVal">1.00</span>x
+
+              </div>
+
+              <div class="detail-row">
+
+                ⏱️ Thời Gian Chờ: <span id="statSpeedVal">1.50</span>s
+
+              </div>
+
+              <div class="detail-row">
+
+                🎓 Thưởng EXP: +<span id="statExpBonusVal">0</span>%
+
+              </div>
+
+              <div class="detail-row">
+
+                💰 Thưởng Giá Bán: +<span id="statGoldBonusVal">0</span>%
+
+              </div>
+
+              <div class="detail-row">
+
+                🔥 Chuỗi Sạch: <span id="cleanStreakText">0</span> lượt
+                <span class="detail-muted">(Kỷ lục <span id="bestCleanStreakText">0</span>)</span>
+
+              </div>
+
+              <div class="detail-row">
+
+                ⚡ Bonus Chuỗi: <span id="cleanStreakBonusText">May mắn +0.00 · EXP +0%</span>
+
+              </div>
+
+            </div>
+
+          </div>
+          <div class="log-panel-container">
+            <div class="log-panel-header">
+              <div class="log-panel-title">
+                <span class="pulse-indicator"></span> 🎣 Nhật Ký Hành Trình Bất Ổn
+              </div>
+              <div class="log-panel-stats">
+                <span>🗑️ Rác: <b id="logTrashStat">0</b></span>
+                <span>🐟 Cá Trê: <b id="logCatfishStat">0</b></span>
+                <span>👑 Tối Cao: <b id="logSupremeStat">0</b></span>
+              </div>
+            </div>
+            <div class="log-box" id="logBox"></div>
+          </div>
+
+          <div class="action-btn-container">
+            <button
+              class="btn idle action-btn-main"
+              id="actionBtn"
+              type="button"
+            >
+              🎣 Quăng Cần
+            </button>
+            <button
+              class="btn action-btn-net"
+              id="netBtn"
+              type="button"
+              onclick="castNet()"
+            >
+              🕸️ Quăng Lưới
+            </button>
+            <button
+              class="btn auto-btn-off action-btn-auto"
+              id="autoBtn"
+              type="button"
+              onclick="toggleAutoFishing()"
+            >
+              🤖 Auto: Tắt
+            </button>
+          </div>
+
+          <div class="zone-selector">
+            <div class="zone-title" onclick="toggleZoneGrid()">
+              📍 CHỌN KHU VỰC CÂU CÁ <span id="zoneToggleIcon">▼ Xem Thêm</span>
+            </div>
+            <div class="zone-info" id="zoneInfo" onclick="toggleZoneGrid()">
+              Chọn một khu vực để bắt đầu câu cá...
+            </div>
+            <div class="zone-grid" id="zoneGrid"></div>
+          </div>
+
+
+
+          <div class="quest-container">
+            <div class="quest-header">
+              <div>
+                <div class="quest-title" data-i18n="quest.title">🧾 NHIỆM VỤ NGÀY &amp; THỬ THÁCH</div>
+                <div class="quest-desc" data-i18n="quest.desc">
+                  Hoàn thành nhiệm vụ hôm nay để nhận vàng, mồi may mắn và buff
+                  hài hước.
+                </div>
+              </div>
+              <button
+                class="collapse-btn"
+                id="questToggleBtn"
+                type="button"
+                onclick="toggleQuestSection()"
+              >
+                <span data-i18n="ui.collapse">Thu gọn</span>
+              </button>
+            </div>
+            <div id="dailyQuestList"></div>
+            <div class="quest-footer">
+              <span data-i18n="quest.footer">Mỗi ngày reset lúc 0h. Nhớ quay lại để nhận phần thưởng nhé!</span>
+            </div>
+          </div>
+
+          <div class="guide-container">
+            <div class="guide-toggle-header" onclick="toggleGuideSection()">
+              <span class="toggle-title"
+                data-i18n="guide.title">📖 BẢNG HƯỚNG DẪN &amp; THÔNG TIN</span
+              >
+              <span class="toggle-icon" id="guideToggleIcon">▼</span>
+            </div>
+            <div class="guide-collapsible" id="guideCollapsible">
+              <div class="guide-tabs">
+                <button
+                  class="tab-btn active"
+                  type="button"
+                  onclick="switchTab('help', this)"
+                >
+                  <span data-i18n="guide.help">❓ Hướng dẫn</span>
+                </button>
+                <button
+                  class="tab-btn"
+                  type="button"
+                  onclick="switchTab('zones', this)"
+                >
+                  <span data-i18n="guide.zones">🗺️ Khu Vực</span>
+                </button>
+                <button
+                  class="tab-btn"
+                  type="button"
+                  onclick="switchTab('crafting', this)"
+                >
+                  🍲 Bếp Ăn
+                </button>
+                <button
+                  class="tab-btn"
+                  type="button"
+                  onclick="switchTab('encyclopedia', this)"
+                >
+                  📚 Bách Khoa
+                </button>
+                <button
+                  class="tab-btn"
+                  type="button"
+                  onclick="switchTab('achievements', this)"
+                >
+                  🏆 Thành Tựu
+                </button>
+
+                <button
+                  class="tab-btn"
+                  type="button"
+                  onclick="switchTab('petTank', this)"
+                >
+                  🏠 Bể Báo Thủ
+                </button>
+              </div>
+              <div class="guide-content">
+                <div id="helpTab" class="guide-tab">
+                  <div class="guide-item">
+                    <b>🎣 Cách Chơi:</b> Chọn khu vực → Quăng cần → Chờ cá cắn →
+                    Nhấn nhanh!
+                  </div>
+                  <div class="guide-item">
+                    <b>🤖 Hệ Thống Auto:</b> Tự động quăng cần và kéo cá. Tốc độ
+                    phản xạ của Auto phụ thuộc vào cấp độ "Tai Nhạy". Nếu chưa
+                    nâng cấp đủ, Auto có thể để sổng cá. Auto tự tắt khi túi đồ
+                    vượt 200 món.
+                  </div>
+                  <div class="guide-item">
+                    <b>⛈️ Biến Cố Bất Ngờ:</b> Hãy cẩn thận với thời tiết
+                    (Nắng/Mưa bão) làm thay đổi nhịp độ câu, hoặc bị khỉ trộm
+                    mồi, kẹt xe mương nước. Thậm chí có tỷ lệ vớt được Rương Bí
+                    Ẩn!
+                  </div>
+                  <div class="guide-item">
+                    <b>🎒 Túi Đồ Chi Chiến:</b> Cá câu được sẽ tích trữ vào túi
+                    đồ. Hãy chọn thời điểm xả hàng thông minh để kiếm vàng tối
+                    đa!
+                  </div>
+                  <div class="guide-item">
+                    <b>🍲 Nồi Lẩu Đột Biến:</b> Gom xác cá trong túi để nấu lẩu
+                    siêu buff chỉ số ẩn! Tối đa 8 tầng cấp độ lẩu khác nhau!
+                  </div>
+                  <div class="guide-item">
+                    <b>🐋 Đa Cấp Vé Số:</b> Gặp biến cố Cá Voi Đa Cấp để mua vé
+                    số nổ hũ x10 hoặc bị úp bô!
+                  </div>
+                  <div class="guide-item">
+                    <b>🔮 Thắp Hương Bái Tổ:</b> Bỏ 50đ xin quẻ Cát (Tăng cá
+                    xịn) hoặc quẻ Hung (Ngập mồm rác)!
+                  </div>
+                  <div class="guide-item">
+                    <b>☯️ Thanh Nghiệp Lực:</b> Câu trúng Rác hoặc hụt cá sẽ
+                    tích nghiệp. Nghiệp cao dễ bị sét đánh rơi tiền!
+                  </div>
+                  <div class="guide-item">
+                    <b>🏆 Thành Tựu Tối Cao:</b> Săn lùng cá phẩm cấp Tối Cao để
+                    mở khóa các thành tựu chấn động vũ trụ!
+                  </div>
+                  <div class="guide-item guide-item-star">
+                    <b>⭐ Hệ Số Sao (1-5★):</b> Mỗi con cá câu được sẽ ngẫu
+                    nhiên nhận 1-5 sao. Sao càng cao → giá bán càng khủng!
+                    1★=x1.0 | 2★=x1.3 | 3★=x1.8 | 4★=x2.5 | 5★=x4.0. Cá hiếm có
+                    tỷ lệ sao cao hơn!
+                  </div>
+                </div>
+                <div id="zonesTab" class="guide-tab">
+                  <div id="zonesInfo"></div>
+                </div>
+                <div id="craftingTab" class="guide-tab">
+                  <div class="crafting-header">
+                    🍲 KHO XÁC CÁ TRONG NỒI:
+                    <div class="crafting-sub">
+                      Rác (<span id="inv-Rác">0</span>) | Phế Liệu (<span
+                        id="inv-Phế-Liệu"
+                        >0</span
+                      >) | Thường (<span id="inv-Thường">0</span>) | Bất Ổn
+                      (<span id="inv-Bất-Ổn">0</span>) | Hiếm (<span
+                        id="inv-Hiếm"
+                        >0</span
+                      >) | Siêu Bựa (<span id="inv-Siêu-Bựa">0</span>)<br>
+                      Cực Hiếm (<span id="inv-Cực-Hiếm">0</span>) | Đột Biến
+                      (<span id="inv-Đột-Biến">0</span>) | Huyền Thoại (<span
+                        id="inv-Huyền-Thoại"
+                        >0</span
+                      >) | Thần Thoại (<span id="inv-Thần-Thoại">0</span>) | Tối
+                      Cao (<span id="inv-Tối-Cao">0</span>) | Vô Tri (<span
+                        id="inv-Vô-Tri"
+                        >0</span
+                      >)
+                    </div>
+                  </div>
+                  <div id="craftingRecipes"></div>
+                </div>
+                <div
+                  id="encyclopediaTab"
+                  class="guide-tab"
+                >
+                  <div class="encyclopedia-header">
+                    📖 Phát Hiện: <b id="discoveredCount">0</b> loài /
+                    <span id="totalSpecies">130+</span>
+                  </div>
+                  <div id="fishEncyclopedia"></div>
+                </div>
+                <div
+                  id="achievementsTab"
+                  class="guide-tab"
+                >
+                  <div class="encyclopedia-header tab-header-orange">
+                    🏆 THÀNH TỰU BUỒN NHẤT &amp; BỰA NHẤT (<span
+                      id="unlockedAchievementsCount"
+                      >0</span
+                    >/<span id="totalAchievementsCount">8</span>)
+                  </div>
+                  <div
+                    id="playerAchievementsList"
+                    class="achievements-list"
+                  ></div>
+                </div>
+
+                <div id="petTankTab" class="guide-tab">
+                  <div class="encyclopedia-header tab-header-orange">
+                    🏠 BỂ NUÔI CÁ BÁO THỦ (BÁO HẠI AO LÀNG)
+                  </div>
+                  <div id="petTankContent"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="game-right-column">
+          <div class="inventory-panel">
+            <div
+              class="inventory-toggle-header"
+              onclick="toggleInventorySection()"
+            >
+              <div class="inventory-header-title">
+                🎒 TÚI ĐỒ CHI CHIẾN
+              </div>
+              <span id="inventoryToggleIcon">▼</span>
+            </div>
+            <div
+              id="inventoryCollapsible"
+              class="inventory-collapsible"
+            >
+              <div class="text-center-mb12">
+                <button
+                  class="btn idle btn-sell-all"
+                  type="button"
+                  onclick="sellAllFish()"
+                >
+                  💰 Xả Kho: Bán Sạch Sành Sanh
+                </button>
+              </div>
+              <div id="playerInventoryList"></div>
+            </div>
+          </div>
+
+          <div class="shop-container">
+            <div class="shop-title" onclick="toggleShop()">
+              ⚙️ NÂNG CẤP VĂN PHÒNG PHẨM <span id="shopToggleIcon">▼</span>
+            </div>
+
+            <div id="shopContent">
+              <div id="consumablePanelMount"></div>
+
+              <div class="shop-section-title">⚙️ CƠ SỞ VẬT CHẤT (VĨNH VIỄN)</div>
+              <div class="shop-row">
+                <div class="shop-icon-box rod" id="rodIconBox">🎣</div>
+                <div class="shop-info">
+                  <div>
+                    <b id="rodNameText">Cần Gỗ</b> - Lv<b id="rodLvText">1</b>
+                  </div>
+                  <div class="shop-desc" id="rodDescText">Thợ câu cơ bản</div>
+                </div>
+                <button
+                  class="shop-btn"
+                  id="btnUpgradeRod"
+                  type="button"
+                  onclick="upgradeStat('rod')"
+                >
+                  15đ
+                </button>
+              </div>
+
+              <div class="shop-row">
+                <div class="shop-icon-box speed" id="speedIconBox">👂</div>
+                <div class="shop-info">
+                  <div>
+                    <b id="speedNameText">Tai Nhạy</b> - Lv<b id="speedLvText"
+                      >1</b
+                    >
+                  </div>
+                  <div class="shop-desc" id="speedDescText">
+                    Phản ứng nhanh hơn
+                  </div>
+                </div>
+                <button
+                  class="shop-btn"
+                  id="btnUpgradeSpeed"
+                  type="button"
+                  onclick="upgradeStat('speed')"
+                >
+                  12đ
+                </button>
+              </div>
+
+              <div class="shop-row">
+                <div class="shop-icon-box loc" id="locIconBox">🔍</div>
+                <div class="shop-info">
+                  <div>
+                    <b id="locNameText">Vị Trí</b> - Lv<b id="locLvText">1</b>
+                  </div>
+                  <div class="shop-desc" id="locDescText">Tìm cá hiếm</div>
+                </div>
+                <button
+                  class="shop-btn"
+                  id="btnUpgradeLoc"
+                  type="button"
+                  onclick="upgradeStat('loc')"
+                >
+                  25đ
+                </button>
+              </div>
+
+              <div class="shop-row">
+                <div class="shop-icon-box pet" id="petIconBox">🐱</div>
+                <div class="shop-info">
+                  <div>
+                    <b id="petNameText">Trợ Thủ</b> - Lv<b id="petLvText">1</b>
+                  </div>
+                  <div class="shop-desc" id="petDescText">Meo Gợi Tài Lộc</div>
+                </div>
+                <button
+                  class="shop-btn"
+                  id="btnUpgradePet"
+                  type="button"
+                  onclick="upgradeStat('pet')"
+                >
+                  20đ
+                </button>
+              </div>
+
+              <div class="shop-row">
+                <div class="shop-icon-box auto-tool" id="autoToolIconBox">
+                  🤖
+                </div>
+                <div class="shop-info">
+                  <div>
+                    <b id="autoNameText">Tool Cùi</b> - Lv<b id="autoLvText"
+                      >1</b
+                    >
+                  </div>
+                  <div class="shop-desc" id="autoDescText">Phản xạ Auto</div>
+                </div>
+                <button
+                  class="shop-btn"
+                  id="btnUpgradeAuto"
+                  type="button"
+                  onclick="upgradeStat('auto')"
+                >
+                  30đ
+                </button>
+              </div>
+
+              <div class="shop-row">
+                <div class="shop-icon-box gacha" id="gachaIconBox">🔮</div>
+                <div class="shop-info">
+                  <div><b class="color-purple">Thắp Hương Bái Tổ</b></div>
+                  <div class="shop-desc" id="gachaStatusText">
+                    Thử thách nhân phẩm (Cát/Hung)
+                  </div>
+                </div>
+                <button
+                  class="shop-btn btn-gacha"
+                  id="btnGacha"
+                  type="button"
+                  onclick="thapHuong()"
+                >
+                  50đ
+                </button>
+              </div>
+
+              <div class="shop-row">
+                <div class="shop-icon-box gomo" id="gomoIconBox">🙏</div>
+                <div class="shop-info">
+                  <div><b class="color-pink">Cúng Dường Online</b></div>
+                  <div class="shop-desc">
+                    Gõ mõ tạch tạch giải sạch nghiệp lực
+                  </div>
+                </div>
+                <button
+                  class="shop-btn btn-gmo"
+                  id="btnGoMo"
+                  type="button"
+                  onclick="goMo()"
+                >
+                  30đ
+                </button>
+              </div>
+              <div class="shop-row">
+                <div class="shop-icon-box pet arena">
+                  🎰
+                </div>
+                <div class="shop-info">
+                  <div><b class="color-purple">Đấu Trường Cá Độc Lạ</b></div>
+                  <div class="shop-desc">
+                    Trả 30đ, chọn 1 trong 3 rương. Có thể nhận vàng, quà hoặc
+                    item bựa.
+                  </div>
+                </div>
+                <button
+                  class="shop-btn btn-gacha"
+                  type="button"
+                  onclick="openMiniGame()"
+                >
+                  30đ
+                </button>
+              </div>
+
+              <!-- Consumables section at the bottom -->
+              <div class="shop-section-title">🧪 NHỮNG BÌNH THUỐC CỨU CÁNH (BUFF)</div>
+              <div id="shopConsumables" class="shop-consumables-grid"></div>
+            </div>
+          </div>
+
+          <div class="mobile-settings-container" id="mobileSettingsContainer">
+            <div class="mobile-settings-panel">
+              <div class="mobile-settings-title" data-i18n="settings.title">⚙️ CÀI ĐẶT HỆ THỐNG</div>
+              <div class="mobile-settings-row">
+                <button id="btnToggleSFXMobile" class="audio-btn audio-btn-sfx" type="button" onclick="toggleSFX()">🔊 SFX: BẬT</button>
+                <button id="btnToggleBGMMobile" class="audio-btn audio-btn-bgm" type="button" onclick="toggleBGM()">🔇 BGM: TẮT</button>
+              </div>
+              <div class="mobile-settings-row">
+                <button class="audio-btn audio-btn-export" type="button" onclick="exportSaveFile()" data-i18n="settings.export">💾 Xuất Save</button>
+                <button class="audio-btn audio-btn-import" type="button" onclick="triggerImportInput()" data-i18n="settings.import">📂 Nhập Save</button>
+              </div>
+              <div class="mobile-settings-row">
+                <label class="settings-language-row">
+                  <span data-i18n="settings.languageLabel">Ngôn ngữ hiển thị</span>
+                  <select class="settings-language-select" data-language-select onchange="setLanguage(this.value)">
+                    <option value="vi">Tiếng Việt</option>
+                    <option value="en">English</option>
+                  </select>
+                </label>
+              </div>
+              <div class="mobile-settings-row">
+                <button class="audio-btn audio-btn-reset" type="button" onclick="resetSaveData()" data-i18n="settings.resetSave">🧹 XÓA SAVE</button>
+              </div>
+
+              <div class="donate-card">
+                <div class="donate-card-title" data-i18n="donate.title">💖 ỦNG HỘ PHÁT TRIỂN 💖</div>
+                <div class="donate-card-body">
+                  <div class="donate-creator"><span data-i18n="donate.created_by">Được tạo bởi</span> <b>RusTaio</b> 🗿</div>
+                  <div class="donate-message" data-i18n="donate.message">Nếu thấy hay - Donate để có thể phát triển thêm nhé 🥺</div>
+                  <div class="donate-bank-info">
+                    <div class="bank-row">
+                      <span data-i18n="donate.bank_label">🏦 Ngân hàng:</span>
+                      <b class="bank-name" data-i18n="donate.bank_name">VCB (Vietcombank)</b>
+                    </div>
+                    <div class="bank-row">
+                      <span data-i18n="donate.stk_label">💳 Số tài khoản:</span>
+                      <b class="bank-stk">9911555414</b>
+                    </div>
+                    <div class="bank-row">
+                      <span data-i18n="donate.owner_label">👤 Chủ tài khoản:</span>
+                      <b class="bank-owner">NGUYEN TAN PHUOC</b>
+                    </div>
+                  </div>
+                  <button class="btn-copy-stk" type="button" onclick="copyDonateSTK()" data-i18n="donate.copy_btn">
+                    📋 Sao Chép Số Tài Khoản 🐸
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="miniGameModal" class="name-modal-overlay">
+      <div class="name-modal-content mini-game">
+        <h3 class="modal-title" data-i18n="minigame.title">🎲 ĐẤU TRƯỜNG CÁ SIÊU BỰA</h3>
+        <p class="modal-desc" data-i18n="minigame.desc">
+          Bỏ 30đ vào cược, chọn 1 trong 3 rương thần bí. Thắng gói về vàng, mồi
+          may mắn, hoặc item bá đạo!
+        </p>
+        <div class="guide-item mini-game-rules">
+          <b data-i18n="minigame.rules_label">Quy tắc:</b> <span data-i18n="minigame.rules_body">30đ / lượt. Phần thưởng có thể là: 60-100đ, 1 mồi may mắn, 1 bình giảm nghiệp, hoặc 1 lọ ớt tốc độ.</span>
+        </div>
+        <div class="mini-game-chest-container">
+          <button
+            class="shop-btn mini-game-chest-btn"
+            type="button"
+            onclick="playMiniGame(1)"
+          >
+            <span data-i18n="minigame.chest1">Rương 1</span>
+          </button>
+          <button
+            class="shop-btn mini-game-chest-btn"
+            type="button"
+            onclick="playMiniGame(2)"
+          >
+            <span data-i18n="minigame.chest2">Rương 2</span>
+          </button>
+          <button
+            class="shop-btn mini-game-chest-btn"
+            type="button"
+            onclick="playMiniGame(3)"
+          >
+            <span data-i18n="minigame.chest3">Rương 3</span>
+          </button>
+        </div>
+        <button
+          class="btn idle modal-start-btn"
+          type="button"
+          onclick="closeMiniGame()"
+        >
+          <span data-i18n="minigame.cancel">Hủy Bỏ</span>
+        </button>
+      </div>
+    </div>
+    <script src="js/modules/i18n.js"></script>
+    <script src="js/modules/audio.js"></script>
+    <script src="js/modules/time-events.js"></script>
+    <script src="js/game-state.js"></script>
+    <script src="js/data/world-data.js"></script>
+    <script src="js/data/progression-data.js"></script>
+    <script src="js/data/translations-content.js"></script>
+    <script src="js/modules/season-system.js"></script>
+    <script src="js/modules/boss-system.js"></script>
+    <script src="js/game-core.js"></script>
+
+  </body>
+</html>
+
+
+
