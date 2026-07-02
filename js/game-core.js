@@ -7495,6 +7495,9 @@
 
 
       function updateStatsPanel() {
+        if (goldText) goldText.innerText = gold;
+        const mshGold = document.getElementById("mshGoldText");
+        if (mshGold) mshGold.innerText = gold;
 
         document.getElementById("playerLvlText").innerText = playerLevel;
 
@@ -9987,7 +9990,7 @@
               entryModal.style.display = "flex";
               const continueBtn = document.getElementById("btnContinueEntry");
               // Chỉ hiện tiếp tục nếu đã có dữ liệu lưu và tên đã đặt
-              if (localStorage.getItem("fish_game_state") && playerName && playerName !== "Ngư Ông Vô Danh") {
+              if (playerName && playerName !== "Ngư Ông Vô Danh") {
                 if (continueBtn) continueBtn.style.display = "block";
               } else {
                 if (continueBtn) continueBtn.style.display = "none";
