@@ -48,6 +48,7 @@ function createMainWindow() {
     minHeight: 680,
     backgroundColor: "#0d0d11",
     title: "Ngư Ông Bất Ổn",
+    icon: path.join(__dirname, "..", "build", "icon.png"),
     autoHideMenuBar: true,
     webPreferences: {
       contextIsolation: true,

@@ -6873,3 +6873,166 @@
       .catch-reveal-exp-value {
         color: #6ee7b7;
       }
+
+      /* Gear Crafting and Equipped Displays */
+      .equipped-gear-display {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+      }
+
+      .gear-slot-card {
+        flex: 1;
+        background: #11111d;
+        border: 1px solid #33334d;
+        border-radius: 8px;
+        padding: 8px;
+        text-align: center;
+        box-shadow: inset 0 0 5px rgba(255,255,255,0.05);
+      }
+
+      .gear-slot-title {
+        font-size: 8px;
+        text-transform: uppercase;
+        color: #777;
+        font-weight: bold;
+        letter-spacing: 0.5px;
+      }
+
+      .gear-slot-name {
+        font-size: 11px;
+        color: #ffd600;
+        font-weight: bold;
+        margin-top: 4px;
+      }
+
+      .gear-slot-buff {
+        font-size: 8.5px;
+        color: #a5f3fc;
+        margin-top: 2px;
+        line-height: 1.2;
+      }
+
+      /* Screen Shake Animation */
+      @keyframes screen-shake {
+        0% { transform: translate(2px, 2px) rotate(0deg); }
+        10% { transform: translate(-2px, -3px) rotate(-1deg); }
+        20% { transform: translate(-4px, 0px) rotate(1deg); }
+        30% { transform: translate(0px, 3px) rotate(0deg); }
+        40% { transform: translate(2px, -2px) rotate(1deg); }
+        50% { transform: translate(-2px, 3px) rotate(-1deg); }
+        60% { transform: translate(-4px, 2px) rotate(0deg); }
+        70% { transform: translate(3px, 2px) rotate(-1deg); }
+        80% { transform: translate(-2px, -2px) rotate(1deg); }
+        90% { transform: translate(3px, 3px) rotate(0deg); }
+        100% { transform: translate(2px, -3px) rotate(-1deg); }
+      }
+      .screen-shake {
+        animation: screen-shake 0.4s ease-in-out;
+      }
+
+      /* Newbie Tutorial Modal Styles */
+      .tutorial-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.75);
+        z-index: 10000;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .tutorial-content {
+        max-width: 420px;
+        width: 90%;
+        padding: 25px;
+        text-align: center;
+        border: 2px solid #519aba;
+        background: rgba(18, 18, 30, 0.96);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        position: relative;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      }
+
+      .tutorial-skip-btn {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        padding: 4px 8px;
+        font-size: 10px;
+        background-color: #2a2a3f;
+        color: #aaa;
+        border: 1px solid #444;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .tutorial-emoji {
+        font-size: 40px;
+        margin-bottom: 15px;
+        display: inline-block;
+      }
+
+      .tutorial-title {
+        color: #ffd600;
+        font-size: 18px;
+        margin-top: 0;
+        margin-bottom: 10px;
+        font-weight: bold;
+      }
+
+      .tutorial-text {
+        font-size: 12.5px;
+        color: #eee;
+        line-height: 1.5;
+        min-height: 80px;
+        margin-bottom: 20px;
+        text-align: left;
+      }
+
+      .tutorial-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .tutorial-dots {
+        display: flex;
+        gap: 6px;
+      }
+
+      .tutorial-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #444;
+        display: inline-block;
+        transition: background-color 0.2s;
+      }
+
+      .tutorial-dot.active {
+        background-color: #ffd600;
+      }
+
+      .tutorial-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .tutorial-btn-prev {
+        padding: 6px 12px;
+        font-size: 11px;
+        background-color: #444;
+        display: none;
+      }
+
+      .tutorial-btn-next {
+        padding: 6px 15px;
+        font-size: 11px;
+        background-color: #519aba;
+      }

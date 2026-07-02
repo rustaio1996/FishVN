@@ -170,6 +170,72 @@ const timeEvents = [
           },
           effects: { karmaMultiplier: 1.5, lightningChanceBonus: 0.2 },
         },
+        {
+          id: "gio_bao_thu",
+          name: "🦢 Giờ Báo Thủ",
+          desc: "Cá báo thủ tung hoành! Cá sổng nhiều gấp đôi (+100%), giá bán giảm 15% nhưng EXP x2.5.",
+          emoji: "🦢",
+          color: "#ef5350",
+          unitLabel: "19h–20h mỗi ngày",
+          check: () => new Date().getHours() === 19,
+          timeLeft: () => {
+            const d = new Date();
+            return Math.max(
+              0,
+              20 * 36e5 -
+                d.getHours() * 36e5 -
+                d.getMinutes() * 6e4 -
+                d.getSeconds() * 1e3,
+            );
+          },
+          effects: { goldMultiplier: 0.85, expMultiplier: 2.5, escapeMultiplier: 2.0 },
+        },
+        {
+          id: "dem_khuya_mi_tom",
+          name: "🍜 Đêm Khuya Mì Tôm",
+          desc: "Đói bụng ăn mì tôm! EXP nhận được tăng x1.5, Tỷ lệ câu trúng Rác tăng x1.5.",
+          emoji: "🍜",
+          color: "#ff7043",
+          unitLabel: "0h–4h mỗi ngày",
+          check: () => {
+            const h = new Date().getHours();
+            return h >= 0 && h < 4;
+          },
+          timeLeft: () => {
+            const d = new Date();
+            return Math.max(
+              0,
+              4 * 36e5 -
+                d.getHours() * 36e5 -
+                d.getMinutes() * 6e4 -
+                d.getSeconds() * 1e3,
+            );
+          },
+          effects: { expMultiplier: 1.5, trashRateBonus: 1.5 },
+        },
+        {
+          id: "thu_sau_13",
+          name: "🎭 Thứ Sáu 13 Bất Ổn",
+          desc: "Thứ Sáu Ngày 13! Gặp cá Thủy Quái và Tâm Linh tăng x2.5, thời gian câu cá tăng 15%.",
+          emoji: "🎭",
+          color: "#37474f",
+          unitLabel: "thứ sáu ngày 13",
+          check: () => {
+            const d = new Date();
+            return d.getDay() === 5 && d.getDate() === 13;
+          },
+          timeLeft: () => {
+            const d = new Date();
+            return Math.max(
+              0,
+              864e5 -
+                d.getHours() * 36e5 -
+                d.getMinutes() * 6e4 -
+                d.getSeconds() * 1e3,
+            );
+          },
+          effects: { waitTimeMultiplier: 1.15, luckMultiplier: 2.5 },
+        },
       ];
 
       function getTimeEventBonuses() {

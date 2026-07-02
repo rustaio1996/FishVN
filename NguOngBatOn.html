@@ -335,13 +335,14 @@
         <div class="mobile-sub-tabs" id="mobile-bag-subtabs">
           <button class="sub-tab-btn active" id="btn-bag-inv" type="button" onclick="selectBagSubTab('bag')" data-i18n="subtab.inventory">🎒 Túi Đồ</button>
           <button class="sub-tab-btn" id="btn-bag-craft" type="button" onclick="selectBagSubTab('crafting')" data-i18n="subtab.crafting">🍲 Bếp Lẩu</button>
+          <button class="sub-tab-btn" id="btn-bag-gear" type="button" onclick="selectBagSubTab('gearcrafting')" data-i18n="subtab.gearcrafting">🛠️ Chế Đồ</button>
         </div>
 
 
 
         <div class="mobile-sub-tabs" id="mobile-records-subtabs">
           <button class="sub-tab-btn active" id="btn-rec-quest" type="button" onclick="selectRecordsSubTab('quest')" data-i18n="subtab.quest">🧾 Nhiệm Vụ</button>
-          <button class="sub-tab-btn" id="btn-rec-ency" type="button" onclick="selectRecordsSubTab('encyclopedia')" data-i18n="subtab.encyclopedia">📚 Bách Khoa</button>
+          <button class="sub-tab-btn" id="btn-rec-ency" type="button" onclick="selectRecordsSubTab('encyclopedia')" data-i18n="subtab.encyclopedia">📖 Bách Khoa</button>
           <button class="sub-tab-btn" id="btn-rec-ach" type="button" onclick="selectRecordsSubTab('achievement')" data-i18n="subtab.achievement">🏆 Thành Tựu</button>
           <button class="sub-tab-btn" id="btn-rec-help" type="button" onclick="selectRecordsSubTab('help')" data-i18n="subtab.help">❓ Trợ Giúp</button>
           <button class="sub-tab-btn" id="btn-rec-zone" type="button" onclick="selectRecordsSubTab('zone')" data-i18n="subtab.zone">🗺️ Bản Đồ</button>
@@ -636,9 +637,16 @@
                 <button
                   class="tab-btn"
                   type="button"
+                  onclick="switchTab('gearcrafting', this)"
+                >
+                  🛠️ Chế Đồ
+                </button>
+                <button
+                  class="tab-btn"
+                  type="button"
                   onclick="switchTab('encyclopedia', this)"
                 >
-                  📚 Bách Khoa
+                  📖 Bách Khoa
                 </button>
                 <button
                   class="tab-btn"
@@ -721,10 +729,21 @@
                       Cao (<span id="inv-Tối-Cao">0</span>) | Vô Tri (<span
                         id="inv-Vô-Tri"
                         >0</span
-                      >)
+                      >) | Ảo Lòi (<span id="inv-Ảo-Lòi">0</span>) | Đáy Xã Hội (<span
+                        id="inv-Đáy-Xã-Hội"
+                        >0</span
+                      >) | Cảm Lạnh (<span id="inv-Cảm-Lạnh">0</span>)
                     </div>
                   </div>
                   <div id="craftingRecipes"></div>
+                </div>
+                <div id="gearcraftingTab" class="guide-tab">
+                  <div class="crafting-header">
+                    🛠️ TRANG BỊ CẦN CÂU HIỆN TẠI:
+                    <div id="equippedGearDisplay" class="equipped-gear-display"></div>
+                  </div>
+                  <div class="crafting-header">🛠️ CÔNG THỨC CHẾ TẠO TRANG BỊ:</div>
+                  <div id="gearCraftingRecipes"></div>
                 </div>
                 <div
                   id="encyclopediaTab"
@@ -1129,6 +1148,28 @@
             Tiếp Tục Câu 🎣
           </button>
         </div>
+    <!-- Newbie Tutorial Modal -->
+    <div id="newbieTutorialModal" class="tutorial-overlay">
+      <div class="tutorial-content">
+        <button class="tutorial-skip-btn" type="button" onclick="skipTutorial()">Bỏ qua ✖️</button>
+        <div id="tutorialStepEmoji" class="tutorial-emoji">🎣🌊⛵</div>
+        <h2 id="tutorialStepTitle" class="tutorial-title">Chào mừng Ngư Ông!</h2>
+        <p id="tutorialStepText" class="tutorial-text">Chào mừng bạn đến với Ngư Ông Bất Ổn! Nơi bạn sẽ bắt đầu sự nghiệp câu cá báo đời, flex nhân phẩm và sưu tầm hơn 259+ loài cá siêu vô tri.</p>
+        
+        <div class="tutorial-footer">
+          <div id="tutorialStepDots" class="tutorial-dots">
+            <span class="tutorial-dot active"></span>
+            <span class="tutorial-dot"></span>
+            <span class="tutorial-dot"></span>
+            <span class="tutorial-dot"></span>
+            <span class="tutorial-dot"></span>
+            <span class="tutorial-dot"></span>
+          </div>
+          <div class="tutorial-actions">
+            <button id="btnPrevTutorial" class="shop-btn tutorial-btn-prev" type="button" onclick="prevTutorialStep()">Trước</button>
+            <button id="btnNextTutorial" class="shop-btn tutorial-btn-next" type="button" onclick="nextTutorialStep()">Tiếp tục ➔</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1140,7 +1181,6 @@
     <script src="js/data/progression-data.js"></script>
     <script src="js/data/translations-content.js"></script>
     <script src="js/modules/season-system.js"></script>
-    <script src="js/modules/boss-system.js"></script>
     <script src="js/game-core.js"></script>
 
   </body>

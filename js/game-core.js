@@ -493,6 +493,8 @@
           "Vô Tri": 11,
           "Ảo Lòi": 12,
           "Đáy Xã Hội": 13,
+          "Cảm Lạnh": 14,
+          "Kiếp Nạn": 15,
         };
 
         return {
@@ -783,6 +785,10 @@
         // Sự kiện thời gian
 
         window.luckLevel *= getTimeEventBonuses().luckMultiplier;
+        if (equippedGear) {
+          if (equippedGear.hook && equippedGear.hook.buff && equippedGear.hook.buff.luck) window.luckLevel += equippedGear.hook.buff.luck;
+          if (equippedGear.bobber && equippedGear.bobber.buff && equippedGear.bobber.buff.luck) window.luckLevel += equippedGear.bobber.buff.luck;
+        }
 
       }
 
@@ -853,8 +859,29 @@
         }
       }
 
+      function triggerScreenShake() {
+        const els = [
+          document.getElementById("pixelFishingScene"),
+          document.getElementById("catchRevealModal")
+        ];
+        els.forEach(el => {
+          if (el) {
+            el.classList.remove("screen-shake");
+            void el.offsetWidth;
+            el.classList.add("screen-shake");
+            setTimeout(() => {
+              el.classList.remove("screen-shake");
+            }, 500);
+          }
+        });
+      }
+
       function addCatchFlavorLog(fish, stars, isNewDiscover) {
         if (!fish) return;
+
+        if (["Huyền Thoại", "Thần Thoại", "Tối Cao", "Vô Tri", "Cảm Lạnh"].includes(fish.rarity)) {
+          triggerScreenShake();
+        }
 
         if (fish.rarity === "Rác" || fish.rarity === "Phế Liệu") {
           if ((pityMeter || 0) >= 6 || Math.random() < 0.35) {
@@ -891,6 +918,10 @@
             "Vô Tri",
             "Ảo Lòi",
             "Đáy Xã Hội",
+            "Tâm Linh",
+            "Tốc Biến",
+            "Vũ Trụ",
+            "Thủy Quái"
           ].includes(fish.rarity)
         ) {
           updateQuestProgress("rare", 1);
@@ -906,6 +937,11 @@
         else if (fish.rarity === "Vô Tri") unlockAchievement("first_votri");
         else if (fish.rarity === "Ảo Lòi") unlockAchievement("first_aoloi");
         else if (fish.rarity === "Đáy Xã Hội") unlockAchievement("first_dayxahoi");
+        else if (fish.rarity === "Kiếp Nạn") unlockAchievement("first_kiepnan");
+        else if (fish.rarity === "Tâm Linh") unlockAchievement("catch_occ_1");
+        else if (fish.rarity === "Tốc Biến") unlockAchievement("catch_flash_1");
+        else if (fish.rarity === "Vũ Trụ") unlockAchievement("catch_cosmic_1");
+        else if (fish.rarity === "Thủy Quái") unlockAchievement("catch_monster_1");
 
         if (fish.name.includes("Cá Voi")) {
           unlockAchievement("whale_doll");
@@ -913,7 +949,13 @@
 
         if (fish.name.includes("Cá Trê")) totalCatfishCount++;
 
-        if (fish.rarity === "Tối Cao" || fish.rarity === "Vô Tri" || fish.rarity === "Ảo Lòi" || fish.rarity === "Đáy Xã Hội") {
+        if (fish.rarity === "Tâm Linh") totalOccultCount++;
+        if (fish.rarity === "Tốc Biến") totalFlashCount++;
+        if (fish.rarity === "Vũ Trụ") totalCosmicCount++;
+        if (fish.rarity === "Thủy Quái") totalLeviathanCount++;
+        if (fish.rarity === "Đột Biến") totalMutantCount++;
+
+        if (["Tối Cao", "Vô Tri", "Ảo Lòi", "Đáy Xã Hội", "Kiếp Nạn", "Tâm Linh", "Tốc Biến", "Vũ Trụ", "Thủy Quái"].includes(fish.rarity)) {
           totalSupremeCount++;
 
           if (showSupremeLog && fish.achievement) {
@@ -1221,11 +1263,18 @@
           }
         }
 
+        let lightningSoundPlayed = false;
         function drawLightning(t) {
           if (currentWeather !== "Bão Táp" || currentZone === "hang_ca") return;
           if (Math.sin(t * 0.002) > 0.97) {
             ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
             ctx.fillRect(0, 0, w, h);
+            if (!lightningSoundPlayed) {
+              if (typeof playLightning === "function") playLightning();
+              lightningSoundPlayed = true;
+            }
+          } else {
+            lightningSoundPlayed = false;
           }
         }
 
@@ -1246,6 +1295,15 @@
             const sy = (i * 23) % 48;
             const alpha = 0.3 + 0.5 * Math.abs(Math.sin(t * 0.002 + i));
             rect(sx, sy, 2, 2, "rgba(224, 180, 255, " + alpha + ")");
+          }
+        }
+
+        function drawSnow(t) {
+          if (currentWeather !== "Băng Giá" || currentZone === "hang_ca") return;
+          for (let i = 0; i < 20; i++) {
+            const sx = (i * 32 + Math.sin(t * 0.001 + i) * 10) % w;
+            const sy = (i * 15 + t * 0.05) % (h - 20);
+            rect(sx, sy, 2, 2, "rgba(255, 255, 255, 0.75)");
           }
         }
 
@@ -1281,6 +1339,11 @@
             rect(0, 16, w, 20, "#1a0033");
             rect(0, 36, w, 12, "#0d001a");
             rect(0, 48, w, 10, "#030008");
+          } else if (currentWeather === "Băng Giá") {
+            rect(0, 0, w, 16, "#e0f7fa");
+            rect(0, 16, w, 20, "#b2ebf2");
+            rect(0, 36, w, 12, "#80deea");
+            rect(0, 48, w, 10, "#4dd0e1");
           } else {
             // Normal
             rect(0, 0, w, 16, "#7dd3fc");
@@ -1335,6 +1398,10 @@
             cloudCol1 = "#4a154b";
             cloudCol2 = "#6b116c";
             cloudCol3 = "#2d0a2e";
+          } else if (currentWeather === "Băng Giá") {
+            cloudCol1 = "#ffffff";
+            cloudCol2 = "#e0f2f1";
+            cloudCol3 = "#b2dfdb";
           }
 
           for (let i = 0; i < 3; i++) {
@@ -1496,6 +1563,11 @@
           rect(46, 64 + bob, 22, 4, "#3b1f15");
           rect(30, 78 + bob, 47, 4, "#3c2118");
 
+          if (currentPet) {
+            ctx.font = "12px sans-serif";
+            ctx.fillText(currentPet.emoji, 40 + pull, 54 + bob);
+          }
+
           if (pixelShowFisherSprite && pixelFisherSpriteReady && pixelFisherSprite) {
             const frameSet = pixelMaleSpriteFrames[pixelCanvasMode] || pixelMaleSpriteFrames.idle;
             const frameSpeed = pixelCanvasMode === "idle" || pixelCanvasMode === "waiting" ? 360 : 145;
@@ -1598,6 +1670,7 @@
           drawEclipseParticles(t);
           drawFog(t);
           drawRain(t);
+          drawSnow(t);
           drawLightning(t);
           drawPixelEvents(t);
           
@@ -3211,6 +3284,13 @@
           finalPrice = Math.round(finalPrice * 1.10);
         }
 
+        if (
+          equippedAchievementId === "first_kiepnan" &&
+          fish.rarity === "Kiếp Nạn"
+        ) {
+          finalPrice = Math.round(finalPrice * 1.15);
+        }
+
 
 
         if (
@@ -3929,6 +4009,14 @@
 
           buffName = "Hào Quang Tổ Độ (Bỏ Rác/Thường)";
 
+        else if (r.buff === "speed_trash")
+
+          buffName = "Siêu Tốc Độc Lạ (Cắn Nhanh + Nhiều Rác)";
+
+        else if (r.buff === "day_xa_hoi_exp")
+
+          buffName = "Húp Mì Hảo Hảo Tăng EXP";
+
 
 
         document.getElementById("buffStatusText").innerText = buffName;
@@ -4021,6 +4109,12 @@
           document.getElementById("craftingTab").style.display = "block";
 
           renderCraftingTab();
+
+        } else if (tab === "gearcrafting") {
+
+          document.getElementById("gearcraftingTab").style.display = "block";
+
+          if (typeof renderGearCraftingTab === 'function') renderGearCraftingTab();
 
         } else if (tab === "achievements") {
 
@@ -4260,11 +4354,18 @@
               "Huyền Thoại": "#ffca28",
               "Thần Thoại": "#ef5350",
               "Tối Cao": "#ffd600",
-              "Vô Tri": "#00ffcc"
+              "Vô Tri": "#00ffcc",
+              "Ảo Lòi": "#ec407a",
+              "Đáy Xã Hội": "#8a8a8a",
+              "Cảm Lạnh": "#a5f3fc",
+              "Kiếp Nạn": "#e65100"
             };
             const borderColor = borderRarity[pet.rarity] || "#4f46e5";
             const shadowStyle = isActive ? `box-shadow: 0 0 15px ${borderColor}; border-color: ${borderColor}; background: rgba(79, 70, 229, 0.1);` : `border-color: #2a2a3f; background: #13131f;`;
             
+            const isOnExp = pet.expedition && pet.expedition.status === 'running';
+            const isExpCompleted = pet.expedition && Date.now() >= pet.expedition.endTime;
+            const expTextStatus = isOnExp ? (isExpCompleted ? ' (🎁 Xong)' : ' (⛵ Đi)') : '';
             html += `
               <div class="pet-slot occupied ${isActive ? 'active' : ''}" style="flex: 1; border: 2px solid; border-radius: 10px; padding: 10px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 120px; transition: all 0.2s; cursor: pointer; ${shadowStyle}" onclick="selectFeedPet(${i})">
                 <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
@@ -4273,12 +4374,12 @@
                 </div>
                 <span class="fish-sprite" data-rarity="${pet.rarity}" style="font-size: 24px; margin-top: 4px;">${pet.emoji}</span>
                 <div style="font-size: 11px; font-weight: bold; color: #ffeb3b; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%;">${pet.name.split(" (")[0]}</div>
-                <div style="font-size: 9px; color: #aaa; margin-top: 1px;">Lv${pet.level}</div>
+                <div style="font-size: 9px; color: #aaa; margin-top: 1px;">Lv${pet.level}${expTextStatus}</div>
                 <div style="display: flex; gap: 4px; width: 100%; margin-top: 6px;">
-                  <button class="shop-btn" style="padding: 2px 4px; font-size: 8px; flex: 1; background-color: ${isActive ? '#888' : '#3f51b5'}; color: #fff;" onclick="event.stopPropagation(); setActivePet(${i})">
+                  <button class="shop-btn" style="padding: 2px 4px; font-size: 8px; flex: 1; background-color: ${isOnExp ? '#333' : (isActive ? '#888' : '#3f51b5')}; color: #fff;" onclick="event.stopPropagation(); ${isOnExp ? '' : `setActivePet(${i})`}" ${isOnExp ? 'disabled' : ''}>
                     ${isActive ? 'Cất' : 'Đeo'}
                   </button>
-                  <button class="shop-btn" style="padding: 2px 4px; font-size: 8px; flex: 1; background-color: #d32f2f; color: #fff;" onclick="event.stopPropagation(); releasePetSpecific(${i})">
+                  <button class="shop-btn" style="padding: 2px 4px; font-size: 8px; flex: 1; background-color: #d32f2f; color: #fff;" onclick="event.stopPropagation(); releasePetSpecific(${i})" ${isOnExp ? 'disabled' : ''}>
                     Thả
                   </button>
                 </div>
@@ -4300,6 +4401,59 @@
         }
 
         const selectedPet = petTank.slots[selectedFeedPetIndex];
+        
+        let expeditionHtml = "";
+        if (selectedPet) {
+          const expState = selectedPet.expedition;
+          if (expState && expState.status === 'running') {
+            const timeLeftMs = expState.endTime - Date.now();
+            const isDone = timeLeftMs <= 0;
+            let timeString = "";
+            if (isDone) {
+              timeString = "Đã hoàn thành!";
+            } else {
+              const sec = Math.floor((timeLeftMs / 1000) % 60);
+              const min = Math.floor((timeLeftMs / (1000 * 60)) % 60);
+              const hour = Math.floor(timeLeftMs / (1000 * 60 * 60));
+              timeString = `${hour}h ${min}m ${sec}s`;
+            }
+            const zoneName = zones[expState.zoneId] ? zones[expState.zoneId].name : expState.zoneId;
+            expeditionHtml = `
+              <div style="background-color: #0d1b2a; padding: 10px; border-radius: 6px; margin-top: 12px; border: 1px solid #519aba;">
+                  <div style="font-size: 11px; font-weight: bold; color: #519aba; margin-bottom: 6px;">⛵ TRẠNG THÁI VIỄN CHINH:</div>
+                  <div style="font-size: 11.5px; color: #fff; line-height: 1.4;">
+                    Bé cưng đang thám hiểm tại:<br><b>${zoneName}</b><br>
+                    Thời gian còn lại: <b style="color: #ff9800;">${timeString}</b>
+                  </div>
+                  <button class="shop-btn" style="padding: 6px 12px; font-size: 11px; margin-top: 8px; font-weight: bold; width: 100%; background-color: ${isDone ? '#ffd600' : '#444'}; color: ${isDone ? '#000' : '#aaa'};" ${isDone ? '' : 'disabled'} onclick="event.stopPropagation(); claimPetExpedition(${selectedFeedPetIndex})">
+                    ${isDone ? '🎁 THU HOẠCH QUÀ VIỄN CHINH' : '⛵ Đang thám hiểm...'}
+                  </button>
+              </div>
+            `;
+          } else {
+            const unlockedZones = Object.keys(zones).filter(zoneId => zones[zoneId].level <= playerLevel);
+            const zoneOptions = unlockedZones.map(zoneId => `<option value="${zoneId}">${zones[zoneId].emoji} ${zones[zoneId].name} (Lv${zones[zoneId].level})</option>`).join('');
+            expeditionHtml = `
+              <div style="background-color: #0d1b2a; padding: 10px; border-radius: 6px; margin-top: 12px; border: 1px solid #519aba;">
+                  <div style="font-size: 11px; font-weight: bold; color: #519aba; margin-bottom: 6px;">⛵ CỬ PET ĐI VIỄN CHINH PHÁT TÀI:</div>
+                  <div style="font-size: 9.5px; color: #ccc; margin-bottom: 8px; line-height: 1.3;">Gửi pet thám hiểm các vùng đã mở khóa để lượm quà mang về.</div>
+                  <div style="display: flex; gap: 6px; margin-bottom: 8px; align-items: center;">
+                    <select id="expeditionZoneSelect" class="inv-select-filter" style="flex: 1; padding: 4px; font-size: 10px; background-color: #12121e; color: #fff; border: 1px solid #333;" title="Chọn khu vực viễn chinh">
+                      ${zoneOptions}
+                    </select>
+                    <select id="expeditionDurationSelect" class="inv-select-filter" style="width: 80px; padding: 4px; font-size: 10px; background-color: #12121e; color: #fff; border: 1px solid #333;" title="Chọn thời gian viễn chinh">
+                      <option value="1">1 giờ (10đ)</option>
+                      <option value="2">2 giờ (20đ)</option>
+                      <option value="4">4 giờ (35đ)</option>
+                    </select>
+                  </div>
+                  <button class="shop-btn" style="padding: 6px 12px; font-size: 11px; font-weight: bold; width: 100%; background-color: #519aba; color: #fff;" onclick="event.stopPropagation(); startPetExpedition(${selectedFeedPetIndex})">
+                    ⛵ BẮT ĐẦU THÁM HIỂM
+                  </button>
+              </div>
+            `;
+          }
+        }
         
         if (!selectedPet) {
           container.innerHTML = html + `
@@ -4427,6 +4581,7 @@
                   <div style="font-size: 11px; font-weight: bold; color: #4caf50; margin-bottom: 8px;">🍲 CHO PET ĂN CÁ CẤP THẤP:</div>
                   ${feedHtml}
               </div>
+              ${expeditionHtml}
           </div>
         `;
         
@@ -4606,6 +4761,85 @@
         }
       }
 
+      window.startPetExpedition = function(slotIndex) {
+        if (!petTank || !petTank.slots[slotIndex]) return;
+        const pet = petTank.slots[slotIndex];
+        if (pet.expedition) return;
+        const zoneSelect = document.getElementById("expeditionZoneSelect");
+        const durationSelect = document.getElementById("expeditionDurationSelect");
+        if (!zoneSelect || !durationSelect) return;
+        const zoneId = zoneSelect.value;
+        const durationHours = parseInt(durationSelect.value);
+        const feeMap = { 1: 10, 2: 20, 4: 35 };
+        const fee = feeMap[durationHours] || 10;
+        if (gold < fee) {
+          addLog(`❌ Không đủ vàng! Cần <b>${fee}đ</b>.`, "error");
+          return;
+        }
+        gold -= fee;
+        if (petTank.activeIndex === slotIndex) {
+          petTank.activeIndex = -1;
+          currentPet = null;
+        }
+        pet.expedition = {
+          zoneId: zoneId, durationHours: durationHours,
+          startTime: Date.now(), endTime: Date.now() + durationHours * 3600000,
+          status: 'running'
+        };
+        addLog(`⛵ <b style="color: #00e5ff;">[VIỄN CHINH]</b> <b>${pet.name}</b> đi thám hiểm <b>${zones[zoneId].name}</b> trong <b>${durationHours}h</b>. Phí: <b>${fee}đ</b>.`, "success");
+        if (typeof playSwoosh === "function") playSwoosh();
+        saveGameState(); renderPetTankTab(); recalculateLuck(); updateStatsPanel();
+      };
+
+      window.claimPetExpedition = function(slotIndex) {
+        if (!petTank || !petTank.slots[slotIndex]) return;
+        const pet = petTank.slots[slotIndex];
+        if (!pet.expedition || pet.expedition.status !== 'running') return;
+        if (pet.expedition.endTime - Date.now() > 0) { addLog("⏳ Chưa xong!", "warning"); return; }
+        const zoneId = pet.expedition.zoneId;
+        const durationHours = pet.expedition.durationHours;
+        let zoneFish = fishList.filter(f => f.zones && f.zones.includes(zoneId) && !f.hidden);
+        if (zoneFish.length === 0) zoneFish = fishList.filter(f => f.rarity === "Thường");
+        const countMap = { 1: [2, 3], 2: [4, 5], 4: [8, 10] };
+        const cr = countMap[durationHours] || [2, 3];
+        const numFish = Math.floor(Math.random() * (cr[1] - cr[0] + 1)) + cr[0];
+        let rewards = [];
+        for (let i = 0; i < numFish; i++) {
+          const fish = zoneFish[Math.floor(Math.random() * zoneFish.length)];
+          rewards.push({ type: 'fish', item: fish, stars: Math.floor(Math.random() * 5) + 1 });
+        }
+        let scrapChance = durationHours === 1 ? 0.15 : durationHours === 2 ? 0.35 : 0.65;
+        if (Math.random() < scrapChance) {
+          let numScrap = durationHours === 4 ? Math.floor(Math.random() * 4) + 3 : Math.floor(Math.random() * 3) + 1;
+          const isTrash = Math.random() < 0.4;
+          const scrapItem = isTrash ? { name: "Bao Nilon Đựng Sự Thất Vọng Của Mẹ", rarity: "Rác", emoji: "🛍️", color: "#8e99a8" } : { name: "Thẻ ATM Nội Địa Số Dư 0đ Khét Lẹt", rarity: "Phế Liệu", emoji: "💳", color: "#8e99a8" };
+          rewards.push({ type: 'material', item: scrapItem, count: numScrap });
+        }
+        if (durationHours === 4 && Math.random() < 0.30) {
+          const items = ["luckyBait", "karmaCleanser", "speedChili"];
+          rewards.push({ type: 'consumable', id: items[Math.floor(Math.random() * items.length)], count: 1 });
+        }
+        let logParts = [];
+        rewards.forEach(r => {
+          if (r.type === 'fish' || r.type === 'material') {
+            const fishObj = r.item; const stars = r.stars || 1; const count = r.count || 1;
+            const bagKey = r.type === 'fish' ? `${fishObj.name}_${stars}star` : `${fishObj.name}_material`;
+            if (!playerBag[bagKey]) playerBag[bagKey] = { fish: fishObj, stars: r.type === 'fish' ? stars : 1, count: 0 };
+            playerBag[bagKey].count += count;
+            if (fishInventory[fishObj.rarity] !== undefined) fishInventory[fishObj.rarity] += count;
+            logParts.push(`<b>${count}x ${fishObj.emoji} ${fishObj.name} (${fishObj.rarity}${r.type === 'fish' ? ` · ${stars}★` : ''})</b>`);
+          } else if (r.type === 'consumable') {
+            consumables[r.id] += r.count;
+            const cn = r.id === 'luckyBait' ? 'Mồi May Mắn 🪱' : r.id === 'karmaCleanser' ? 'Bình Giải Nghiệp 🧪' : 'Ớt Siêu Tốc 🌶️';
+            logParts.push(`<b>${r.count}x ${cn}</b>`);
+          }
+        });
+        addLog(`🎁 <b style="color: #ffd600;">[THU HOẠCH]</b> <b>${pet.name}</b> quay về với:<br>${logParts.join("<br>")}`, "success");
+        if (typeof playCooking === "function") playCooking();
+        pet.expedition = null;
+        saveGameState(); renderPetTankTab(); recalculateLuck(); updateStatsPanel();
+      };
+
       window.togglePetTankSection = function() {
         const collapsible = document.getElementById("petTankCollapsible");
         const icon = document.getElementById("petTankToggleIcon");
@@ -4713,6 +4947,9 @@
         if (group === "trash") {
           w = Math.max(1, w / (1 + (finalLuck - 1) * 0.6));
           w = w * pityBonus.trashWeightMultiplier;
+          if (activeBuff === "speed_trash") {
+            w = w * 1.3;
+          }
         } else if (group === "common") {
           w = Math.max(5, w / (1 + (finalLuck - 1) * 0.3));
         } else if (group === "rare") {
@@ -5358,8 +5595,10 @@
             waitTime = Math.max(1200, 4000 - (speedLevel - 1) * 28);
 
             if (activeBuff === "speed") waitTime = Math.round(waitTime * 0.9);
+            if (activeBuff === "speed_trash") waitTime = Math.round(waitTime * 0.75);
 
             if (Date.now() < speedBoostUntil) waitTime = Math.round(waitTime * 0.88); // Áp dụng Bình Nước Siêu Tốc
+            if (equippedGear && equippedGear.line && equippedGear.line.buff && equippedGear.line.buff.speed) waitTime = Math.round(waitTime * (1 + equippedGear.line.buff.speed));
 
           }
 
@@ -5667,6 +5906,7 @@
         }
 
         if (activeBuff === "speed") cooldownMs = Math.round(cooldownMs * 0.9);
+        if (activeBuff === "speed_trash") cooldownMs = Math.round(cooldownMs * 0.75);
 
         if (Date.now() < speedBoostUntil) cooldownMs = Math.round(cooldownMs * 0.88);
 
@@ -5781,7 +6021,25 @@
 
 
 
-        if (playerLevel >= 90) {
+        if (playerLevel >= 150) {
+
+          currentTitle = "🌌 Thực Thể Tối Thượng Đáy Xã Hội";
+
+          titleColor = "#ffd54f";
+
+        } else if (playerLevel >= 120) {
+
+          currentTitle = "🔱 Chúa Tể Đại Dương Bất Ổn";
+
+          titleColor = "#00e5ff";
+
+        } else if (playerLevel >= 100) {
+
+          currentTitle = "🎭 Ảo Thuật Gia Luộc Cá";
+
+          titleColor = "#e040fb";
+
+        } else if (playerLevel >= 90) {
 
           currentTitle = "👑 Đấng Vô Địch Vô Tri";
 
@@ -5858,6 +6116,24 @@
           currentTitle = "👑 Chúa Tể Nhân Phẩm Tối Cổ";
 
           titleColor = "#00ffff";
+
+        } else if (totalLeviathanCount >= 1) {
+
+          currentTitle = "🦑 Kẻ Huỷ Diệt Thuỷ Quái Cổ Đại";
+
+          titleColor = "#ff1744";
+
+        } else if (totalMutantCount >= 10) {
+
+          currentTitle = "🧬 Quái Nhân Phòng Thí Nghiệm Đáy Ao";
+
+          titleColor = "#00e676";
+
+        } else if (totalOccultCount >= 5) {
+
+          currentTitle = "🔮 Trưởng Lão Hội Thắp Hương Online";
+
+          titleColor = "#b388ff";
 
         } else if (totalCatfishCount >= 15) {
 
@@ -6459,6 +6735,7 @@
           let reduction = (autoLevel - 1) * 0.6;
 
           escapeChance = Math.max(5, escapeChance - reduction);
+          if (equippedGear && equippedGear.bobber && equippedGear.bobber.buff && equippedGear.bobber.buff.auto_fail_reduct) escapeChance = Math.max(2, escapeChance * (1 - equippedGear.bobber.buff.auto_fail_reduct));
 
 
 
@@ -6642,8 +6919,17 @@
 
         let caughtStars = rollFishStars(selectedFish.rarity);
 
-        if (caughtStars >= 3) {
-          triggerCatchFlash(selectedFish.color || getStarColor(caughtStars), caughtStars);
+        if (caughtStars >= 3 || selectedFish.rarity === "Thủy Quái") {
+          const flashColor = selectedFish.rarity === "Thủy Quái" ? "#d50000" : (selectedFish.color || getStarColor(caughtStars));
+          triggerCatchFlash(flashColor, caughtStars);
+        }
+
+        if (selectedFish.rarity === "Thủy Quái") {
+          playLightning();
+          addLog(
+            `💀🔱 <b style="color: #d50000; font-size: 14px; text-shadow: 0 0 5px rgba(213,0,0,0.8);">[ĐÃ CHINH PHỤC THỦY QUÁI]</b> 🔱💀<br>Cả đại dương rung chuyển! Bạn đã khuất phục được quái thú truyền thuyết: <b style="color: #ffd600;">${selectedFish.emoji} ${fn(selectedFish.name)}</b>! ⚡⚡`,
+            "highlight"
+          );
         }
 
         if (catchModalThreshold !== "none") {
@@ -6843,6 +7129,12 @@
 
         }
 
+        if (activeBuff === "day_xa_hoi_exp" && currentZone === "day_xa_hoi") {
+
+          finalExp = Math.round(finalExp * 1.3);
+
+        }
+
 
 
         if (systemBuffs["exp_1"] > nowTs) {
@@ -6955,6 +7247,7 @@
         }
 
         if (activeBuff === "exp") expBonusText += " [Buff EXP x2]";
+        if (activeBuff === "day_xa_hoi_exp" && currentZone === "day_xa_hoi") expBonusText += " [Buff Lẩu Mì Tôm +30% EXP]";
 
         if (systemBuffs["exp_1"] > nowTs) expBonusText += " [Hệ Thống +50%]";
 
@@ -7429,8 +7722,9 @@
 
 
       function gainExp(amount) {
-
-        playerExp += amount;
+        let finalAmount = amount;
+        if (equippedGear && equippedGear.line && equippedGear.line.buff && equippedGear.line.buff.exp_bonus) finalAmount = Math.round(finalAmount * (1 + equippedGear.line.buff.exp_bonus));
+        playerExp += finalAmount;
 
         while (playerExp >= expNeeded) {
 
@@ -7452,9 +7746,11 @@
             10: "Cực Hiếm",
             12: "Đột Biến",
             18: "Huyền Thoại",
-            25: "Thần Thoại",
-            30: "Tối Cao",
-            35: "Vô Tri"
+            25: "Tâm Linh & Thần Thoại",
+            30: "Tốc Biến & Tối Cao",
+            35: "Vô Tri",
+            40: "Vũ Trụ",
+            45: "Thủy Quái"
           };
           if (rarityMilestones[playerLevel]) {
             addLog(
@@ -7584,6 +7880,7 @@
             currentWaitTime = Math.max(1200, 4000 - speedReduction);
 
             if (activeBuff === "speed") currentWaitTime = currentWaitTime * 0.88;
+            if (activeBuff === "speed_trash") currentWaitTime = currentWaitTime * 0.75;
 
             if (Date.now() < speedBoostUntil) currentWaitTime = currentWaitTime * 0.88; // Áp dụng Bình Nước Siêu Tốc
 
@@ -8675,6 +8972,7 @@
             consumables: consumables,
             speedBoostUntil: speedBoostUntil,
             zoneMastery: zoneMastery,
+            equippedGear: equippedGear,
           };
           await db.save("fish_game_state", state);
         } catch (e) {
@@ -8859,6 +9157,7 @@
             if (state.lightningRageEnd !== undefined) {
               lightningRageEnd = state.lightningRageEnd;
             }
+            if (state.equippedGear !== undefined) equippedGear = state.equippedGear;
           } catch (e) {
 
             console.error("Error loading game state:", e);
@@ -8902,6 +9201,8 @@
           `🎉 Chào mừng cần thủ <b>${escapeHtml(playerName)}</b> gia nhập hội bất ổn!`,
 
         );
+
+        if (typeof checkShowTutorial === "function") checkShowTutorial();
 
       }
 
@@ -9885,6 +10186,14 @@
 
         }
 
+        let petTankTab = document.getElementById("petTankTab");
+
+        if (petTankTab && petTankTab.style.display === "block") {
+
+          renderPetTankTab();
+
+        }
+
       }, 1000);
 
 
@@ -9943,6 +10252,194 @@
       }
 
 
+
+      function renderGearCraftingTab() {
+        const recipesDiv = document.getElementById("gearCraftingRecipes");
+        const equippedDiv = document.getElementById("equippedGearDisplay");
+        if (!recipesDiv || typeof gearRecipes === 'undefined') return;
+        
+        // Render equipped gear
+        if (equippedDiv) {
+          const slotLabels = { hook: "🪝 Lưỡi Câu", line: "🧵 Dây Câu", bobber: "🧪 Phao Câu" };
+          let eqHtml = "";
+          for (const slotType of ["hook", "line", "bobber"]) {
+            const gear = equippedGear[slotType];
+            eqHtml += `<div class="gear-slot-card">
+              <div class="gear-slot-title">${slotLabels[slotType]}</div>
+              <div class="gear-slot-name">${gear ? gear.name : '(Trống)'}</div>
+              ${gear ? `<div class="gear-slot-buff">${gear.desc}</div>` : ''}
+            </div>`;
+          }
+          equippedDiv.innerHTML = eqHtml;
+        }
+        
+        // Render recipes
+        let html = "";
+        gearRecipes.forEach(recipe => {
+          let canCraft = true;
+          let reqHtml = "";
+          for (const [rarity, needed] of Object.entries(recipe.req)) {
+            const have = fishInventory[rarity] || 0;
+            const ok = have >= needed;
+            if (!ok) canCraft = false;
+            reqHtml += `<span style="color: ${ok ? '#4caf50' : '#ef5350'};">${rarity}: ${have}/${needed}</span> `;
+          }
+          
+          const isEquipped = equippedGear[recipe.type] && equippedGear[recipe.type].id === recipe.id;
+          
+          html += `<div class="shop-row" style="border-left: 3px solid ${isEquipped ? '#ffd600' : '#519aba'};">
+            <div class="shop-info">
+              <div><b style="color: #ffd600;">${recipe.name}</b>${isEquipped ? ' <span style="color: #4caf50; font-size: 9px;">✅ ĐANG ĐEO</span>' : ''}</div>
+              <div class="shop-desc">${recipe.desc}</div>
+              <div style="font-size: 9px; margin-top: 3px;">${reqHtml}</div>
+            </div>
+            <button class="shop-btn" type="button" ${!canCraft || isEquipped ? 'disabled' : ''} onclick="craftGear('${recipe.id}')">
+              ${isEquipped ? 'Đã Đeo' : (canCraft ? '🛠️ Chế' : '❌')}
+            </button>
+          </div>`;
+        });
+        recipesDiv.innerHTML = html;
+      }
+
+      window.craftGear = function(recipeId) {
+        const recipe = gearRecipes.find(r => r.id === recipeId);
+        if (!recipe) return;
+        
+        for (const [rarity, needed] of Object.entries(recipe.req)) {
+          const have = fishInventory[rarity] || 0;
+          if (have < needed) {
+            addLog(`❌ Không đủ nguyên liệu <b>${rarity}</b> để chế tạo!`, "error");
+            return;
+          }
+        }
+        
+        // Trừ nguyên liệu
+        for (const [rarity, needed] of Object.entries(recipe.req)) {
+          fishInventory[rarity] -= needed;
+        }
+        
+        equippedGear[recipe.type] = recipe;
+        
+        addLog(`🛠️ <b style="color: #ffd600;">[CHẾ TẠO THÀNH CÔNG]</b> Bạn đã chế tạo và trang bị <b>${recipe.name}</b>!`, "success");
+        if (typeof playUpgrade === "function") playUpgrade();
+        
+        saveGameState();
+        recalculateLuck();
+        updateStatsPanel();
+        renderGearCraftingTab();
+      };
+
+      // ===== HỆ THỐNG HƯỚNG DẪN TÂN THỦ (NEWBIE ONBOARDING TUTORIAL) =====
+      let currentTutorialStep = 0;
+      const tutorialSteps = [
+        {
+          emoji: "🎣🌊⛵",
+          title: "Chào mừng Ngư Ông!",
+          text: "Chào mừng bạn đến với <b>Ngư Ông Bất Ổn</b>! Nơi bạn sẽ bắt đầu sự nghiệp câu cá báo đời, flex nhân phẩm và sưu tầm hơn 259+ loài cá siêu vô tri."
+        },
+        {
+          emoji: "🎣⚡🐟",
+          title: "Cách câu cá cơ bản",
+          text: "Nhấn nút <b>Quăng Cần</b> để thả mồi. Chờ cá cắn câu (khi phao động đậy và hiện chữ <b>Đớp!</b>), hãy nhanh tay nhấn <b>KÉO CẦN</b> để thu hoạch cá. Hãy cẩn thận kẻo cá sổng mất!"
+        },
+        {
+          emoji: "🎒📖💎",
+          title: "Hành Trang & Bách Khoa",
+          text: "Cá câu được sẽ nằm trong <b>🎒 Túi Đồ</b>. Bạn có thể bán chúng lấy vàng, giữ lại để làm nguyên liệu chế tạo, hoặc xem các kỷ lục hài hước trong <b>📖 Bách Khoa</b>."
+        },
+        {
+          emoji: "🏠🍲⛵",
+          title: "Nuôi Cá & Bể Báo Thủ",
+          text: "Nhấn <b>Nuôi</b> trên một con cá để đưa vào <b>Bể Báo</b>. Cho chúng ăn để tăng cấp độ báo hại, tiến hóa thành các Pet siêu đỉnh và cử chúng đi <b>Viễn Chinh (Expedition)</b> mang quà quý về!"
+        },
+        {
+          emoji: "🛠️🪝🧵",
+          title: "Nâng Cấp Cần Câu & Chế Đồ",
+          text: "Ghé <b>🛒 Cửa Hàng</b> để nâng cấp cần câu và Auto-fishing. Sử dụng phế liệu từ viễn chinh để <b>Chế tạo Trang Bị Cần Câu</b> (Lưỡi câu, Dây câu, Phao câu) và nấu lẩu để nhận Buff cực mạnh!"
+        },
+        {
+          emoji: "⛈️🌫️🌌",
+          title: "Thời Tiết & Nhân Phẩm",
+          text: "Thời tiết thay đổi liên tục sẽ mang lại hiệu ứng độc đáo (như Bão Tuyết, Bão Táp, Sương Mù). Đặc biệt, game có <b>Bảo hiểm Nhân Phẩm</b> (Pity) bảo vệ bạn khỏi những chuỗi ngày xui xẻo kéo rác!"
+        }
+      ];
+
+      window.checkShowTutorial = function() {
+        const completed = localStorage.getItem("fish_tutorial_completed");
+        if (!completed) {
+          currentTutorialStep = 0;
+          const modal = document.getElementById("newbieTutorialModal");
+          if (modal) {
+            modal.style.display = "flex";
+            updateTutorialStep();
+          }
+        }
+      };
+
+      window.updateTutorialStep = function() {
+        const step = tutorialSteps[currentTutorialStep];
+        const emojiEl = document.getElementById("tutorialStepEmoji");
+        const titleEl = document.getElementById("tutorialStepTitle");
+        const textEl = document.getElementById("tutorialStepText");
+        const prevBtn = document.getElementById("btnPrevTutorial");
+        const nextBtn = document.getElementById("btnNextTutorial");
+        const dotsContainer = document.getElementById("tutorialStepDots");
+
+        if (emojiEl) emojiEl.innerHTML = step.emoji;
+        if (titleEl) titleEl.innerHTML = step.title;
+        if (textEl) textEl.innerHTML = step.text;
+
+        // Toggles Prev button
+        if (prevBtn) {
+          prevBtn.style.display = currentTutorialStep === 0 ? "none" : "block";
+        }
+
+        // Updates Next button text
+        if (nextBtn) {
+          if (currentTutorialStep === tutorialSteps.length - 1) {
+            nextBtn.innerHTML = "Bắt đầu chơi! 🎉";
+          } else {
+            nextBtn.innerHTML = "Tiếp tục ➔";
+          }
+        }
+
+        // Updates active dots
+        if (dotsContainer) {
+          const dots = dotsContainer.children;
+          for (let i = 0; i < dots.length; i++) {
+            if (i === currentTutorialStep) {
+              dots[i].classList.add("active");
+            } else {
+              dots[i].classList.remove("active");
+            }
+          }
+        }
+      };
+
+      window.nextTutorialStep = function() {
+        if (currentTutorialStep < tutorialSteps.length - 1) {
+          currentTutorialStep++;
+          updateTutorialStep();
+        } else {
+          skipTutorial();
+        }
+      };
+
+      window.prevTutorialStep = function() {
+        if (currentTutorialStep > 0) {
+          currentTutorialStep--;
+          updateTutorialStep();
+        }
+      };
+
+      window.skipTutorial = function() {
+        localStorage.setItem("fish_tutorial_completed", "true");
+        const modal = document.getElementById("newbieTutorialModal");
+        if (modal) {
+          modal.style.display = "none";
+        }
+        addLog("🎣 <b>[HƯỚNG DẪN]</b> Chúc bạn có thời gian đi câu cá báo hại vui vẻ!", "info");
+      };
 
       // KHỞI CHẠY
       async function initGame() {
@@ -10230,6 +10727,18 @@
 
           switchTab('crafting');
 
+        } else if (sub === 'gearcrafting') {
+
+          const btn = document.getElementById("btn-bag-gear");
+
+          if (btn) btn.classList.add("active");
+
+          if (invPanel) invPanel.style.setProperty("display", "none", "important");
+
+          if (guideContainer) guideContainer.style.setProperty("display", "block", "important");
+
+          switchTab('gearcrafting');
+
         } else if (sub === 'aquarium') {
 
           const btn = document.getElementById("btn-bag-pet");
@@ -10366,7 +10875,11 @@
 
           "anti_karma": "Lẩu Giải Nghiệp",
 
-          "exp": "Lẩu Nhân EXP"
+          "exp": "Lẩu Nhân EXP",
+
+          "speed_trash": "Lẩu Trà Sữa Hành Lá",
+
+          "day_xa_hoi_exp": "Lẩu Mì Tôm Chín Người Ngửi"
 
         };
 
@@ -10538,6 +11051,8 @@
         // If player has no name yet, prompt for name registration
         if (!playerName || playerName === "Ngư Ông Vô Danh") {
           document.getElementById("nameInputModal").style.display = "flex";
+        } else {
+          if (typeof checkShowTutorial === "function") checkShowTutorial();
         }
       };
 

@@ -176,6 +176,36 @@ let achievements = {
           current: 0,
           target: 500,
         },
+        first_kiepnan: {
+          name: "🌪️ Kiếp Nạn Thứ 82 Của Ngư Ông",
+          desc: "Lần đầu câu được cá phẩm chất Kiếp Nạn. Kiếp nạn ập đến không kịp vuốt tóc!",
+          unlocked: false,
+        },
+        catch_occ_1: {
+          name: "🔮 Pháp Sư Gọi Hồn Đại Dương",
+          desc: "Lần đầu câu được cá thuộc phẩm chất Tâm Linh.",
+          unlocked: false,
+        },
+        catch_flash_1: {
+          name: "⚡ Nhanh Như Chớp Nhưng Không Kịp Vuốt Tóc",
+          desc: "Lần đầu câu được cá thuộc phẩm chất Tốc Biến.",
+          unlocked: false,
+        },
+        catch_cosmic_1: {
+          name: "🌌 Kẻ Du Hành Không Gian Vô Tri",
+          desc: "Lần đầu câu được cá thuộc phẩm chất Vũ Trụ.",
+          unlocked: false,
+        },
+        catch_monster_1: {
+          name: "🦑 Thợ Săn Thủy Quái Khét Tiếng",
+          desc: "Lần đầu câu được cá thuộc phẩm chất Thủy Quái.",
+          unlocked: false,
+        },
+        upgrade_150: {
+          name: "👑 Đỉnh Cao Sĩ Diện 150",
+          desc: "Nâng cấp bất kỳ trang bị nào đạt cấp độ 150 tối đa mới.",
+          unlocked: false,
+        },
       };
 
       let karmaWithoutLightning = 0;
@@ -208,6 +238,11 @@ const rodTiers = [
         "Ánh Sáng",
         "Phép Thuật",
         "Thần Thánh",
+        "🔱 Thủy Quái Triệu Hồi",
+        "🌌 Không Gian Nứt Vỡ",
+        "🪙 Card Đồ Họa Cắm Câu",
+        "🧬 Sợi Gen Đột Biến",
+        "👑 Bất Ổn Tối Thượng"
       ];
       const speedTiers = [
         "Dã Mạn",
@@ -220,6 +255,11 @@ const rodTiers = [
         "Cấp 7",
         "Cấp 8",
         "Vô Hạn",
+        "Tức Thời",
+        "Xuyên Không",
+        "Bẻ Cong Trọng Lực",
+        "Báo Động Cấp Vũ Trụ",
+        "Vô Hạn Tối Thượng"
       ];
       const locTiers = [
         "Vô Nghĩa",
@@ -232,6 +272,11 @@ const rodTiers = [
         "Thiên Hạ",
         "Cực Thị",
         "Vũ Trụ",
+        "Đáy Xã Hội",
+        "Vực Thẳm Trầm Cảm",
+        "Hố Đen All-In",
+        "Tam Giác Bermuda Vô Tri",
+        "Tâm Linh Huyền Thoại"
       ];
       const petTiers = [
         "Mèo Bình",
@@ -244,6 +289,11 @@ const rodTiers = [
         "Mèo Quý",
         "Mèo Thần",
         "Mèo Tối Cao",
+        "Mèo Tâm Linh",
+        "Mèo Tốc Biến",
+        "Mèo Vũ Trụ",
+        "Mèo Thủy Quái",
+        "Mèo All-In Báo Tổ"
       ];
       const autoTiers = [
         "Cùi Bắp",
@@ -256,6 +306,11 @@ const rodTiers = [
         "Siêu Cấp Vip",
         "Thần Treo Máy",
         "Đấng Lười Biếng",
+        "Auto All-in Bán Nhà",
+        "Tool Crack Trung Quốc",
+        "AI Thao Túng Nhân Phẩm",
+        "Lỗi Thuật Toán Biết Tự Câu",
+        "Đấng Treo Máy Đáy Xã Hội"
       ];
       const rarityConfig = {
         Rác: {
@@ -386,6 +441,60 @@ const rodTiers = [
           defaultTier: "Lỗi Hệ Thống Biết Bơi",
           luckGroup: "supreme",
         },
+        "Cảm Lạnh": {
+          rank: 14,
+          baseWeight: 80,
+          minLevel: 45,
+          stars: "❄️🥶🥶❄️",
+          starBonus: 0.35,
+          defaultTier: "Lỗi Hệ Thống Biết Bơi",
+          luckGroup: "supreme",
+        },
+        "Kiếp Nạn": {
+          rank: 15,
+          baseWeight: 50,
+          minLevel: 45,
+          stars: "☠️🌪️🔥🌪️☠️",
+          starBonus: 0.4,
+          defaultTier: "Lỗi Hệ Thống Biết Bơi",
+          luckGroup: "supreme",
+        },
+        "Tâm Linh": {
+          rank: 16,
+          baseWeight: 45,
+          minLevel: 25,
+          stars: "🔮✨👻✨🔮",
+          starBonus: 0.45,
+          defaultTier: "Huyền Thoại Chưa Rửa Bát",
+          luckGroup: "supreme",
+        },
+        "Tốc Biến": {
+          rank: 17,
+          baseWeight: 40,
+          minLevel: 30,
+          stars: "⚡🏃💨🏃⚡",
+          starBonus: 0.50,
+          defaultTier: "Sinh Vật Không Nên Tồn Tại",
+          luckGroup: "supreme",
+        },
+        "Vũ Trụ": {
+          rank: 18,
+          baseWeight: 30,
+          minLevel: 40,
+          stars: "🌌🛸🪐🛸🌌",
+          starBonus: 0.60,
+          defaultTier: "Sinh Vật Không Nên Tồn Tại",
+          luckGroup: "supreme",
+        },
+        "Thủy Quái": {
+          rank: 19,
+          baseWeight: 20,
+          minLevel: 45,
+          stars: "🦑🔱🐋🔱🦑",
+          starBonus: 0.80,
+          defaultTier: "Lỗi Hệ Thống Biết Bơi",
+          luckGroup: "supreme",
+        },
       };
 
       const fishTierConfig = {
@@ -419,7 +528,7 @@ const rodTiers = [
             emoji: "🎣",
             baseCost: 42,
             growth: 1.26,
-            maxLevel: 100,
+            maxLevel: 150,
             desc: "Tăng may mắn, mở đường săn cá hiếm.",
           },
           speed: {
@@ -428,7 +537,7 @@ const rodTiers = [
             emoji: "⚡",
             baseCost: 36,
             growth: 1.25,
-            maxLevel: 100,
+            maxLevel: 150,
             desc: "Giảm thời gian chờ cá cắn.",
           },
           loc: {
@@ -437,7 +546,7 @@ const rodTiers = [
             emoji: "🗺️",
             baseCost: 60,
             growth: 1.31,
-            maxLevel: 100,
+            maxLevel: 150,
             desc: "Tăng xác suất gặp cá ngon theo khu.",
           },
           pet: {
@@ -446,7 +555,7 @@ const rodTiers = [
             emoji: "🐾",
             baseCost: 54,
             growth: 1.29,
-            maxLevel: 100,
+            maxLevel: 150,
             desc: "Tăng EXP và thêm may mắn phụ.",
           },
           auto: {
@@ -455,7 +564,7 @@ const rodTiers = [
             emoji: "🤖",
             baseCost: 95,
             growth: 1.34,
-            maxLevel: 100,
+            maxLevel: 150,
             desc: "Tăng hiệu quả AFK nên đắt hơn.",
           },
         },
@@ -526,5 +635,76 @@ const rodTiers = [
           buff: "supreme_luck",
           duration: 60,
         },
+        {
+          id: "lau_tra_sua_hanh",
+          name: "🍲 Lẩu Trà Sữa Hành Lá (Siêu Bựa)",
+          desc: "Nấu từ trà sữa trân châu kèm hành lá thái nhỏ. Giảm 25% thời gian chờ cá cắn nhưng tăng 30% tỷ lệ câu trúng Rác.",
+          req: { "Siêu Bựa": 5, "Rác": 5 },
+          buff: "speed_trash",
+          duration: 80,
+        },
+        {
+          id: "lau_mi_tom_9_nguoi",
+          name: "🍲 Lẩu 1 Gói Mì Tôm Chín Người Ngửi (Đáy Xã Hội)",
+          desc: "Nồi lẩu đậm vị mì tôm túng thiếu đáy xã hội. Tăng 30% EXP nhận được khi câu ở vùng Đáy Xã Hội.",
+          req: { "Đáy Xã Hội": 3 },
+          buff: "day_xa_hoi_exp",
+          duration: 100,
+        },
       ];
+
+      const gearRecipes = [
+        {
+          id: "hook_sat_lo",
+          type: "hook",
+          name: "🪝 Lưỡi Câu Sắt Lỏ",
+          desc: "Chế từ phế liệu hoen rỉ. Tăng +0.05 May Mắn.",
+          req: { "Phế Liệu": 15, "Rác": 5 },
+          buff: { luck: 0.05 }
+        },
+        {
+          id: "hook_kim_cuong",
+          type: "hook",
+          name: "💎 Lưỡi Câu Kim Cương Siêu Cấp",
+          desc: "Bóng loáng và hấp dẫn cá khủng. Tăng +0.15 May Mắn và +5% cơ hội gặp cá Huyền Thoại.",
+          req: { "Phế Liệu": 45, "Cực Hiếm": 2 },
+          buff: { luck: 0.15, legendary_chance: 0.05 }
+        },
+        {
+          id: "line_soi_chuoi",
+          type: "line",
+          name: "🧵 Dây Câu Sợi Chuối Dẻo Dai",
+          desc: "Dây bện từ bẹ chuối ao làng. Giảm 5% thời gian chờ cá cắn.",
+          req: { "Rác": 20, "Thường": 5 },
+          buff: { speed: -0.05 }
+        },
+        {
+          id: "line_titan",
+          type: "line",
+          name: "🧬 Dây Câu Siêu Hợp Kim Titan",
+          desc: "Dây cáp bọc titan siêu bền. Giảm 15% thời gian chờ và nhận thêm +10% EXP khi câu.",
+          req: { "Phế Liệu": 40, "Đột Biến": 2 },
+          buff: { speed: -0.15, exp_bonus: 0.10 }
+        },
+        {
+          id: "bobber_ve_chai",
+          type: "bobber",
+          name: "🧪 Phao Ve Chai Giải Nghiệp",
+          desc: "Làm từ vỏ chai nhựa nổi. Giảm 15% Nghiệp tích tụ khi câu hụt hoặc trúng rác.",
+          req: { "Rác": 10, "Phế Liệu": 10 },
+          buff: { karma_reduct: 0.15 }
+        },
+        {
+          id: "bobber_cam_bien",
+          type: "bobber",
+          name: "📡 Phao Cảm Biến Không Dây Vô Tri",
+          desc: "Tích hợp AI dự đoán cá cắn. Giảm 12% tỉ lệ sổng cá khi treo máy Auto.",
+          req: { "Phế Liệu": 30, "Rác": 10, "Thần Thoại": 1 },
+          buff: { auto_fail_reduct: 0.12 }
+        }
+      ];
+
+      if (typeof window !== 'undefined') {
+        window.gearRecipes = gearRecipes;
+      }
 

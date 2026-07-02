@@ -83,6 +83,35 @@
   border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
+.fish-sprite[data-rarity="Cảm Lạnh"] {
+  background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 40%, #4dd0e1 80%, #00bcd4 100%);
+  box-shadow: 0 0 25px rgba(77, 208, 225, 0.8), 0 0 50px rgba(0, 188, 212, 0.4);
+  animation: sprite-shimmer 2.5s linear infinite, sprite-float 2.2s ease-in-out infinite;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.fish-sprite[data-rarity="Cảm Lạnh"]::before {
+  content: '❄️';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 10px;
+  color: #b2ebf2;
+  animation: particle-orbit 2s linear infinite;
+  pointer-events: none;
+}
+
+.fish-sprite[data-rarity="Cảm Lạnh"]::after {
+  content: '🥶';
+  position: absolute;
+  bottom: -6px;
+  left: -6px;
+  font-size: 8px;
+  color: #4dd0e1;
+  animation: particle-orbit 2s linear infinite reverse;
+  pointer-events: none;
+}
+
 /* ===== CATCH REVEAL ANIMATIONS ===== */
 
 /* Flash effect when catching high-tier fish */
@@ -291,4 +320,29 @@
 
 .catch-reveal-content {
   animation: catch-content-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Fix broken image boxes when sprites fail to load or are loading */
+.fish-sprite-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: none;
+  vertical-align: middle;
+}
+
+.fish-sprite-img.loaded {
+  display: inline-block !important;
+}
+
+.fish-sprite-img.error {
+  display: none !important;
+}
+
+.emoji-fallback {
+  display: inline-block;
+}
+
+.emoji-fallback.hidden {
+  display: none !important;
 }

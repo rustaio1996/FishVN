@@ -33,6 +33,11 @@ let gameState = "idle";
       let totalTrashCount = 0;
       let totalCatfishCount = 0;
       let totalSupremeCount = 0;
+      let totalOccultCount = 0;
+      let totalFlashCount = 0;
+      let totalCosmicCount = 0;
+      let totalLeviathanCount = 0;
+      let totalMutantCount = 0;
       let cleanCatchStreak = 0;
 
       let bestCleanCatchStreak = 0;
@@ -64,6 +69,12 @@ let gameState = "idle";
         "Vô Tri": 0,
         "Ảo Lòi": 0,
         "Đáy Xã Hội": 0,
+        "Cảm Lạnh": 0,
+        "Kiếp Nạn": 0,
+        "Tâm Linh": 0,
+        "Tốc Biến": 0,
+        "Vũ Trụ": 0,
+        "Thủy Quái": 0,
       };
       let playerBag = {}; // TÚI ĐỒ KIỂM SOÁT CÁ ĐÃ CÂU ĐƯỢC CỦA NGƯỜI CHƠI
 
@@ -98,3 +109,9 @@ let gameState = "idle";
       let fishEncyclopedia = document.getElementById("fishEncyclopedia");
 
       let lightningRageEnd = 0;
+
+      let equippedGear = {
+        hook: null,
+        line: null,
+        bobber: null
+      };
