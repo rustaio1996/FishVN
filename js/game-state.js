@@ -4,7 +4,7 @@ let gameState = "idle";
         fishCount = 0,
         playerLevel = 1,
         playerExp = 0,
-        expNeeded = 45;
+        expNeeded = 60;
       let rodLevel = 1,
         speedLevel = 1,
         locLevel = 1,
@@ -62,6 +62,8 @@ let gameState = "idle";
         "Thần Thoại": 0,
         "Tối Cao": 0,
         "Vô Tri": 0,
+        "Ảo Lòi": 0,
+        "Đáy Xã Hội": 0,
       };
       let playerBag = {}; // TÚI ĐỒ KIỂM SOÁT CÁ ĐÃ CÂU ĐƯỢC CỦA NGƯỜI CHƠI
 

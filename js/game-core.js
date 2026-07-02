@@ -217,21 +217,44 @@
 
         const upperMsg = msg.toUpperCase();
 
-        if (upperMsg.includes("TỐI CAO") || upperMsg.includes("VÔ TRI")) {
+        if (
+          upperMsg.includes("TỐI CAO") ||
+          upperMsg.includes("VÔ TRI") ||
+          upperMsg.includes("LỖI HỆ THỐNG BIẾT BƠI") ||
+          upperMsg.includes("SINH VẬT KHÔNG NÊN TỒN TẠI")
+        ) {
 
           logEntry.classList.add("log-supreme");
 
-        } else if (upperMsg.includes("THẦN THOẠI")) {
+        } else if (
+          upperMsg.includes("THẦN THOẠI") ||
+          upperMsg.includes("HUYỀN THOẠI CHƯA RỬA BÁT")
+        ) {
 
           logEntry.classList.add("log-mythic");
 
-        } else if (upperMsg.includes("HUYỀN THOẠI")) {
+        } else if (
+          upperMsg.includes("HUYỀN THOẠI") ||
+          upperMsg.includes("ĐẠI CA ĐÁY AO")
+        ) {
 
           logEntry.classList.add("log-legendary");
 
-        } else if (upperMsg.includes("ĐỘT BIẾN") || upperMsg.includes("CỰC HIẾM")) {
+        } else if (
+          upperMsg.includes("ĐỘT BIẾN") ||
+          upperMsg.includes("CỰC HIẾM") ||
+          upperMsg.includes("TRÙM KHU NƯỚC ĐỤC")
+        ) {
 
           logEntry.classList.add("log-rare-tier");
+
+        } else if (upperMsg.includes("ẢO LÒI")) {
+
+          logEntry.classList.add("log-aoloi");
+
+        } else if (upperMsg.includes("ĐÁY XÃ HỘI")) {
+
+          logEntry.classList.add("log-dayxahoi");
 
         } else if (upperMsg.includes("JACKPOT")) {
 
@@ -361,40 +384,235 @@
 
       }
 
+      function showConfirm(message) {
+        return new Promise((resolve) => {
+          const overlay = document.createElement("div");
+          overlay.className = "confirm-modal-overlay";
+
+          const box = document.createElement("div");
+          box.className = "confirm-modal-box";
+
+          const text = document.createElement("div");
+          text.className = "confirm-modal-text";
+          text.innerHTML = message;
+
+          const btnContainer = document.createElement("div");
+          btnContainer.className = "confirm-modal-buttons";
+
+          const yesBtn = document.createElement("button");
+          yesBtn.className = "confirm-btn confirm-btn-yes";
+          yesBtn.innerText = "ĐỒNG Ý";
+
+          const noBtn = document.createElement("button");
+          noBtn.className = "confirm-btn confirm-btn-no";
+          noBtn.innerText = "HỦY BỎ";
+
+          yesBtn.onclick = () => {
+            document.body.removeChild(overlay);
+            resolve(true);
+          };
+
+          noBtn.onclick = () => {
+            document.body.removeChild(overlay);
+            resolve(false);
+          };
+
+          btnContainer.appendChild(yesBtn);
+          btnContainer.appendChild(noBtn);
+          box.appendChild(text);
+          box.appendChild(btnContainer);
+          overlay.appendChild(box);
+          document.body.appendChild(overlay);
+        });
+      }
 
 
-      function getRarityStars(rarity) {
 
-        const starMap = {
 
-          Rác: "⭐",
+      function applyGachaAndWeatherMods(fish, weight, applyWeather) {
+        let w = weight;
+        const rank = getRarityRank(fish.rarity);
 
-          "Phế Liệu": "⭐⚙️",
+        // Gacha buffs
+        if (gachaBuffActive === "cat") {
+          if (rank >= 6) { // Cực Hiếm or higher (Cực Hiếm, Đột Biến, Huyền Thoại, Thần Thoại, Tối Cao, Vô Tri)
+            w = w * 6;
+          }
+        } else if (gachaBuffActive === "hung") {
+          if (rank <= 3) { // Rác, Phế Liệu, Thường, Bất Ổn
+            w = w * 12;
+          }
+        }
 
-          Thường: "⭐⭐",
+        // Weather buffs (only if applyWeather is true)
+        if (applyWeather) {
+          const nowTs = Date.now();
+          const hasDragonEye1 =
+            systemBuffs["dragon_eye_1"] > nowTs ||
+            systemBuffs["dragon_eye_2"] > nowTs ||
+            systemBuffs["dragon_eye_3"] > nowTs;
 
-          "Bất Ổn": "⭐⭐☣️",
+          // Ảnh hưởng của Sương Mù Bất Ổn: giảm 3 lần tỷ lệ gặp cá hiếm+ nếu không có bùa Thấu Thị
+          if (currentWeather === "Sương Mù" && !hasDragonEye1) {
+            if (rank >= 4) { // Hiếm and higher
+              w = w / 3;
+            }
+          }
 
-          Hiếm: "⭐⭐⭐",
+          // Nhật Thực Vô Tri: Tăng 50% tỷ lệ bắt cá Tối Cao / Vô Tri
+          if (currentWeather === "Nhật Thực") {
+            if (rank >= 10) { // Tối Cao and Vô Tri
+              w = w * 1.5;
+            }
+          }
+        }
 
-          "Siêu Bựa": "⭐⭐⭐🎭",
+        return w;
+      }
 
-          "Cực Hiếm": "⭐⭐⭐⭐",
 
-          "Đột Biến": "⭐⭐⭐⭐🧬",
 
-          "Huyền Thoại": "⭐⭐⭐⭐⭐",
 
-          "Thần Thoại": "⭐⭐⭐⭐⭐🔮",
+      function getRarityConfig(rarity) {
+        if (typeof rarityConfig !== "undefined" && rarityConfig[rarity]) {
+          return rarityConfig[rarity];
+        }
 
-          "Tối Cao": "⭐⭐⭐⭐⭐✨",
-
-          "Vô Tri": "⭐⭐⭐⭐⭐✨🧠",
-
+        const fallbackRanks = {
+          Rác: 0,
+          "Phế Liệu": 1,
+          Thường: 2,
+          "Bất Ổn": 3,
+          Hiếm: 4,
+          "Siêu Bựa": 5,
+          "Cực Hiếm": 6,
+          "Đột Biến": 7,
+          "Huyền Thoại": 8,
+          "Thần Thoại": 9,
+          "Tối Cao": 10,
+          "Vô Tri": 11,
+          "Ảo Lòi": 12,
+          "Đáy Xã Hội": 13,
         };
 
-        return starMap[rarity] || "";
+        return {
+          rank: fallbackRanks[rarity] || 0,
+          baseWeight: 100,
+          minLevel: 1,
+          stars: "",
+          starBonus: 0,
+          defaultTier: "Dân Anh Vật Vờ",
+          luckGroup: "common",
+        };
+      }
 
+      function getRarityStars(rarity) {
+        return getRarityConfig(rarity).stars || "";
+      }
+
+      function getFishTier(fish) {
+        if (!fish) return "Chưa Rõ Hệ";
+        return fish.tier || getRarityConfig(fish.rarity).defaultTier || "Dân Anh Vật Vờ";
+      }
+
+      function getFishMinLevel(fish) {
+        if (!fish) return 1;
+        const explicitLevel = Number(fish.minLevel);
+        if (Number.isFinite(explicitLevel) && explicitLevel > 0) return explicitLevel;
+        return getRarityConfig(fish.rarity).minLevel || 1;
+      }
+
+      function getFishTierRank(fish) {
+        const tier = getFishTier(fish);
+        if (typeof fishTierConfig !== "undefined" && fishTierConfig[tier]) {
+          return fishTierConfig[tier].rank || 0;
+        }
+        return 0;
+      }
+
+      function getTierClass(fishOrTier) {
+        const tier = typeof fishOrTier === "string" ? fishOrTier : getFishTier(fishOrTier);
+        const classMap = {
+          "Mầm Non Ao Làng": "tier-mam-non",
+          "Dân Anh Vật Vờ": "tier-dan-anh",
+          "Giang Hồ Sông Nước": "tier-giang-ho",
+          "Trùm Khu Nước Đục": "tier-trum-khu",
+          "Đại Ca Đáy Ao": "tier-dai-ca",
+          "Huyền Thoại Chưa Rửa Bát": "tier-huyen-thoai",
+          "Sinh Vật Không Nên Tồn Tại": "tier-sinh-vat",
+          "Lỗi Hệ Thống Biết Bơi": "tier-loi-he-thong",
+        };
+        return classMap[tier] || "tier-dan-anh";
+      }
+
+      function getTierBadgeHtml(fish) {
+        const tier = getFishTier(fish);
+        return `<span class="tier-badge ${getTierClass(tier)}">🏷️ ${tier}</span>`;
+      }
+
+      function matchesTierFilter(fish, filterTier) {
+        if (!filterTier || filterTier === "all") return true;
+        const rank = getFishTierRank(fish);
+        if (filterTier === "ao_lang") return rank <= 1;
+        if (filterTier === "giang_ho") return rank === 2;
+        if (filterTier === "trum_khu") return rank === 3;
+        if (filterTier === "huyen_thoai_plus") return rank >= 4 && rank <= 6;
+        if (filterTier === "loi_he_thong") return rank >= 7;
+        return true;
+      }
+
+      function getUpgradeEconomy(type) {
+        const fallback = {
+          rod: { label: "Cần câu", logName: "Cần câu", emoji: "🎣", baseCost: 12, growth: 1.24, maxLevel: 100 },
+          speed: { label: "Tai nhạy", logName: "Tai nhạy", emoji: "⚡", baseCost: 10, growth: 1.23, maxLevel: 100 },
+          loc: { label: "Vị trí", logName: "Vị trí", emoji: "🗺️", baseCost: 20, growth: 1.3, maxLevel: 100 },
+          pet: { label: "Trợ thủ", logName: "Trợ thủ", emoji: "🐾", baseCost: 18, growth: 1.28, maxLevel: 100 },
+          auto: { label: "Tool Auto", logName: "Tool Auto", emoji: "🤖", baseCost: 32, growth: 1.32, maxLevel: 100 },
+        };
+        const configured = typeof economyConfig !== "undefined" && economyConfig.upgrades ? economyConfig.upgrades[type] : null;
+        return configured || fallback[type] || fallback.rod;
+      }
+
+      function getUpgradeLevel(type) {
+        if (type === "rod") return rodLevel;
+        if (type === "speed") return speedLevel;
+        if (type === "loc") return locLevel;
+        if (type === "pet") return petLevel;
+        if (type === "auto") return autoLevel;
+        return 1;
+      }
+
+      function setUpgradeLevel(type, value) {
+        if (type === "rod") rodLevel = value;
+        else if (type === "speed") speedLevel = value;
+        else if (type === "loc") locLevel = value;
+        else if (type === "pet") petLevel = value;
+        else if (type === "auto") autoLevel = value;
+      }
+
+      function getUpgradeCost(type, level = getUpgradeLevel(type)) {
+        const cfg = getUpgradeEconomy(type);
+        const safeLevel = Math.max(1, level);
+        let cost = cfg.baseCost * Math.pow(safeLevel, cfg.growth);
+        const curve = typeof economyConfig !== "undefined" ? economyConfig.upgradeCurve : null;
+        if (curve && safeLevel > curve.endgameStart) {
+          cost *= 1 + Math.pow(safeLevel - curve.endgameStart, curve.endgamePower) * curve.endgameScale;
+        }
+        return Math.round(cost);
+      }
+
+      function formatUpgradeButtonText(cost) {
+        if (gold >= cost) return `${cost}đ`;
+        return `${cost}đ (thiếu ${cost - gold}đ)`;
+      }
+
+      function getExpNeededForLevel(level) {
+        const curve = typeof economyConfig !== "undefined" && economyConfig.expCurve ? economyConfig.expCurve : null;
+        const lvl = Math.max(1, Number(level) || 1);
+        if (!curve) return Math.round(lvl * 30 + 15);
+        if (lvl <= 10) return Math.round(curve.earlyBase + lvl * curve.earlyGrowth);
+        if (lvl <= 25) return Math.round(260 + (lvl - 10) * curve.midGrowth);
+        return Math.round(800 + Math.pow(lvl - 25, curve.latePower) * curve.lateGrowth);
       }
 
 
@@ -402,36 +620,6 @@
       // --- HỆ THỐNG SAO CÁ (1-5⭐) ---
 
       // Cá hiếm hơn có cơ hội nhận sao cao hơn
-
-      const rarityStarBonus = {
-
-        Rác: 0,
-
-        "Phế Liệu": 0,
-
-        Thường: 0,
-
-        "Bất Ổn": 0.02,
-
-        Hiếm: 0.05,
-
-        "Siêu Bựa": 0.07,
-
-        "Cực Hiếm": 0.1,
-
-        "Đột Biến": 0.12,
-
-        "Huyền Thoại": 0.15,
-
-        "Thần Thoại": 0.18,
-
-        "Tối Cao": 0.22,
-
-        "Vô Tri": 0.25,
-
-      };
-
-
 
       const starPriceMultiplier = { 1: 1.0, 2: 1.3, 3: 1.8, 4: 2.5, 5: 4.0 };
 
@@ -441,7 +629,7 @@
 
       function rollFishStars(rarity) {
 
-        let bonus = rarityStarBonus[rarity] || 0;
+        let bonus = getRarityConfig(rarity).starBonus || 0;
 
         // Xác suất cơ bản: 1⭐=40%, 2⭐=30%, 3⭐=18%, 4⭐=9%, 5⭐=3%
 
@@ -635,22 +823,7 @@
       }
 
       function getRarityRank(rarity) {
-        const ranks = {
-          Rác: 0,
-          "Phế Liệu": 1,
-          Thường: 2,
-          "Bất Ổn": 3,
-          Hiếm: 4,
-          "Siêu Bựa": 5,
-          "Cực Hiếm": 6,
-          "Đột Biến": 7,
-          "Huyền Thoại": 8,
-          "Thần Thoại": 9,
-          "Tối Cao": 10,
-          "Vô Tri": 11,
-        };
-
-        return ranks[rarity] || 0;
+        return getRarityConfig(rarity).rank || 0;
       }
 
       function addPity(amount, reason) {
@@ -716,6 +889,8 @@
             "Thần Thoại",
             "Tối Cao",
             "Vô Tri",
+            "Ảo Lòi",
+            "Đáy Xã Hội",
           ].includes(fish.rarity)
         ) {
           updateQuestProgress("rare", 1);
@@ -729,6 +904,8 @@
         else if (fish.rarity === "Thần Thoại") unlockAchievement("first_thanthoai");
         else if (fish.rarity === "Tối Cao") unlockAchievement("first_toicao");
         else if (fish.rarity === "Vô Tri") unlockAchievement("first_votri");
+        else if (fish.rarity === "Ảo Lòi") unlockAchievement("first_aoloi");
+        else if (fish.rarity === "Đáy Xã Hội") unlockAchievement("first_dayxahoi");
 
         if (fish.name.includes("Cá Voi")) {
           unlockAchievement("whale_doll");
@@ -736,7 +913,7 @@
 
         if (fish.name.includes("Cá Trê")) totalCatfishCount++;
 
-        if (fish.rarity === "Tối Cao" || fish.rarity === "Vô Tri") {
+        if (fish.rarity === "Tối Cao" || fish.rarity === "Vô Tri" || fish.rarity === "Ảo Lòi" || fish.rarity === "Đáy Xã Hội") {
           totalSupremeCount++;
 
           if (showSupremeLog && fish.achievement) {
@@ -2387,15 +2564,21 @@
         if (!modal) return;
 
         const titleEl = document.getElementById("catchModalTitle");
+        const tier = getFishTier(fish);
+        const tierRank = getFishTierRank(fish);
         let titleText = "🎉 CÂU ĐƯỢC CÁ XỊN!";
-        if (fish.rarity === "Tối Cao") {
+        if (tierRank >= 7 || fish.rarity === "Vô Tri") {
+          titleText = "🧠 LỖI HỆ THỐNG BIẾT BƠI!";
+        } else if (tierRank >= 6 || fish.rarity === "Tối Cao") {
           titleText = "🌈 SIÊU PHẨM TỐI CAO XUẤT HIỆN!";
-        } else if (fish.rarity === "Vô Tri") {
-          titleText = "🌌 TIẾP CẬN ĐẤNG VÔ TRI!";
-        } else if (fish.rarity === "Huyền Thoại" || fish.rarity === "Thần Thoại") {
+        } else if (tierRank >= 4 || fish.rarity === "Huyền Thoại" || fish.rarity === "Thần Thoại") {
           titleText = "🏆 CÂU ĐƯỢC HUYỀN THOẠI!";
         }
         if (titleEl) titleEl.innerText = titleText;
+        modal.classList.remove("catch-tier-legendary", "catch-tier-supreme", "catch-tier-votri");
+        if (tierRank >= 7) modal.classList.add("catch-tier-votri");
+        else if (tierRank >= 6) modal.classList.add("catch-tier-supreme");
+        else if (tierRank >= 4) modal.classList.add("catch-tier-legendary");
 
         const zoneEl = document.getElementById("catchModalZone");
         if (zoneEl && typeof zones !== "undefined" && zones[currentZone]) {
@@ -2404,7 +2587,7 @@
 
         const spriteEl = document.getElementById("catchModalSprite");
         if (spriteEl) {
-          spriteEl.className = "fish-sprite";
+          spriteEl.className = "fish-sprite catch-reveal-sprite";
           spriteEl.dataset.rarity = fish.rarity;
           spriteEl.innerText = fish.emoji;
         }
@@ -2422,10 +2605,22 @@
           rarityEl.style.color = "#000000";
         }
 
+        const tierEl = document.getElementById("catchModalTier");
+        if (tierEl) {
+          tierEl.className = `tier-badge ${getTierClass(tier)}`;
+          tierEl.innerText = `🏷️ ${tier}`;
+        }
+
         const starsEl = document.getElementById("catchModalStars");
         if (starsEl) {
           starsEl.innerText = getStarDisplay(stars);
           starsEl.style.color = getStarColor(stars);
+        }
+
+        const metaEl = document.getElementById("catchModalMeta");
+        if (metaEl) {
+          const zoneName = typeof zones !== "undefined" && zones[currentZone] ? zones[currentZone].name : "khu chưa rõ";
+          metaEl.innerText = `Mở từ Lv ${getFishMinLevel(fish)} | Khu vực: ${zoneName}`;
         }
 
         const priceEl = document.getElementById("catchModalPrice");
@@ -3009,6 +3204,13 @@
 
         }
 
+        if (
+          equippedAchievementId === "first_dayxahoi" &&
+          currentZone === "day_xa_hoi"
+        ) {
+          finalPrice = Math.round(finalPrice * 1.10);
+        }
+
 
 
         if (
@@ -3089,6 +3291,7 @@
         // Get filter values from UI (defaults if not loaded yet)
         const filterRarity = document.getElementById("invFilterRarity") ? document.getElementById("invFilterRarity").value : "all";
         const filterStars = document.getElementById("invFilterStars") ? document.getElementById("invFilterStars").value : "all";
+        const filterTier = document.getElementById("invFilterTier") ? document.getElementById("invFilterTier").value : "all";
         const sortOrder = document.getElementById("invSortOrder") ? document.getElementById("invSortOrder").value : "priceDesc";
 
         // Filter keys
@@ -3103,7 +3306,7 @@
             if (filterRarity === "common" && r !== "Thường" && r !== "Bất Ổn") return false;
             if (filterRarity === "rare" && r !== "Hiếm" && r !== "Siêu Bựa") return false;
             if (filterRarity === "epic" && r !== "Cực Hiếm" && r !== "Đột Biến") return false;
-            if (filterRarity === "legendary" && r !== "Huyền Thoại" && r !== "Thần Thoại" && r !== "Tối Cao" && r !== "Vô Tri") return false;
+            if (filterRarity === "legendary" && r !== "Huyền Thoại" && r !== "Thần Thoại" && r !== "Tối Cao" && r !== "Vô Tri" && r !== "Ảo Lòi" && r !== "Đáy Xã Hội") return false;
           }
 
           // Stars filter
@@ -3111,6 +3314,8 @@
             const stars = item.stars || 1;
             if (String(stars) !== filterStars) return false;
           }
+
+          if (!matchesTierFilter(item.fish, filterTier)) return false;
 
           return true;
         });
@@ -3134,8 +3339,7 @@
           if (sortOrder === "countDesc") return itemB.count - itemA.count;
 
           if (sortOrder === "rarityDesc") {
-            const order = ["Vô Tri", "Tối Cao", "Thần Thoại", "Huyền Thoại", "Đột Biến", "Cực Hiếm", "Siêu Bựa", "Hiếm", "Bất Ổn", "Thường", "Phế Liệu", "Rác"];
-            return order.indexOf(itemA.fish.rarity) - order.indexOf(itemB.fish.rarity);
+            return getRarityRank(itemB.fish.rarity) - getRarityRank(itemA.fish.rarity);
           }
 
           if (sortOrder === "starsDesc") return (itemB.stars || 1) - (itemA.stars || 1);
@@ -3162,6 +3366,9 @@
           let starDisp = getStarDisplay(stars);
 
           let starCol = getStarColor(stars);
+          let fishTier = getFishTier(fish);
+          let fishTierBadge = getTierBadgeHtml(fish);
+          let fishMinLevel = getFishMinLevel(fish);
 
           let escapedKey = bagKey.replace(/'/g, "\\'");
 
@@ -3180,6 +3387,10 @@
             let priceSpan = card.querySelector(".fish-price");
 
             if (priceSpan) priceSpan.innerText = "Giá xả kho hiện tại: 💵 " + currentPrice + "đ / con";
+
+            let tierSpan = card.querySelector(".fish-tier-slot");
+
+            if (tierSpan) tierSpan.innerHTML = fishTierBadge;
 
             // Re-append to ensure it matches the sorted DOM order
             listDiv.appendChild(card);
@@ -3202,19 +3413,25 @@
 
             card.innerHTML = `
 
-                      <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <div class="fish-card-row">
 
-                          <div>
+                          <div class="fish-card-main">
 
-                              <div style="font-weight: 500; color:${fish.color};"><span class="fish-sprite" data-rarity="${fish.rarity}">${fish.emoji}</span> ${fn(fish.name)} <b class="fish-count">(x${item.count})</b> <span style="color: #ffd54f; font-size: 12px;">${rarityStars}</span></div>
+                              <div class="fish-card-name" style="color:${fish.color};"><span class="fish-sprite" data-rarity="${fish.rarity}">${fish.emoji}</span> ${fn(fish.name)} <b class="fish-count">(x${item.count})</b></div>
 
-                              <div style="font-size: 12px; color: ${starCol}; margin-top: 2px; letter-spacing: 2px; font-weight: bold;">${starDisp} <span style="font-size: 10px; color: #bbb;">(x${starPriceMultiplier[stars]} giá)</span></div>
+                              <div class="fish-card-badges">
+                                <span class="rarity-badge" style="background-color: ${fish.color};">${rn(fish.rarity)}</span>
+                                <span style="color: #ffd54f; font-size: 12px;">${rarityStars}</span>
+                                <span class="fish-tier-slot">${fishTierBadge}</span>
+                              </div>
 
-                              <div style="font-size: 11px; color: #ffeb3b; margin-top: 2px;" class="fish-price">Giá xả kho hiện tại: 💵 ${currentPrice}đ / con</div>
+                              <div class="fish-card-stars" style="color: ${starCol};">${starDisp} <span>(x${starPriceMultiplier[stars]} giá | mở Lv ${fishMinLevel})</span></div>
+
+                              <div class="fish-price">Giá xả kho hiện tại: 💵 ${currentPrice}đ / con</div>
 
                           </div>
 
-                          <div style="display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end;">
+                          <div class="fish-card-actions">
 
                               <button class="shop-btn" style="padding: 4px 6px; min-width: 45px; background-color: #4caf50; font-size: 11px;" onclick="sellFish('${escapedKey}', false)">Bán 1</button>
 
@@ -3252,7 +3469,7 @@
 
 
 
-      function quickSellCategory(category) {
+      async function quickSellCategory(category) {
 
         let text = "";
 
@@ -3278,7 +3495,9 @@
 
         if (!filterFn) return;
 
-        if (!confirm(text)) return;
+        const approved = await showConfirm(text);
+        if (!approved) return;
+
 
 
 
@@ -4430,21 +4649,19 @@
 
 
 
-      function releasePet() {
+      async function releasePet() {
 
         if (!currentPet) return;
 
 
 
-        if (
+        const approved = await showConfirm(
 
-          confirm(
+          `🚪 Bạn có chắc chắn muốn thả bé ${currentPet.emoji} ${currentPet.name} về với biển cả để nhận nuôi con khác không?`
 
-            `🚪 Bạn có chắc chắn muốn thả bé ${currentPet.emoji} ${currentPet.name} về với biển cả để nhận nuôi con khác không?`,
+        );
 
-          )
-
-        ) {
+        if (approved) {
 
           addLog(
 
@@ -4467,6 +4684,7 @@
         }
 
       }
+
 
 
 
@@ -4549,6 +4767,72 @@
 
       }
 
+      function isFishEligibleForZone(fish, zoneId, hasDragonEye1, hasDragonEye2, respectLevel = true) {
+        if (!fish || !fish.zones || !fish.zones.includes(zoneId)) return false;
+        if (fish.hidden === 1 && !hasDragonEye1) return false;
+        if (fish.hidden === 2 && !hasDragonEye2) return false;
+        if (respectLevel && getFishMinLevel(fish) > playerLevel) return false;
+        return true;
+      }
+
+      function getZoneRarityModifier(zoneId, rarity) {
+        const zone = typeof zones !== "undefined" ? zones[zoneId] : null;
+        if (!zone || !zone.rarityMods) return 1;
+        return zone.rarityMods[rarity] || 1;
+      }
+
+      function getFishTierWeightModifier(fish) {
+        const tier = getFishTier(fish);
+        if (typeof fishTierConfig !== "undefined" && fishTierConfig[tier]) {
+          return fishTierConfig[tier].weightMod || 1;
+        }
+        return 1;
+      }
+
+      function getFishDynamicWeight(fish, pityBonus) {
+        let w = getRarityConfig(fish.rarity).baseWeight || 100;
+
+        let rawLuck = window.luckLevel;
+        if (activeBuff === "luck") rawLuck = rawLuck + 0.08;
+        if (activeBuff === "supreme_luck") rawLuck = rawLuck + 0.2;
+
+        let finalLuck = getEffectiveLuck(rawLuck) + pityBonus.luckBonus;
+        const group = getRarityConfig(fish.rarity).luckGroup || "common";
+
+        if (group === "trash") {
+          w = Math.max(1, w / (1 + (finalLuck - 1) * 0.6));
+          w = w * pityBonus.trashWeightMultiplier;
+        } else if (group === "common") {
+          w = Math.max(5, w / (1 + (finalLuck - 1) * 0.3));
+        } else if (group === "rare") {
+          let multiplier = fish.rarity === "Siêu Bựa" ? 0.6 : 0.4;
+          w = w * (1 + (finalLuck - 1) * multiplier);
+          w = w * pityBonus.rareWeightMultiplier;
+        } else if (group === "epic") {
+          let multiplier = fish.rarity === "Đột Biến" ? 1.0 : 0.8;
+          w = w * (1 + (finalLuck - 1) * multiplier);
+          w = w * pityBonus.rareWeightMultiplier;
+        } else if (group === "legendary") {
+          let multiplier = fish.rarity === "Thần Thoại" ? 2.0 : 1.5;
+          w = w * (1 + (finalLuck - 1) * multiplier);
+          w = w * pityBonus.rareWeightMultiplier;
+        } else if (group === "supreme") {
+          let multiplier = fish.rarity === "Vô Tri" ? 4.0 : 3.0;
+          w = w * (1 + (finalLuck - 1) * multiplier);
+          w = w * pityBonus.rareWeightMultiplier;
+        }
+
+        if (equippedAchievementId === "first_aoloi" && fish.rarity === "Ảo Lòi") {
+          w = w * 1.15;
+        }
+
+        w = w * getZoneRarityModifier(currentZone, fish.rarity);
+        w = w * getFishTierWeightModifier(fish);
+        if (fish.weightMod) w = w * fish.weightMod;
+
+        return Math.max(1, w);
+      }
+
 
 
       function selectFishFromList(fishListInput) {
@@ -4558,101 +4842,8 @@
         const pityBonus = getPityBonus();
 
         let currentWeights = fishListInput.map((fish) => {
-          let w = rarityWeights[fish.rarity] || 100;
-
-          let rawLuck = window.luckLevel;
-
-
-          if (activeBuff === "luck") rawLuck = rawLuck + 0.08;
-
-          if (activeBuff === "supreme_luck") rawLuck = rawLuck + 0.2;
-
-          let finalLuck = getEffectiveLuck(rawLuck) + pityBonus.luckBonus;
-
-
-
-          if (fish.rarity === "Rác" || fish.rarity === "Phế Liệu") {
-
-            w = Math.max(1, w / (1 + (finalLuck - 1) * 0.6));
-            w = w * pityBonus.trashWeightMultiplier;
-          } else if (fish.rarity === "Thường" || fish.rarity === "Bất Ổn") {
-
-            w = Math.max(5, w / (1 + (finalLuck - 1) * 0.3));
-
-          } else if (fish.rarity === "Hiếm" || fish.rarity === "Siêu Bựa") {
-
-            let multiplier = fish.rarity === "Siêu Bựa" ? 0.6 : 0.4;
-
-            w = w * (1 + (finalLuck - 1) * multiplier);
-            w = w * pityBonus.rareWeightMultiplier;
-          } else if (fish.rarity === "Cực Hiếm" || fish.rarity === "Đột Biến") {
-
-            let multiplier = fish.rarity === "Đột Biến" ? 1.0 : 0.8;
-
-            w = w * (1 + (finalLuck - 1) * multiplier);
-            w = w * pityBonus.rareWeightMultiplier;
-          } else if (
-
-            fish.rarity === "Huyền Thoại" ||
-
-            fish.rarity === "Thần Thoại"
-
-          ) {
-
-            let multiplier = fish.rarity === "Thần Thoại" ? 2.0 : 1.5;
-
-            w = w * (1 + (finalLuck - 1) * multiplier);
-            w = w * pityBonus.rareWeightMultiplier;
-          } else if (fish.rarity === "Tối Cao" || fish.rarity === "Vô Tri") {
-
-            let multiplier = fish.rarity === "Vô Tri" ? 4.0 : 3.0;
-
-            w = w * (1 + (finalLuck - 1) * multiplier);
-            w = w * pityBonus.rareWeightMultiplier;
-          }
-
-
-
-          if (gachaBuffActive === "cat") {
-
-            if (
-
-              fish.rarity === "Cực Hiếm" ||
-
-              fish.rarity === "Đột Biến" ||
-
-              fish.rarity === "Huyền Thoại" ||
-
-              fish.rarity === "Thần Thoại" ||
-
-              fish.rarity === "Tối Cao" ||
-
-              fish.rarity === "Vô Tri"
-
-            )
-
-              w = w * 6;
-
-          } else if (gachaBuffActive === "hung") {
-
-            if (
-
-              fish.rarity === "Rác" ||
-
-              fish.rarity === "Phế Liệu" ||
-
-              fish.rarity === "Thường" ||
-
-              fish.rarity === "Bất Ổn"
-
-            )
-
-              w = w * 12;
-
-          }
-
-
-
+          let w = getFishDynamicWeight(fish, pityBonus);
+          w = applyGachaAndWeatherMods(fish, w, false);
           return { ...fish, dynamicWeight: w };
 
         });
@@ -4771,17 +4962,15 @@
 
           systemBuffs["dragon_eye_3"] > nowTs;
 
-        let fishInZone = fishList.filter((f) => {
+        let fishInZone = fishList.filter((f) =>
+          isFishEligibleForZone(f, currentZone, hasDragonEye1, hasDragonEye2, true),
+        );
 
-          if (!f.zones.includes(currentZone)) return false;
-
-          if (f.hidden === 1 && !hasDragonEye1) return false;
-
-          if (f.hidden === 2 && !hasDragonEye2) return false;
-
-          return true;
-
-        });
+        if (fishInZone.length === 0) {
+          fishInZone = fishList.filter((f) =>
+            isFishEligibleForZone(f, currentZone, hasDragonEye1, hasDragonEye2, false),
+          );
+        }
 
 
 
@@ -6547,10 +6736,9 @@
         }
 
         if (catchModalThreshold !== "none") {
-          const rarityOrder = ["Rác", "Phế Liệu", "Thường", "Bất Ổn", "Hiếm", "Siêu Bựa", "Cực Hiếm", "Đột Biến", "Huyền Thoại", "Thần Thoại", "Tối Cao", "Vô Tri"];
-          const fishRarityIndex = rarityOrder.indexOf(selectedFish.rarity);
-          const thresholdIndex = rarityOrder.indexOf(catchModalThreshold || "Hiếm");
-          if (fishRarityIndex >= thresholdIndex || caughtStars >= 4) {
+          const fishRarityRank = getRarityRank(selectedFish.rarity);
+          const thresholdRank = getRarityRank(catchModalThreshold || "Hiếm");
+          if (fishRarityRank >= thresholdRank || caughtStars >= 4) {
             showCatchModal(selectedFish, caughtStars);
           }
         }
@@ -6705,10 +6893,18 @@
 
         addCatchFlavorLog(selectedFish, caughtStars, isNewDiscover);
 
+        const caughtTierRank = getFishTierRank(selectedFish);
+        if (caughtTierRank >= 4 || (isNewDiscover && getRarityRank(selectedFish.rarity) >= 4)) {
+          addLog(
+            `🏷️ <b style="color:${selectedFish.color};">[CẤP BẬC ${getFishTier(selectedFish).toUpperCase()}]</b> ${selectedFish.emoji} <b>${fn(selectedFish.name)}</b> vừa được đóng dấu vào hồ sơ flex. Ao làng xin phép đứng dậy vỗ tay.`,
+            caughtTierRank >= 6 ? "highlight" : "success",
+          );
+        }
+
 
         addLog(
 
-          `🎒 <span style="color: #00ffff; font-weight: bold;">${rn("Rác") === "Rác" ? "✓ Cất vào túi đồ!" : "✓ Stashed in bag!"}</span> Số lượng: <b style="color: #ffeb3b;">+1</b> | <span style="color: ${starCol};">${starDisp}</span> | Mở Túi Đồ để xả hàng nhé!`,
+          `🎒 <span style="color: #00ffff; font-weight: bold;">${rn("Rác") === "Rác" ? "✓ Cất vào túi đồ!" : "✓ Stashed in bag!"}</span> Số lượng: <b style="color: #ffeb3b;">+1</b> | <span style="color: ${starCol};">${starDisp}</span> | ${getTierBadgeHtml(selectedFish)} | Mở Túi Đồ để xả hàng nhé!`,
 
           "highlight",
 
@@ -7167,152 +7363,24 @@
 
 
 
-        let fishInZone = fishList.filter((f) => {
+        let fishInZone = fishList.filter((f) =>
+          isFishEligibleForZone(f, currentZone, hasDragonEye1, hasDragonEye2, true),
+        );
 
-          if (!f.zones.includes(currentZone)) return false;
-
-          if (f.hidden === 1 && !hasDragonEye1) return false;
-
-          if (f.hidden === 2 && !hasDragonEye2) return false;
-
-          return true;
-
-        });
+        if (fishInZone.length === 0) {
+          fishInZone = fishList.filter((f) =>
+            isFishEligibleForZone(f, currentZone, hasDragonEye1, hasDragonEye2, false),
+          );
+        }
 
 
 
         const pityBonus = getPityBonus();
 
         let currentWeights = fishInZone.map((fish) => {
-          let w = rarityWeights[fish.rarity] || 100;
-
-          let rawLuck = window.luckLevel;
-
-
-          if (activeBuff === "luck") rawLuck = rawLuck + 0.08;
-
-          if (activeBuff === "supreme_luck") rawLuck = rawLuck + 0.2;
-
-          let finalLuck = getEffectiveLuck(rawLuck) + pityBonus.luckBonus;
-
-
-
-          if (fish.rarity === "Rác" || fish.rarity === "Phế Liệu") {
-
-            w = Math.max(1, w / (1 + (finalLuck - 1) * 0.6));
-            w = w * pityBonus.trashWeightMultiplier;
-          } else if (fish.rarity === "Thường" || fish.rarity === "Bất Ổn") {
-
-            w = Math.max(5, w / (1 + (finalLuck - 1) * 0.3));
-
-          } else if (fish.rarity === "Hiếm" || fish.rarity === "Siêu Bựa") {
-
-            let multiplier = fish.rarity === "Siêu Bựa" ? 0.6 : 0.4;
-
-            w = w * (1 + (finalLuck - 1) * multiplier);
-            w = w * pityBonus.rareWeightMultiplier;
-
-          } else if (fish.rarity === "Cực Hiếm" || fish.rarity === "Đột Biến") {
-
-            let multiplier = fish.rarity === "Đột Biến" ? 1.0 : 0.8;
-
-            w = w * (1 + (finalLuck - 1) * multiplier);
-            w = w * pityBonus.rareWeightMultiplier;
-
-          } else if (
-
-            fish.rarity === "Huyền Thoại" ||
-
-            fish.rarity === "Thần Thoại"
-
-          ) {
-
-            let multiplier = fish.rarity === "Thần Thoại" ? 2.0 : 1.5;
-
-            w = w * (1 + (finalLuck - 1) * multiplier);
-            w = w * pityBonus.rareWeightMultiplier;
-
-          } else if (fish.rarity === "Tối Cao" || fish.rarity === "Vô Tri") {
-
-            let multiplier = fish.rarity === "Vô Tri" ? 4.0 : 3.0;
-
-            w = w * (1 + (finalLuck - 1) * multiplier);
-            w = w * pityBonus.rareWeightMultiplier;
-
-          }
-
-
-
-          if (gachaBuffActive === "cat") {
-
-            if (
-
-              fish.rarity === "Cực Hiếm" ||
-
-              fish.rarity === "Đột Biến" ||
-
-              fish.rarity === "Huyền Thoại" ||
-
-              fish.rarity === "Thần Thoại" ||
-
-              fish.rarity === "Tối Cao" ||
-
-              fish.rarity === "Vô Tri"
-
-            )
-
-              w = w * 6;
-
-          } else if (gachaBuffActive === "hung") {
-
-            if (
-
-              fish.rarity === "Rác" ||
-
-              fish.rarity === "Phế Liệu" ||
-
-              fish.rarity === "Thường" ||
-
-              fish.rarity === "Bất Ổn"
-
-            )
-
-              w = w * 12;
-
-          }
-
-
-
-          // Ảnh hưởng của Sương Mù Bất Ổn: giảm 3 lần tỷ lệ gặp cá hiếm+ nếu không có bùa Thấu Thị
-
-          if (currentWeather === "Sương Mù" && !hasDragonEye1) {
-
-            if (!["Rác", "Phế Liệu", "Thường", "Bất Ổn"].includes(fish.rarity)) {
-
-              w = w / 3;
-
-            }
-
-          }
-
-
-
-          // Nhật Thực Vô Tri: Tăng 50% tỷ lệ bắt cá Tối Cao / Vô Tri
-
-          if (currentWeather === "Nhật Thực") {
-
-            if (fish.rarity === "Tối Cao" || fish.rarity === "Vô Tri") {
-
-              w = w * 1.5;
-
-            }
-
-          }
-
-
-
+          let w = getFishDynamicWeight(fish, pityBonus);
+          w = applyGachaAndWeatherMods(fish, w, true);
           return { ...fish, dynamicWeight: w };
-
         });
 
 
@@ -7453,19 +7521,47 @@
 
         playerExp += amount;
 
-        if (playerExp >= expNeeded) {
+        while (playerExp >= expNeeded) {
 
           playerExp -= expNeeded;
 
           playerLevel++;
 
-          expNeeded = Math.round(playerLevel * 30 + 15);
+          expNeeded = getExpNeededForLevel(playerLevel);
 
           addLog(
-
-            `<span style="color: #ffea00; font-weight: bold;">👑 LÊN CẤP! Cấp ${playerLevel}!</span>`,
-
+            `<span style="color: #ffea00; font-weight: bold;">👑 LÊN CẤP! Cấp ${playerLevel}!</span>`
           );
+
+          // Rarity unlocks log
+          const rarityMilestones = {
+            3: "Bất Ổn",
+            5: "Hiếm",
+            8: "Siêu Bựa",
+            10: "Cực Hiếm",
+            12: "Đột Biến",
+            18: "Huyền Thoại",
+            25: "Thần Thoại",
+            30: "Tối Cao",
+            35: "Vô Tri"
+          };
+          if (rarityMilestones[playerLevel]) {
+            addLog(
+              `✨ <b style="color: #00e5ff;">[MỞ KHÓA PHẨM CHẤT MỚI]</b> Đã mở khóa cơ hội câu được cá phẩm chất <b style="color: #ffd600;">${rarityMilestones[playerLevel]}</b>!`,
+              "highlight"
+            );
+          }
+
+          // Zone unlocks log
+          for (let zoneId in zones) {
+            if (zones[zoneId].level === playerLevel) {
+              addLog(
+                `🧭 <b style="color: #4caf50;">[MỞ KHÓA KHU VỰC MỚI]</b> Vùng nước mới <b>${zones[zoneId].name}</b> (Milestone Lv ${zones[zoneId].level}) đã sẵn sàng để ní vào báo hại!`,
+                "highlight"
+              );
+            }
+          }
+
 
 
 
@@ -7842,126 +7938,20 @@
 
         let success = false;
 
-        if (type === "rod") {
+        const cfg = getUpgradeEconomy(type);
+        const currentLevel = getUpgradeLevel(type);
+        const cost = getUpgradeCost(type, currentLevel);
 
-          let cost = Math.round(15 * Math.pow(rodLevel, 1.3));
-
-          if (gold >= cost && rodLevel < 100) {
-
-            gold -= cost;
-
-            rodLevel++;
-
-            addLog(`✨ Nâng cấp cần câu! (Lv ${rodLevel})`);
-
-            success = true;
-
-          } else if (rodLevel >= 100) {
-
-            addLog(`⚠️ Cần câu max!`);
-
-          } else {
-
-            addLog(`❌ Không đủ vàng!`);
-
-          }
-
-        } else if (type === "speed") {
-
-          let cost = Math.round(12 * Math.pow(speedLevel, 1.3));
-
-          if (gold >= cost && speedLevel < 100) {
-
-            gold -= cost;
-
-            speedLevel++;
-
-            addLog(`⚡ Nâng cấp tai nhạy! (Lv ${speedLevel})`);
-
-            success = true;
-
-          } else if (speedLevel >= 100) {
-
-            addLog(`⚠️ Tai nhạy max!`);
-
-          } else {
-
-            addLog(`❌ Không đủ vàng!`);
-
-          }
-
-        } else if (type === "loc") {
-
-          let cost = Math.round(25 * Math.pow(locLevel, 1.4));
-
-          if (gold >= cost && locLevel < 100) {
-
-            gold -= cost;
-
-            locLevel++;
-
-            addLog(`🗺️ Nâng cấp vị trí! (Lv ${locLevel})`);
-
-            success = true;
-
-          } else if (locLevel >= 100) {
-
-            addLog(`⚠️ Vị trí max!`);
-
-          } else {
-
-            addLog(`❌ Không đủ vàng!`);
-
-          }
-
-        } else if (type === "pet") {
-
-          let cost = Math.round(20 * Math.pow(petLevel, 1.35));
-
-          if (gold >= cost && petLevel < 100) {
-
-            gold -= cost;
-
-            petLevel++;
-
-            addLog(`🐾 Nâng cấp trợ thủ! (Lv ${petLevel})`);
-
-            success = true;
-
-          } else if (petLevel >= 100) {
-
-            addLog(`⚠️ Trợ thủ max!`);
-
-          } else {
-
-            addLog(`❌ Không đủ vàng!`);
-
-          }
-
-        } else if (type === "auto") {
-
-          let cost = Math.round(30 * Math.pow(autoLevel, 1.35));
-
-          if (gold >= cost && autoLevel < 100) {
-
-            gold -= cost;
-
-            autoLevel++;
-
-            addLog(`🤖 Nâng cấp Tool Auto! (Lv ${autoLevel})`);
-
-            success = true;
-
-          } else if (autoLevel >= 100) {
-
-            addLog(`⚠️ Tool Auto max!`);
-
-          } else {
-
-            addLog(`❌ Không đủ vàng!`);
-
-          }
-
+        if (currentLevel >= cfg.maxLevel) {
+          addLog(`⚠️ ${cfg.label} max!`);
+        } else if (gold >= cost) {
+          gold -= cost;
+          const nextLevel = currentLevel + 1;
+          setUpgradeLevel(type, nextLevel);
+          addLog(`${cfg.emoji} Nâng cấp ${cfg.logName}! (Lv ${nextLevel})`);
+          success = true;
+        } else {
+          addLog(`❌ Không đủ vàng để nâng ${cfg.label}! Cần thêm ${cost - gold}đ.`);
         }
 
         if (success) {
@@ -8014,7 +8004,7 @@
 
         document.getElementById("rodDescText").innerText =
 
-          `Tăng mạnh may mắn. Hiện tại: +${((rodLevel - 1) * 1.1).toFixed(1)}x May Mắn (Tiếp: +${nextRodBonus}x)`;
+          `${getUpgradeEconomy("rod").desc} Hiện tại: +${((rodLevel - 1) * 1.1).toFixed(1)}x May Mắn (Tiếp: +${nextRodBonus}x)`;
 
 
 
@@ -8040,7 +8030,7 @@
 
         document.getElementById("speedDescText").innerText =
 
-          `Chờ cá cắn: ${currentWaitTime.toFixed(2)}s (Tiếp: ${nextWaitTime.toFixed(2)}s) | +${((speedLevel - 1) * 0.3).toFixed(1)}x May Mắn`;
+          `${getUpgradeEconomy("speed").desc} Chờ cá cắn: ${currentWaitTime.toFixed(2)}s (Tiếp: ${nextWaitTime.toFixed(2)}s) | +${((speedLevel - 1) * 0.3).toFixed(1)}x May Mắn`;
 
 
 
@@ -8056,7 +8046,7 @@
 
         document.getElementById("locDescText").innerText =
 
-          `Tăng tỉ lệ tìm cá hiếm. Hiện tại: +${((locLevel - 1) * 0.12).toFixed(2)}x May Mắn`;
+          `${getUpgradeEconomy("loc").desc} Hiện tại: +${((locLevel - 1) * 0.12).toFixed(2)}x May Mắn`;
 
 
 
@@ -8072,7 +8062,7 @@
 
         document.getElementById("petDescText").innerText =
 
-          `Nhận thêm EXP. Hiện tại: +${(petLevel - 1) * 5}% EXP | +${((petLevel - 1) * 0.1).toFixed(1)}x May Mắn`;
+          `${getUpgradeEconomy("pet").desc} Hiện tại: +${(petLevel - 1) * 5}% EXP | +${((petLevel - 1) * 0.1).toFixed(1)}x May Mắn`;
 
 
 
@@ -8106,7 +8096,7 @@
 
         document.getElementById("autoDescText").innerText =
 
-          `Phản xạ Auto. Hiện tại: ~${currentReactionAvg.toFixed(2)}s (Tiếp: ~${nextReactionAvg.toFixed(2)}s)`;
+          `${getUpgradeEconomy("auto").desc} Phản xạ hiện tại: ~${currentReactionAvg.toFixed(2)}s (Tiếp: ~${nextReactionAvg.toFixed(2)}s)`;
 
 
 
@@ -8212,9 +8202,9 @@
 
         if (rodLevel < 100) {
 
-          let cost = Math.round(15 * Math.pow(rodLevel, 1.3));
+          let cost = getUpgradeCost("rod", rodLevel);
 
-          btnRod.innerText = cost + "đ";
+          btnRod.innerText = formatUpgradeButtonText(cost);
 
           btnRod.disabled = gold < cost;
 
@@ -8230,9 +8220,9 @@
 
         if (speedLevel < 100) {
 
-          let cost = Math.round(12 * Math.pow(speedLevel, 1.3));
+          let cost = getUpgradeCost("speed", speedLevel);
 
-          btnSpeed.innerText = cost + "đ";
+          btnSpeed.innerText = formatUpgradeButtonText(cost);
 
           btnSpeed.disabled = gold < cost;
 
@@ -8248,9 +8238,9 @@
 
         if (locLevel < 100) {
 
-          let cost = Math.round(25 * Math.pow(locLevel, 1.4));
+          let cost = getUpgradeCost("loc", locLevel);
 
-          btnLoc.innerText = cost + "đ";
+          btnLoc.innerText = formatUpgradeButtonText(cost);
 
           btnLoc.disabled = gold < cost;
 
@@ -8266,9 +8256,9 @@
 
         if (petLevel < 100) {
 
-          let cost = Math.round(20 * Math.pow(petLevel, 1.35));
+          let cost = getUpgradeCost("pet", petLevel);
 
-          btnPet.innerText = cost + "đ";
+          btnPet.innerText = formatUpgradeButtonText(cost);
 
           btnPet.disabled = gold < cost;
 
@@ -8288,9 +8278,9 @@
 
           if (autoLevel < 100) {
 
-            let cost = Math.round(30 * Math.pow(autoLevel, 1.35));
+            let cost = getUpgradeCost("auto", autoLevel);
 
-            btnAuto.innerText = cost + "đ";
+            btnAuto.innerText = formatUpgradeButtonText(cost);
 
             btnAuto.disabled = gold < cost;
 
@@ -8390,22 +8380,29 @@
           let rarityStars = getRarityStars(fish.rarity);
 
           let maxStarPrice = Math.round(fish.price * starPriceMultiplier[5]);
+          let fishTier = getFishTier(fish);
+          let fishMinLevel = getFishMinLevel(fish);
+          let fishTierBadge = getTierBadgeHtml(fish);
 
           card.innerHTML = `
 
-                  <div style="font-weight: 500; color:${fish.color};"><span class="fish-sprite" data-rarity="${fish.rarity}">${fish.emoji}</span> ${fn(fish.name)}</div>
+                  <div class="fish-card-main">
+                    <div class="fish-card-name" style="color:${fish.color};"><span class="fish-sprite" data-rarity="${fish.rarity}">${fish.emoji}</span> ${fn(fish.name)}</div>
 
-                  <div style="display: flex; align-items: center; gap: 5px; flex-wrap: wrap;">
+                    <div class="fish-card-badges">
 
-                      <span style="color: #ffeb3b;">💵 ${fish.price}đ ~ ${maxStarPrice}đ</span>
+                        <span class="rarity-badge" style="background-color: ${fish.color};">${rn(fish.rarity)}</span>
 
-                      <span class="rarity-badge" style="background-color: ${fish.color};">${rn(fish.rarity)}</span>
+                        <span style="color: #ffd54f; font-size: 13px;">${rarityStars}</span>
 
-                      <span style="color: #ffd54f; font-size: 13px;">${rarityStars}</span>
+                        ${fishTierBadge}
 
+                    </div>
+
+                    <div class="fish-card-meta">💵 ${fish.price}đ ~ ${maxStarPrice}đ | EXP ${fish.exp} | Mở từ Lv ${fishMinLevel}</div>
+
+                    <div class="fish-card-note">★ Giá theo sao: 1★x1.0 | 2★x1.3 | 3★x1.8 | 4★x2.5 | 5★x4.0</div>
                   </div>
-
-                  <div style="font-size: 10px; color: #888; margin-top: 2px;">★ Giá theo sao: 1★x1.0 | 2★x1.3 | 3★x1.8 | 4★x2.5 | 5★x4.0</div>
 
               `;
 
@@ -8563,6 +8560,14 @@
         if (id === "first_votri")
 
           return "Tăng +15% giá bán cho toàn bộ gia tộc Cá Trê.";
+
+        if (id === "first_aoloi")
+
+          return "Tăng +15% tỷ lệ gặp Cá Ảo Lòi.";
+
+        if (id === "first_dayxahoi")
+
+          return "Tăng +10% giá bán cá khi ở trong vùng nước Đáy Xã Hội.";
 
         if (id === "pet_master")
 
@@ -8831,9 +8836,11 @@
 
               currentTitle = state.currentTitle;
 
-            if (state.fishInventory !== undefined)
-
+            if (state.fishInventory !== undefined) {
               fishInventory = state.fishInventory;
+              if (fishInventory["Ảo Lòi"] === undefined) fishInventory["Ảo Lòi"] = 0;
+              if (fishInventory["Đáy Xã Hội"] === undefined) fishInventory["Đáy Xã Hội"] = 0;
+            }
 
             if (state.playerBag !== undefined) {
 
@@ -8987,11 +8994,10 @@
 
 
       async function resetSaveData() {
-        if (
-          confirm(
-            "⚠️ CẢNH BÁO: Bạn có chắc chắn muốn xóa toàn bộ dữ liệu lưu trữ (vàng, cấp độ, túi đồ, thành tựu...) để chơi lại từ đầu không?",
-          )
-        ) {
+        const approved = await showConfirm(
+          "⚠️ CẢNH BÁO: Bạn có chắc chắn muốn xóa toàn bộ dữ liệu lưu trữ (vàng, cấp độ, túi đồ, thành tựu...) để chơi lại từ đầu không?"
+        );
+        if (approved) {
           await db.clear();
           location.reload();
         }
@@ -10056,12 +10062,29 @@
 
           renderZoneButtons();
 
-          // Yêu cầu đặt tên nếu chưa có
-          if (!playerName || playerName === "Ngư Ông Vô Danh") {
-            document.getElementById("nameInputModal").style.display = "flex";
+          // LUÔN HIỆN DIỆN ENTRY MODAL MỖI LẦN VÀO GAME (TRỪ KHI ĐANG CẦN TẠO MỚI)
+          const isNewGamePending = sessionStorage.getItem("start_new_game_pending") === "true";
+          const entryModal = document.getElementById("gameEntryModal");
+          const nameModal = document.getElementById("nameInputModal");
+
+          if (isNewGamePending) {
+            sessionStorage.removeItem("start_new_game_pending");
+            if (entryModal) entryModal.style.display = "none";
+            if (nameModal) nameModal.style.display = "flex";
           } else {
-            document.getElementById("playerNameText").innerText = playerName;
+            if (entryModal) {
+              entryModal.style.display = "flex";
+              const continueBtn = document.getElementById("btnContinueEntry");
+              // Chỉ hiện tiếp tục nếu đã có dữ liệu lưu và tên đã đặt
+              if (localStorage.getItem("fish_game_state") && playerName && playerName !== "Ngư Ông Vô Danh") {
+                if (continueBtn) continueBtn.style.display = "block";
+              } else {
+                if (continueBtn) continueBtn.style.display = "none";
+              }
+            }
           }
+
+          document.getElementById("playerNameText").innerText = playerName;
 
           selectZone(currentZone);
           initPixelCanvasScene();
@@ -10547,3 +10570,52 @@
         }
         document.body.removeChild(textArea);
       }
+
+      window.submitCloudSyncId = async function() {
+        const inputVal = document.getElementById("cloudSyncIdInput").value.trim();
+        if (!inputVal) {
+          alert("⚠️ Vui lòng nhập ID Cloud Sync hợp lệ!");
+          return;
+        }
+
+        showLoadingOverlay("Đang đồng bộ dữ liệu...");
+        localStorage.setItem("fish_game_player_id", inputVal);
+        
+        // Remove current local state so it pulls the cloud state of the new player
+        localStorage.removeItem("fish_game_state");
+
+        // Reload the game to pull the loaded save state
+        location.reload();
+      };
+
+      window.startNewGameFromEntry = async function() {
+        const approved = await showConfirm(
+          "⚠️ CẢNH BÁO: Bắt đầu game mới sẽ tạo tài khoản mới hoàn toàn và ghi đè save cũ của bạn trên thiết bị này. Bạn có chắc chắn muốn tiếp tục?"
+        );
+        if (!approved) return;
+
+        showLoadingOverlay("Đang tạo tài khoản mới...");
+        
+        // Flag that we are intentionally starting a new game session
+        sessionStorage.setItem("start_new_game_pending", "true");
+
+        // Generate new random playerId
+        const newId = "player_" + Math.random().toString(36).substring(2, 11) + "_" + Date.now().toString(36);
+        localStorage.setItem("fish_game_player_id", newId);
+        
+        // Clear old save keys
+        localStorage.removeItem("fish_game_state");
+        
+        // Reload to start clean
+        location.reload();
+      };
+
+      window.continueExistingGame = function() {
+        document.getElementById("gameEntryModal").style.display = "none";
+        
+        // If player has no name yet, prompt for name registration
+        if (!playerName || playerName === "Ngư Ông Vô Danh") {
+          document.getElementById("nameInputModal").style.display = "flex";
+        }
+      };
+

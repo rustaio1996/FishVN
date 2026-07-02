@@ -46,6 +46,20 @@ const bossPool = {
     timeLimit: 7,
     desc: "Thực thể tối cao của Thiên Hà Vô Tri. Thần có sức mạnh huỷ diệt nhưng không biết đọc bảng chữ cái.",
     reward: { gold: 2000, title: "Đấng Xoá Mù Chữ Vũ Trụ" }
+  },
+  dai_lo_ao: {
+    name: "🤳 Cá Trê Đệ Nhất Meitu",
+    hp: 60,
+    timeLimit: 7,
+    desc: "Nó dùng app chỉnh ảnh bóp nát không gian xung quanh, khiến cần câu của bạn bị cong vẹo bất thường!",
+    reward: { gold: 2500, title: "Kẻ Bóc Phốt Sống Ảo" }
+  },
+  day_xa_hoi: {
+    name: "📉 Cá Lóc Chúa Tể Đu Đỉnh",
+    hp: 70,
+    timeLimit: 6,
+    desc: "Kẻ all-in coin rác mất hết tất cả, nó sẽ bám lấy chân bạn để xin tiền đổ xăng chạy Grab!",
+    reward: { gold: 3000, title: "Chúa Tể Về Bờ" }
   }
 };
 

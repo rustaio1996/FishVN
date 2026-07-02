@@ -261,7 +261,23 @@ const contentTranslations = {
     "Sát Thủ Ao Làng": "Village Pond Assassin",
     "Kẻ Giải Cứu Cáp Quang": "Fiber Cable Savior",
     "Đấng Vô Tri": "The Brainless One",
-    "Thần Gacha Thắp Hương": "Incense Gacha God"
+    "Thần Gacha Thắp Hương": "Incense Gacha God",
+    "🎭 Đại Lộ Ảo Lòi": "🎭 Hyper-Unreal Avenue",
+    "🏚️ Đáy Xã Hội": "🏚️ Rock Bottom of Society",
+    "Ảo Lòi": "Hyper-Unreal",
+    "Đáy Xã Hội": "Rock Bottom",
+    "Cá Trê Dùng App Meitu Gánh Cong Cả Cột Nhà": "Meitu-Filtered Column-Bending Catfish",
+    "Cá Chép Nhận Vơ Làm Con Nuôi Tỷ Phú": "Billionaire's Self-Proclaimed Adopted Carp",
+    "Cá Mập Photoshop Bóp Eo Thon Như Ngọc Trinh": "Photoshopped Waist-Slimmed Shark",
+    "Cá Hồi Đăng Ảnh Đi Ghi Hình Show Thực Tế": "Salmon Posing for Reality Show Shoot",
+    "Cá Ngừ Tự Phong Danh Hiệu Chúa Tể Check-in": "Self-Proclaimed Check-in Lord Tuna",
+    "Cá Trích Kiếm Tiền Online Bằng Cách Xem Quảng Cáo": "Ad-Watching Online Earner Herring",
+    "Cá Trê Trốn Nợ Bị Dán Ảnh Khắp Cột Điện": "Debt-Dodging Catfish Printed on Utility Poles",
+    "Cá Lóc All-in Coin Rác Đu Đỉnh 3 Năm Chưa Về Bờ": "All-in Shitcoin Peak-Trapped Snakehead",
+    "Cá Chép Chạy Grab 24h Vẫn Bị Khách Hủy Kèo": "24h Grab-Riding Carp Canceled by Customers",
+    "Cá Rô Đồng Thuê Nhà Trọ 8m2 Không Có Cửa Sổ": "Windowless 8m2 Room Renter Perch",
+    "Cá Thu Bị Vợ Quản Lý Chi Tiêu Năm Nghìn Một Ngày": "Mackerel Restricted to $0.2 Daily Spending",
+    "Cá Mập Vay Nợ App Tín Dụng Đen Bị Gọi Điện Khủng Bố": "Black-Credit App Harassed Loan-Shark"
   }
 };
 

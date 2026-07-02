@@ -8,7 +8,10 @@
   "scripts": {
     "start": "electron .",
     "build:win": "electron-builder --win portable",
-    "check:js": "node --check js/modules/i18n.js && node --check js/modules/audio.js && node --check js/modules/time-events.js && node --check js/game-state.js && node --check js/data/world-data.js && node --check js/data/progression-data.js && node --check js/game-core.js && node --check electron/main.js"
+    "check:js": "node --check js/modules/i18n.js && node --check js/modules/audio.js && node --check js/modules/time-events.js && node --check js/game-state.js && node --check js/data/world-data.js && node --check js/data/progression-data.js && node --check js/game-core.js && node --check electron/main.js",
+    "analyze:fish": "node scratch/analyze_fish_balance.js",
+    "simulate:fish": "node scratch/simulate_fish_rolls.js",
+    "simulate:economy": "node scratch/simulate_economy.js"
   },
   "build": {
     "appId": "com.nguongbaton.game",
