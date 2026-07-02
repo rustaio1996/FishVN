@@ -182,6 +182,7 @@ let achievements = {
       let consecutiveCatGacha = 0;
       let equippedAchievementId = null;
       let currentPet = null;
+      let petTank = { slots: [null, null, null], unlockedSlots: 1, activeIndex: -1 };
 
       let karma = 0;
 

@@ -2011,6 +2011,12 @@
 
       }
 
+      #petTankPanel {
+
+        order: 8;
+
+      }
+
       .shop-container {
 
         order: 6;
@@ -2025,7 +2031,8 @@
 
 
 
-      .inventory-panel {
+      .inventory-panel,
+      #petTankPanel {
 
         background-color: #12121a;
 
@@ -3794,7 +3801,9 @@
 
         .consumable-panel,
 
-        .mobile-settings-container {
+        .mobile-settings-container,
+
+        #petTankPanel {
 
           display: none !important;
 
@@ -4167,6 +4176,35 @@
         }
 
 
+
+        /* Bể Nuôi tab */
+        body.tab-pet .game-layout {
+          display: flex !important;
+          flex-direction: column !important;
+          height: 100% !important;
+          overflow: hidden !important;
+        }
+
+        body.tab-pet #petTankPanel {
+          display: flex !important;
+          flex-direction: column;
+          flex: 1 !important;
+          overflow: hidden !important;
+          margin-bottom: 0;
+          border: none;
+          background: transparent;
+          padding: 0;
+        }
+
+        body.tab-pet #petTankCollapsible {
+          max-height: none !important;
+          opacity: 1 !important;
+          display: flex !important;
+          flex-direction: column;
+          flex: 1 !important;
+          overflow-y: auto !important;
+          height: 0 !important;
+        }
 
         /* Cửa Hàng tab */
 
@@ -6353,8 +6391,8 @@
         width: 100vw;
         height: 100vh;
         background-color: rgba(10, 10, 15, 0.85);
-        backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
+        backdrop-filter: blur(8px);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -6453,4 +6491,385 @@
         color: #b0b0b0;
         font-weight: bold;
         text-shadow: 0 0 4px rgba(112, 112, 112, 0.4);
+      }
+
+      /* ===== EXTRACTED INLINE STYLES ===== */
+
+      /* Game Loading Overlay */
+      #gameLoadingOverlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(9, 9, 15, 0.95);
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+      }
+
+      .loading-anchor {
+        font-size: 50px;
+        animation: loading-bounce 1s ease-in-out infinite alternate;
+      }
+
+      .loading-overlay-text {
+        font-size: 16px;
+        font-weight: bold;
+        color: #a5b4fc;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+      }
+
+      .loading-progress-container {
+        width: 200px;
+        height: 6px;
+        background: #27272a;
+        border-radius: 3px;
+        overflow: hidden;
+        border: 1px solid #3f3f46;
+        position: relative;
+      }
+
+      .loading-progress-bar {
+        width: 80px;
+        height: 100%;
+        background: linear-gradient(90deg, #4f46e5, #818cf8);
+        position: absolute;
+        animation: loading-progress 1.5s infinite ease-in-out;
+      }
+
+      /* Game Entry Modal */
+      #gameEntryModal {
+        display: none;
+      }
+
+      .entry-modal-content {
+        border-color: #ffd600;
+        box-shadow: 0 0 20px rgba(255, 214, 0, 0.3);
+      }
+
+      .entry-modal-title {
+        color: #ffd600;
+        text-shadow: 0 0 10px rgba(255, 214, 0, 0.4);
+        margin-bottom: 12px;
+        font-size: 18px;
+      }
+
+      .entry-modal-desc {
+        color: #ccc;
+        font-size: 11.5px;
+        line-height: 1.5;
+        margin-bottom: 15px;
+      }
+
+      .cloud-id-section {
+        background: rgba(0, 0, 0, 0.25);
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #3a3a4f;
+        margin-bottom: 16px;
+        text-align: left;
+      }
+
+      .cloud-id-label {
+        font-size: 11px;
+        color: #ffd600;
+        font-weight: bold;
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      #cloudSyncIdInput {
+        width: 100%;
+        padding: 8px 10px;
+        background: #0c0c12;
+        border: 1px solid #3f3f5a;
+        border-radius: 6px;
+        color: #fff;
+        font-family: inherit;
+        font-size: 12px;
+        margin-bottom: 8px;
+        text-align: center;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+      }
+
+      .btn-cloud-sync {
+        width: 100%;
+        background: linear-gradient(135deg, #00e5ff, #008ba3);
+        color: #fff;
+        font-size: 12px;
+        font-weight: bold;
+        padding: 8px 0;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0, 229, 255, 0.2);
+        transition: all 0.2s ease;
+      }
+
+      .btn-cloud-sync:hover {
+        background: linear-gradient(135deg, #33f0ff, #00acc1);
+        box-shadow: 0 4px 14px rgba(0, 229, 255, 0.4);
+      }
+
+      .entry-actions-container {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .btn-continue-game {
+        background: linear-gradient(135deg, #4caf50, #388e3c);
+        color: #fff;
+        font-size: 12.5px;
+        font-weight: bold;
+        padding: 10px 0;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(76, 175, 80, 0.2);
+        transition: all 0.2s ease;
+      }
+
+      .btn-continue-game:hover {
+        background: linear-gradient(135deg, #66bb6a, #43a047);
+        box-shadow: 0 4px 14px rgba(76, 175, 80, 0.4);
+      }
+
+      .btn-new-game {
+        background: linear-gradient(135deg, #ff3d00, #b22a00);
+        color: #fff;
+        font-size: 12.5px;
+        font-weight: bold;
+        padding: 10px 0;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(255, 61, 0, 0.2);
+        transition: all 0.2s ease;
+      }
+
+      .btn-new-game:hover {
+        background: linear-gradient(135deg, #ff6333, #d84315);
+        box-shadow: 0 4px 14px rgba(255, 61, 0, 0.4);
+      }
+
+      /* Cloud Sync Settings Panel */
+      .settings-cloud-sync-panel {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        border: 1px solid #4f46e5;
+        padding: 12px;
+        border-radius: 10px;
+        background-color: #1d1d2e;
+      }
+
+      .settings-cloud-sync-title {
+        color: #a5b4fc;
+        margin-bottom: 2px;
+      }
+
+      .settings-cloud-sync-desc {
+        font-size: 12px;
+        color: #9ca3af;
+        text-align: left;
+        line-height: 1.4;
+      }
+
+      .settings-cloud-id-row {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 4px;
+      }
+
+      #cloudPlayerIdInput {
+        flex: 1;
+        padding: 8px 12px;
+        background: #13131a;
+        border: 1px solid #3f3f46;
+        color: #a5b4fc;
+        border-radius: 6px;
+        font-size: 13px;
+        font-family: monospace;
+        outline: none;
+      }
+
+      .btn-copy-id {
+        padding: 8px 16px;
+        background: #27272a;
+        border: 1px solid #4a4a6a;
+        color: #fff;
+        cursor: pointer;
+        border-radius: 6px;
+        margin: 0;
+        font-weight: bold;
+        font-size: 12px;
+        transition: all 0.2s;
+      }
+
+      .btn-copy-id:hover {
+        background: #3f3f46;
+        border-color: #6b7280;
+      }
+
+      .settings-cloud-buttons-container {
+        display: flex;
+        gap: 8px;
+        margin-top: 4px;
+      }
+
+      .btn-login-cloud {
+        flex: 1;
+        padding: 10px;
+        background: #2e1065;
+        color: #d8b4fe;
+        border: 1px solid #581c87;
+        margin: 0;
+        height: auto;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: all 0.2s;
+      }
+
+      .btn-login-cloud:hover {
+        background: #4c1d95;
+      }
+
+      .btn-sync-cloud {
+        flex: 1;
+        padding: 10px;
+        background: #064e3b;
+        color: #6ee7b7;
+        border: 1px solid #065f46;
+        margin: 0;
+        height: auto;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: all 0.2s;
+      }
+
+      .btn-sync-cloud:hover {
+        background: #065f46;
+      }
+
+      /* Quick Sell Panel */
+      .quick-sell-panel {
+        margin-bottom: 10px;
+        padding: 8px 10px;
+        background: rgba(239, 68, 68, 0.08);
+        border: 1px solid rgba(239, 68, 68, 0.25);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .quick-sell-title {
+        font-size: 11px;
+        color: #fca5a5;
+        font-weight: bold;
+      }
+
+      .quick-sell-buttons {
+        display: flex;
+        gap: 6px;
+      }
+
+      .btn-quick-sell-trash {
+        padding: 4px 10px;
+        background: #7f1d1d;
+        border: 1px solid #b91c1c;
+        color: #fca5a5;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .btn-quick-sell-trash:hover {
+        background: #991b1b;
+      }
+
+      .btn-quick-sell-common {
+        padding: 4px 10px;
+        background: #1e3a8a;
+        border: 1px solid #2563eb;
+        color: #bfdbfe;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .btn-quick-sell-common:hover {
+        background: #1e40af;
+      }
+
+      /* Inventory Controls */
+      .inventory-controls {
+        margin-bottom: 10px;
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      .inv-select-filter {
+        padding: 6px;
+        background: #1a1a2a;
+        border: 1px solid #3a3a55;
+        color: #fff;
+        border-radius: 6px;
+        font-size: 11px;
+        outline: none;
+        cursor: pointer;
+      }
+
+      #invFilterRarity, #invSortOrder {
+        flex: 1.2;
+        min-width: 110px;
+      }
+
+      #invFilterStars {
+        flex: 0.8;
+        min-width: 80px;
+      }
+
+      #invFilterTier {
+        flex: 1.1;
+        min-width: 110px;
+      }
+
+      /* Catch Reveal Modal */
+      #catchRevealModal {
+        display: none;
+        z-index: 9999;
+      }
+
+      .catch-reveal-price-label, .catch-reveal-exp-label {
+        color: #888;
+      }
+
+      .catch-reveal-price-value {
+        color: #ffd54f;
+      }
+
+      .catch-reveal-exp-value {
+        color: #6ee7b7;
       }

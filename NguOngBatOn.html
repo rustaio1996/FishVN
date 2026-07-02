@@ -20,11 +20,11 @@
     <div id="catch-flash-overlay"></div>
 
     <!-- Game Loading Overlay -->
-    <div id="gameLoadingOverlay" style="position: fixed; inset: 0; background: rgba(9, 9, 15, 0.95); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;">
-      <div style="font-size: 50px; animation: loading-bounce 1s ease-in-out infinite alternate;">⚓</div>
-      <div style="font-size: 16px; font-weight: bold; color: #a5b4fc; letter-spacing: 2px; text-transform: uppercase;" id="loadingOverlayText">Đang tải dữ liệu trò chơi...</div>
-      <div style="width: 200px; height: 6px; background: #27272a; border-radius: 3px; overflow: hidden; border: 1px solid #3f3f46; position: relative;">
-        <div style="width: 80px; height: 100%; background: linear-gradient(90deg, #4f46e5, #818cf8); position: absolute; animation: loading-progress 1.5s infinite ease-in-out;"></div>
+    <div id="gameLoadingOverlay">
+      <div class="loading-anchor">⚓</div>
+      <div class="loading-overlay-text" id="loadingOverlayText">Đang tải dữ liệu trò chơi...</div>
+      <div class="loading-progress-container">
+        <div class="loading-progress-bar"></div>
       </div>
     </div>
 
@@ -61,6 +61,10 @@
         <span class="nav-icon">🎒</span>
         <span class="nav-text" data-i18n="nav.bag">Hành Trang</span>
       </div>
+      <div class="nav-item" id="nav-pet" onclick="switchMobileTab('pet')">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-text" data-i18n="nav.pet">Bể Báo</span>
+      </div>
       <div class="nav-item" id="nav-shop" onclick="switchMobileTab('shop')">
         <span class="nav-icon">🛒</span>
         <span class="nav-text" data-i18n="nav.shop">Cửa Hàng</span>
@@ -76,28 +80,27 @@
     </div>
 
     <!-- Game Entry Modal: Cloud Sync Login / New Game -->
-    <div id="gameEntryModal" class="name-modal-overlay" style="display: none;">
-      <div class="name-modal-content" style="border-color: #ffd600; box-shadow: 0 0 20px rgba(255, 214, 0, 0.3);">
-        <h3 class="modal-title" style="color: #ffd600; text-shadow: 0 0 10px rgba(255, 214, 0, 0.4); margin-bottom: 12px; font-size: 18px;">
+    <div id="gameEntryModal" class="name-modal-overlay">
+      <div class="name-modal-content entry-modal-content">
+        <h3 class="modal-title entry-modal-title">
           🔑 ĐĂNG NHẬP CLOUD SYNC
         </h3>
-        <p class="modal-desc" style="color: #ccc; font-size: 11.5px; line-height: 1.5; margin-bottom: 15px;">
+        <p class="modal-desc entry-modal-desc">
           Để bảo vệ tiến trình chơi và không bị tải nhầm dữ liệu của cần thủ khác trên thiết bị này:
         </p>
 
         <!-- Nhập Cloud ID -->
-        <div style="background: rgba(0,0,0,0.25); padding: 12px; border-radius: 8px; border: 1px solid #3a3a4f; margin-bottom: 16px; text-align: left;">
-          <label style="font-size: 11px; color: #ffd600; font-weight: bold; display: block; margin-bottom: 6px;">ID CLOUD SYNC CỦA BẠN:</label>
+        <div class="cloud-id-section">
+          <label class="cloud-id-label">ID CLOUD SYNC CỦA BẠN:</label>
           <input
             type="text"
             id="cloudSyncIdInput"
             placeholder="Dán ID Cloud của bạn vào đây..."
-            style="width: 100%; padding: 8px 10px; background: #0c0c12; border: 1px solid #3f3f5a; border-radius: 6px; color: #fff; font-family: inherit; font-size: 12px; margin-bottom: 8px; text-align: center; box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);"
+            title="ID Cloud Sync"
           >
           <button
-            class="btn idle"
+            class="btn idle btn-cloud-sync"
             type="button"
-            style="width: 100%; background: linear-gradient(135deg, #00e5ff, #008ba3); color: #fff; font-size: 12px; font-weight: bold; padding: 8px 0; border: none; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 229, 255, 0.2);"
             onclick="submitCloudSyncId()"
           >
             🔄 Đồng Bộ Dữ Liệu
@@ -105,21 +108,19 @@
         </div>
 
         <!-- Các lựa chọn vào game -->
-        <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div class="entry-actions-container">
           <button
             id="btnContinueEntry"
-            class="btn idle"
+            class="btn idle btn-continue-game"
             type="button"
-            style="background: linear-gradient(135deg, #4caf50, #388e3c); color: #fff; font-size: 12.5px; font-weight: bold; padding: 10px 0; border: none; border-radius: 6px; cursor: pointer; display: none; box-shadow: 0 4px 10px rgba(76, 175, 80, 0.2);"
             onclick="continueExistingGame()"
           >
             ▶️ Tiếp Tục Chơi (Save Hiện Tại)
           </button>
 
           <button
-            class="btn idle"
+            class="btn idle btn-new-game"
             type="button"
-            style="background: linear-gradient(135deg, #ff3d00, #b22a00); color: #fff; font-size: 12.5px; font-weight: bold; padding: 10px 0; border: none; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 10px rgba(255, 61, 0, 0.2);"
             onclick="startNewGameFromEntry()"
           >
             🆕 Chơi Mới (Tạo Account Mới)
@@ -253,22 +254,22 @@
           </div>
         </div>
 
-        <div class="audio-control-panel settings-mt-15" style="display: flex; flex-direction: column; align-items: stretch; gap: 10px; border: 1px solid #4f46e5; padding: 12px; border-radius: 10px; background-color: #1d1d2e;">
-          <span class="audio-title" style="color: #a5b4fc; margin-bottom: 2px;"> ☁️ CLOUD SYNC (MONGODB) </span>
-          <div style="font-size: 12px; color: #9ca3af; text-align: left; line-height: 1.4;">
+        <div class="audio-control-panel settings-mt-15 settings-cloud-sync-panel">
+          <span class="audio-title settings-cloud-sync-title"> ☁️ CLOUD SYNC (MONGODB) </span>
+          <div class="settings-cloud-sync-desc">
             Mã ID tài khoản (Dùng để lưu/tải game trên thiết bị khác):
           </div>
-          <div style="display: flex; gap: 8px; margin-bottom: 4px;">
-            <input type="text" id="cloudPlayerIdInput" readonly style="flex: 1; padding: 8px 12px; background: #13131a; border: 1px solid #3f3f46; color: #a5b4fc; border-radius: 6px; font-size: 13px; font-family: monospace; outline: none;" />
-            <button type="button" onclick="copyPlayerId()" class="audio-btn" style="padding: 8px 16px; background: #27272a; border: 1px solid #4a4a6a; color: #fff; cursor: pointer; border-radius: 6px; margin: 0; font-weight: bold; font-size: 12px; transition: all 0.2s;" onmouseover="this.style.background='#3f3f46'; this.style.borderColor='#6b7280';" onmouseout="this.style.background='#27272a'; this.style.borderColor='#4a4a6a';">
+          <div class="settings-cloud-id-row">
+            <input type="text" id="cloudPlayerIdInput" readonly title="Mã ID tài khoản">
+            <button type="button" onclick="copyPlayerId()" class="audio-btn btn-copy-id">
               Sao chép
             </button>
           </div>
-          <div class="audio-buttons-container" style="display: flex; gap: 8px; margin-top: 4px;">
-            <button type="button" onclick="changePlayerIdPrompt()" class="audio-btn" style="flex: 1; padding: 10px; background: #2e1065; color: #d8b4fe; border: 1px solid #581c87; margin: 0; height: auto; border-radius: 6px; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='#4c1d95';" onmouseout="this.style.background='#2e1065';">
+          <div class="audio-buttons-container settings-cloud-buttons-container">
+            <button type="button" onclick="changePlayerIdPrompt()" class="audio-btn btn-login-cloud">
               🔑 Đăng nhập ID
             </button>
-            <button type="button" id="btnSyncCloud" onclick="syncCloudSave()" class="audio-btn" style="flex: 1; padding: 10px; background: #064e3b; color: #6ee7b7; border: 1px solid #065f46; margin: 0; height: auto; border-radius: 6px; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='#065f46';" onmouseout="this.style.background='#064e3b';">
+            <button type="button" id="btnSyncCloud" onclick="syncCloudSave()" class="audio-btn btn-sync-cloud">
               🔄 Đồng bộ ngay
             </button>
           </div>
@@ -334,7 +335,6 @@
         <div class="mobile-sub-tabs" id="mobile-bag-subtabs">
           <button class="sub-tab-btn active" id="btn-bag-inv" type="button" onclick="selectBagSubTab('bag')" data-i18n="subtab.inventory">🎒 Túi Đồ</button>
           <button class="sub-tab-btn" id="btn-bag-craft" type="button" onclick="selectBagSubTab('crafting')" data-i18n="subtab.crafting">🍲 Bếp Lẩu</button>
-          <button class="sub-tab-btn" id="btn-bag-pet" type="button" onclick="selectBagSubTab('aquarium')" data-i18n="subtab.pet">🏠 Bể Báo</button>
         </div>
 
 
@@ -357,7 +357,7 @@
               <div class="pixel-cloud cloud-a"></div>
               <div class="pixel-cloud cloud-b"></div>
             </div>
-            
+
             <div class="pixel-boat">
               <div class="pixel-fisher">
                 <div class="pixel-head"></div>
@@ -592,6 +592,17 @@
             </div>
           </div>
 
+          <!-- Bể Nuôi Cá Báo Thủ Panel -->
+          <div class="pet-tank-panel" id="petTankPanel">
+            <div class="pet-tank-toggle-header" onclick="togglePetTankSection()">
+              <span class="toggle-title">🏠 BỂ NUÔI CÁ BÁO THỦ (PET)</span>
+              <span class="toggle-icon" id="petTankToggleIcon">▼</span>
+            </div>
+            <div class="pet-tank-collapsible" id="petTankCollapsible">
+              <div id="petTankContent"></div>
+            </div>
+          </div>
+
           <div class="guide-container">
             <div class="guide-toggle-header" onclick="toggleGuideSection()">
               <span class="toggle-title"
@@ -635,14 +646,6 @@
                   onclick="switchTab('achievements', this)"
                 >
                   🏆 Thành Tựu
-                </button>
-
-                <button
-                  class="tab-btn"
-                  type="button"
-                  onclick="switchTab('petTank', this)"
-                >
-                  🏠 Bể Báo Thủ
                 </button>
               </div>
               <div class="guide-content">
@@ -749,12 +752,7 @@
                   ></div>
                 </div>
 
-                <div id="petTankTab" class="guide-tab">
-                  <div class="encyclopedia-header tab-header-orange">
-                    🏠 BỂ NUÔI CÁ BÁO THỦ (BÁO HẠI AO LÀNG)
-                  </div>
-                  <div id="petTankContent"></div>
-                </div>
+
               </div>
             </div>
           </div>
@@ -784,27 +782,27 @@
                   💰 Xả Kho: Bán Sạch Sành Sanh
                 </button>
               </div>
-              
+
               <!-- Bán nhanh theo nhóm -->
-              <div class="quick-sell-panel" style="margin-bottom: 10px; padding: 8px 10px; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
-                <span style="font-size: 11px; color: #fca5a5; font-weight: bold;">⚡ BÁN NHANH THEO NHÓM:</span>
-                <div style="display: flex; gap: 6px;">
-                  <button type="button" onclick="quickSellCategory('trash')" style="padding: 4px 10px; background: #7f1d1d; border: 1px solid #b91c1c; color: #fca5a5; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#991b1b'" onmouseout="this.style.background='#7f1d1d'">🗑️ Bán Rác/Phế liệu</button>
-                  <button type="button" onclick="quickSellCategory('common')" style="padding: 4px 10px; background: #1e3a8a; border: 1px solid #2563eb; color: #bfdbfe; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#1e40af'" onmouseout="this.style.background='#1e3a8a'">🐟 Bán Thường/Bất ổn</button>
+              <div class="quick-sell-panel">
+                <span class="quick-sell-title">⚡ BÁN NHANH THEO NHÓM:</span>
+                <div class="quick-sell-buttons">
+                  <button type="button" onclick="quickSellCategory('trash')" class="btn-quick-sell-trash">🗑️ Bán Rác/Phế liệu</button>
+                  <button type="button" onclick="quickSellCategory('common')" class="btn-quick-sell-common">🐟 Bán Thường/Bất ổn</button>
                 </div>
               </div>
 
               <!-- Bộ lọc và Sắp xếp -->
-              <div class="inventory-controls" style="margin-bottom: 10px; display: flex; gap: 6px; flex-wrap: wrap;">
-                <select id="invFilterRarity" onchange="renderInventoryTab()" style="flex: 1.2; min-width: 110px; padding: 6px; background: #1a1a2a; border: 1px solid #3a3a55; color: #fff; border-radius: 6px; font-size: 11px; outline: none; cursor: pointer;">
+              <div class="inventory-controls">
+                <select id="invFilterRarity" onchange="renderInventoryTab()" class="inv-select-filter" title="Lọc theo độ hiếm">
                   <option value="all">🔍 Tất cả độ hiếm</option>
-                  <option value="trash">🗑️ Rác & Phế liệu</option>
-                  <option value="common">🐟 Thường & Bất ổn</option>
-                  <option value="rare">🎭 Hiếm & Siêu bựa</option>
-                  <option value="epic">🧬 Cực hiếm & Đột biến</option>
+                  <option value="trash">🗑️ Rác &amp; Phế liệu</option>
+                  <option value="common">🐟 Thường &amp; Bất ổn</option>
+                  <option value="rare">🎭 Hiếm &amp; Siêu bựa</option>
+                  <option value="epic">🧬 Cực hiếm &amp; Đột biến</option>
                   <option value="legendary">👑 Từ Huyền Thoại trở lên</option>
                 </select>
-                <select id="invFilterStars" onchange="renderInventoryTab()" style="flex: 0.8; min-width: 80px; padding: 6px; background: #1a1a2a; border: 1px solid #3a3a55; color: #fff; border-radius: 6px; font-size: 11px; outline: none; cursor: pointer;">
+                <select id="invFilterStars" onchange="renderInventoryTab()" class="inv-select-filter" title="Lọc theo số sao">
                   <option value="all">⭐ Tất cả sao</option>
                   <option value="1">⭐ 1 sao</option>
                   <option value="2">⭐⭐ 2 sao</option>
@@ -812,7 +810,7 @@
                   <option value="4">⭐⭐⭐⭐ 4 sao</option>
                   <option value="5">⭐⭐⭐⭐⭐ 5 sao</option>
                 </select>
-                <select id="invFilterTier" onchange="renderInventoryTab()" style="flex: 1.1; min-width: 110px; padding: 6px; background: #1a1a2a; border: 1px solid #3a3a55; color: #fff; border-radius: 6px; font-size: 11px; outline: none; cursor: pointer;">
+                <select id="invFilterTier" onchange="renderInventoryTab()" class="inv-select-filter" title="Lọc theo cấp bậc">
                   <option value="all">🏷️ Tất cả cấp bậc</option>
                   <option value="ao_lang">🌱 Ao làng</option>
                   <option value="giang_ho">🎣 Giang hồ</option>
@@ -820,7 +818,7 @@
                   <option value="huyen_thoai_plus">👑 Huyền thoại+</option>
                   <option value="loi_he_thong">🧠 Lỗi hệ thống</option>
                 </select>
-                <select id="invSortOrder" onchange="renderInventoryTab()" style="flex: 1.2; min-width: 110px; padding: 6px; background: #1a1a2a; border: 1px solid #3a3a55; color: #fff; border-radius: 6px; font-size: 11px; outline: none; cursor: pointer;">
+                <select id="invSortOrder" onchange="renderInventoryTab()" class="inv-select-filter" title="Sắp xếp danh sách">
                   <option value="priceDesc">💵 Giá: Cao → Thấp</option>
                   <option value="priceAsc">💵 Giá: Thấp → Cao</option>
                   <option value="countDesc">📦 Số lượng: Nhiều → Ít</option>
@@ -1098,11 +1096,11 @@
       </div>
     </div>
     <!-- Catch Reveal Modal (Hiện khi câu được cá xịn) -->
-    <div id="catchRevealModal" class="name-modal-overlay" style="display: none; z-index: 9999;">
+    <div id="catchRevealModal" class="name-modal-overlay">
       <div class="name-modal-content catch-reveal-content">
         <h3 class="modal-title catch-reveal-title" id="catchModalTitle">🎉 CÂU ĐƯỢC CÁ XỊN!</h3>
         <p class="catch-reveal-zone" id="catchModalZone">tại Đầm Lầy Ăn Vạ</p>
-        
+
         <div class="catch-ray-container">
           <div class="catch-ray-spin"></div>
           <div id="catchModalSprite" class="catch-reveal-sprite">🐟</div>
@@ -1113,16 +1111,16 @@
           <div class="rarity-badge catch-rarity-badge" id="catchModalRarity">Tối Cao</div>
           <div class="tier-badge tier-dan-anh" id="catchModalTier">Dân Anh Vật Vờ</div>
         </div>
-        
+
         <div id="catchModalStars" class="catch-reveal-stars">⭐⭐⭐⭐⭐</div>
         <div class="catch-reveal-meta" id="catchModalMeta">Mở từ Lv 1</div>
 
         <div class="catch-reveal-rewards">
           <div>
-            <span style="color: #888;">Giá bán:</span> <b style="color: #ffd54f;" id="catchModalPrice">💵 1,200đ</b>
+            <span class="catch-reveal-price-label">Giá bán:</span> <b class="catch-reveal-price-value" id="catchModalPrice">💵 1,200đ</b>
           </div>
           <div>
-            <span style="color: #888;">EXP:</span> <b style="color: #6ee7b7;" id="catchModalExp">+400</b>
+            <span class="catch-reveal-exp-label">EXP:</span> <b class="catch-reveal-exp-value" id="catchModalExp">+400</b>
           </div>
         </div>
 
