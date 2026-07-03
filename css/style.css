@@ -7036,3 +7036,223 @@
         font-size: 11px;
         background-color: #519aba;
       }
+
+      /* Pet Tank Styles */
+      .pet-slots-container {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+
+      .pet-slot {
+        flex: 1;
+        border-radius: 10px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 120px;
+      }
+
+      .pet-slot.locked {
+        border: 2px dashed #3a3a55;
+        padding: 15px 10px;
+        background: rgba(0, 0, 0, 0.15);
+      }
+
+      .pet-slot-lock-icon {
+        font-size: 20px;
+        color: #555;
+      }
+
+      .pet-slot-title {
+        font-size: 10px;
+        margin-top: 6px;
+        font-weight: bold;
+      }
+
+      .pet-slot-title.locked {
+        color: #777;
+      }
+
+      .pet-slot-title.empty {
+        color: #aaa;
+      }
+
+      .pet-slot-btn.unlock {
+        padding: 4px 6px;
+        font-size: 9px;
+        margin-top: 8px;
+        background-color: #ffd600;
+        color: #000;
+        font-weight: bold;
+      }
+
+      .pet-slot.empty {
+        border: 2px dashed #4f46e5;
+        padding: 15px 10px;
+        background: rgba(0, 0, 0, 0.1);
+      }
+
+      .pet-slot-empty-icon {
+        font-size: 24px;
+        color: #444;
+      }
+
+      .pet-slot-desc {
+        font-size: 8px;
+        color: #666;
+        margin-top: 2px;
+        line-height: 1.2;
+      }
+
+      .pet-slot.occupied {
+        border: 2px solid #2a2a3f;
+        padding: 10px;
+        justify-content: space-between;
+        transition: all 0.2s;
+        cursor: pointer;
+        background: #13131f;
+      }
+
+      .pet-slot.occupied.active {
+        box-shadow: 0 0 15px var(--rarity-color);
+        border-color: var(--rarity-color);
+        background: rgba(79, 70, 229, 0.1);
+      }
+
+      .pet-slot-header {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        align-items: center;
+      }
+
+      .pet-slot-badge {
+        font-size: 8px;
+        background: var(--rarity-color);
+        color: #000;
+        padding: 1px 4px;
+        border-radius: 3px;
+        font-weight: bold;
+      }
+
+      .pet-slot-active-icon {
+        font-size: 10px;
+        color: #ffd600;
+      }
+
+      .pet-slot-name {
+        font-size: 11px;
+        font-weight: bold;
+        color: #ffeb3b;
+        margin-top: 4px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 100%;
+      }
+
+      .pet-slot-level {
+        font-size: 9px;
+        color: #aaa;
+        margin-top: 1px;
+      }
+
+      .pet-slot-actions {
+        display: flex;
+        gap: 4px;
+        width: 100%;
+        margin-top: 6px;
+      }
+
+      .pet-slot-action-btn {
+        padding: 2px 4px;
+        font-size: 8px;
+        flex: 1;
+        color: #fff;
+      }
+
+      .pet-slot-action-btn.equip {
+        background-color: #3f51b5;
+      }
+
+      .pet-slot-action-btn.equip.active {
+        background-color: #888;
+      }
+
+      .pet-slot-action-btn.equip.on-exp {
+        background-color: #333;
+      }
+
+      .pet-slot-action-btn.release {
+        background-color: #d32f2f;
+      }
+
+      /* Settings Scroll & Layout Customizations */
+      .settings-modal-content {
+        max-width: 420px !important;
+        position: relative;
+        padding-right: 35px !important;
+      }
+
+      .settings-modal-body {
+        max-height: 380px;
+        overflow-y: auto;
+        padding-right: 5px;
+        scroll-behavior: smooth;
+        text-align: left;
+      }
+
+      .settings-modal-body::-webkit-scrollbar {
+        width: 4px;
+      }
+      .settings-modal-body::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+      }
+      .settings-modal-body::-webkit-scrollbar-thumb {
+        background: #00e5ff;
+        border-radius: 2px;
+      }
+
+      .settings-scroll-controls {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        z-index: 10;
+      }
+
+      .scroll-control-btn {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background-color: #1a1a2e;
+        border: 1px solid #00e5ff;
+        color: #00e5ff;
+        font-weight: bold;
+        font-size: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        box-shadow: 0 0 5px rgba(0, 229, 255, 0.2);
+        padding: 0;
+      }
+
+      .scroll-control-btn:hover {
+        background-color: #00e5ff;
+        color: #000;
+        box-shadow: 0 0 10px #00e5ff;
+      }
+      
+      .scroll-control-btn:active {
+        transform: scale(0.9);
+      }
+
+

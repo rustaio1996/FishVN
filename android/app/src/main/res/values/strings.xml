@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Ngư Ông Bất Ổn</string>
+    <string name="title_activity_main">Ngư Ông Bất Ổn</string>
+    <string name="package_name">com.nguongbaton.game</string>
+    <string name="custom_url_scheme">com.nguongbaton.game</string>
+</resources>

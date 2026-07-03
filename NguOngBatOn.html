@@ -130,9 +130,9 @@
     </div>
 
     <!-- Khai báo danh tính Modal -->
-    <div id="nameInputModal" class="name-modal-overlay">
+    <div id="nameInputModal" class="name-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="nameModalTitle">
       <div class="name-modal-content">
-        <h3 class="modal-title" data-i18n="name.title">🎣 KHAI BÁO DANH TÍNH</h3>
+        <h3 id="nameModalTitle" class="modal-title" data-i18n="name.title">🎣 KHAI BÁO DANH TÍNH</h3>
         <p class="modal-desc" data-i18n="name.desc">
           Chào mừng cần thủ đến với vùng biển bất ổn! Hãy khai báo danh tính bựa
           nhất của bạn để bắt đầu hành trình và đặt tên cho file lưu game:
@@ -144,6 +144,8 @@
           data-i18n-placeholder="name.placeholder"
           maxlength="20"
           class="modal-input"
+          aria-label="Tên người chơi"
+          aria-describedby="nameModalTitle"
         >
         <button
           class="btn idle modal-start-btn"
@@ -156,148 +158,146 @@
     </div>
 
     <!-- Cài đặt hệ thống Modal cho Desktop -->
-    <div id="desktopSettingsModal" class="name-modal-overlay">
-      <div class="name-modal-content">
-        <h3 class="modal-title" data-i18n="settings.title">⚙️ CÀI ĐẶT HỆ THỐNG</h3>
-        <div class="audio-control-panel settings-mt-15">
-          <span class="audio-title" data-i18n="settings.required"> 🎮 CẤU HÌNH BẮT BUỘC </span>
-          <div class="audio-buttons-container">
-            <button
-              id="btnToggleSFX"
-              type="button"
-              onclick="toggleSFX()"
-              class="audio-btn audio-btn-sfx"
-            >
-              🔊 SFX: BẬT
-            </button>
-            <button
-              id="btnToggleBGM"
-              type="button"
-              onclick="toggleBGM()"
-              class="audio-btn audio-btn-bgm"
-            >
-              🔇 BGM: TẮT
-            </button>
-            <button
-              id="btnResetGame"
-              type="button"
-              onclick="resetSaveData()"
-              class="audio-btn audio-btn-reset"
-            >
-              <span data-i18n="settings.resetSave">🧹 XÓA SAVE</span>
-            </button>
-          </div>
+    <div id="desktopSettingsModal" class="name-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="desktopSettingsTitle">
+      <div class="name-modal-content settings-modal-content" tabindex="-1">
+        <h3 id="desktopSettingsTitle" class="modal-title" data-i18n="settings.title">⚙️ CÀI ĐẶT HỆ THỐNG</h3>
+        
+        <!-- Nút cuộn lên xuống cho tab Cài đặt -->
+        <div class="settings-scroll-controls">
+          <button type="button" class="scroll-control-btn scroll-up" onclick="scrollSettings('up')" title="Cuộn lên">▲</button>
+          <button type="button" class="scroll-control-btn scroll-down" onclick="scrollSettings('down')" title="Cuộn xuống">▼</button>
         </div>
 
-        <div class="audio-control-panel settings-mt-15">
-
-          <span class="audio-title" data-i18n="settings.languageTitle"> 🌐 NGÔN NGỮ / LANGUAGE </span>
-
-          <label class="settings-language-row">
-
-            <span data-i18n="settings.languageLabel">Ngôn ngữ hiển thị</span>
-
-            <select class="settings-language-select" data-language-select onchange="setLanguage(this.value)">
-
-              <option value="vi">Tiếng Việt</option>
-
-              <option value="en">English</option>
-
-            </select>
-
-          </label>
-
-        </div>
-
-        <div class="audio-control-panel settings-mt-15">
-          <span class="audio-title"> 🏆 THÔNG BÁO CÂU ĐƯỢC CÁ </span>
-          <label class="settings-language-row">
-            <span>Báo cá hiếm từ cấp:</span>
-            <select class="settings-language-select" id="catchModalSelect" onchange="setCatchModalThreshold(this.value)">
-              <option value="none">Tắt thông báo</option>
-              <option value="Hiếm">Hiếm trở lên</option>
-              <option value="Cực Hiếm">Cực Hiếm trở lên</option>
-              <option value="Huyền Thoại">Huyền Thoại trở lên</option>
-              <option value="Thần Thoại">Thần Thoại trở lên</option>
-              <option value="Tối Cao">Tối Cao trở lên</option>
-            </select>
-          </label>
-        </div>
-
-
-
-        <div class="audio-control-panel audio-panel-save">
-          <span class="audio-title" data-i18n="settings.saveTitle"> 💾 LƯU GAME VẬT LÝ </span>
-          <div class="audio-buttons-container">
-            <button
-              type="button"
-              onclick="exportSaveFile()"
-              class="audio-btn audio-btn-export"
-            >
-              <span data-i18n="settings.export">💾 Xuất Save</span>
-            </button>
-            <button
-              type="button"
-              onclick="triggerImportInput()"
-              class="audio-btn audio-btn-import"
-            >
-              <span data-i18n="settings.import">📂 Nhập Save</span>
-            </button>
-            <input
-              type="file"
-              accept=".json"
-              id="importSaveInput"
-              class="hide-input"
-              onchange="importSaveFile(this)"
-              title="Nhập Save File"
-            >
-          </div>
-        </div>
-
-        <div class="audio-control-panel settings-mt-15 settings-cloud-sync-panel">
-          <span class="audio-title settings-cloud-sync-title"> ☁️ CLOUD SYNC (MONGODB) </span>
-          <div class="settings-cloud-sync-desc">
-            Mã ID tài khoản (Dùng để lưu/tải game trên thiết bị khác):
-          </div>
-          <div class="settings-cloud-id-row">
-            <input type="text" id="cloudPlayerIdInput" readonly title="Mã ID tài khoản">
-            <button type="button" onclick="copyPlayerId()" class="audio-btn btn-copy-id">
-              Sao chép
-            </button>
-          </div>
-          <div class="audio-buttons-container settings-cloud-buttons-container">
-            <button type="button" onclick="changePlayerIdPrompt()" class="audio-btn btn-login-cloud">
-              🔑 Đăng nhập ID
-            </button>
-            <button type="button" id="btnSyncCloud" onclick="syncCloudSave()" class="audio-btn btn-sync-cloud">
-              🔄 Đồng bộ ngay
-            </button>
-          </div>
-        </div>
-
-
-        <div class="donate-card">
-          <div class="donate-card-title" data-i18n="donate.title">💖 ỦNG HỘ PHÁT TRIỂN 💖</div>
-          <div class="donate-card-body">
-            <div class="donate-creator"><span data-i18n="donate.created_by">Được tạo bởi</span> <b>RusTaio</b> 🗿</div>
-            <div class="donate-message" data-i18n="donate.message">Nếu thấy hay - Donate để có thể phát triển thêm nhé 🥺</div>
-            <div class="donate-bank-info">
-              <div class="bank-row">
-                <span data-i18n="donate.bank_label">🏦 Ngân hàng:</span>
-                <b class="bank-name" data-i18n="donate.bank_name">VCB (Vietcombank)</b>
-              </div>
-              <div class="bank-row">
-                <span data-i18n="donate.stk_label">💳 Số tài khoản:</span>
-                <b class="bank-stk">9911555414</b>
-              </div>
-              <div class="bank-row">
-                <span data-i18n="donate.owner_label">👤 Chủ tài khoản:</span>
-                <b class="bank-owner">NGUYEN TAN PHUOC</b>
-              </div>
+        <div class="settings-modal-body" id="settingsModalBody">
+          <div class="audio-control-panel settings-mt-15">
+            <span class="audio-title" data-i18n="settings.required"> 🎮 CẤU HÌNH BẮT BUỘC </span>
+            <div class="audio-buttons-container">
+              <button
+                id="btnToggleSFX"
+                type="button"
+                onclick="toggleSFX()"
+                class="audio-btn audio-btn-sfx"
+              >
+                🔊 SFX: BẬT
+              </button>
+              <button
+                id="btnToggleBGM"
+                type="button"
+                onclick="toggleBGM()"
+                class="audio-btn audio-btn-bgm"
+              >
+                🔇 BGM: TẮT
+              </button>
+              <button
+                id="btnResetGame"
+                type="button"
+                onclick="resetSaveData()"
+                class="audio-btn audio-btn-reset"
+              >
+                <span data-i18n="settings.resetSave">🧹 XÓA SAVE</span>
+              </button>
             </div>
-            <button class="btn-copy-stk" type="button" onclick="copyDonateSTK()" data-i18n="donate.copy_btn">
-              📋 Sao Chép Số Tài Khoản 🐸
-            </button>
+          </div>
+
+          <div class="audio-control-panel settings-mt-15">
+            <span class="audio-title" data-i18n="settings.languageTitle"> 🌐 NGÔN NGỮ / LANGUAGE </span>
+            <label class="settings-language-row">
+              <span data-i18n="settings.languageLabel">Ngôn ngữ hiển thị</span>
+              <select class="settings-language-select" data-language-select onchange="setLanguage(this.value)">
+                <option value="vi">Tiếng Việt</option>
+                <option value="en">English</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="audio-control-panel settings-mt-15">
+            <span class="audio-title"> 🏆 THÔNG BÁO CÂU ĐƯỢC CÁ </span>
+            <label class="settings-language-row">
+              <span>Báo cá hiếm từ cấp:</span>
+              <select class="settings-language-select" id="catchModalSelect" onchange="setCatchModalThreshold(this.value)">
+                <option value="none">Tắt thông báo</option>
+                <option value="Hiếm">Hiếm trở lên</option>
+                <option value="Cực Hiếm">Cực Hiếm trở lên</option>
+                <option value="Huyền Thoại">Huyền Thoại trở lên</option>
+                <option value="Thần Thoại">Thần Thoại trở lên</option>
+                <option value="Tối Cao">Tối Cao trở lên</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="audio-control-panel audio-panel-save">
+            <span class="audio-title" data-i18n="settings.saveTitle"> 💾 LƯU GAME VẬT LÝ </span>
+            <div class="audio-buttons-container">
+              <button
+                type="button"
+                onclick="exportSaveFile()"
+                class="audio-btn audio-btn-export"
+              >
+                <span data-i18n="settings.export">💾 Xuất Save</span>
+              </button>
+              <button
+                type="button"
+                onclick="triggerImportInput()"
+                class="audio-btn audio-btn-import"
+              >
+                <span data-i18n="settings.import">📂 Nhập Save</span>
+              </button>
+              <input
+                type="file"
+                accept=".json"
+                id="importSaveInput"
+                class="hide-input"
+                onchange="importSaveFile(this)"
+                title="Nhập Save File"
+                aria-label="Chọn file lưu game (.json) để nhập"
+              >
+            </div>
+          </div>
+
+          <div class="audio-control-panel settings-mt-15 settings-cloud-sync-panel">
+            <span class="audio-title settings-cloud-sync-title"> ☁️ CLOUD SYNC (MONGODB) </span>
+            <div class="settings-cloud-sync-desc">
+              Mã ID tài khoản (Dùng để lưu/tải game trên thiết bị khác):
+            </div>
+            <div class="settings-cloud-id-row">
+              <input type="text" id="cloudPlayerIdInput" readonly title="Mã ID tài khoản">
+              <button type="button" onclick="copyPlayerId()" class="audio-btn btn-copy-id">
+                Sao chép
+              </button>
+            </div>
+            <div class="audio-buttons-container settings-cloud-buttons-container">
+              <button type="button" onclick="changePlayerIdPrompt()" class="audio-btn btn-login-cloud">
+                🔑 Đăng nhập ID
+              </button>
+              <button type="button" id="btnSyncCloud" onclick="syncCloudSave()" class="audio-btn btn-sync-cloud">
+                🔄 Đồng bộ ngay
+              </button>
+            </div>
+          </div>
+
+          <div class="donate-card">
+            <div class="donate-card-title" data-i18n="donate.title">💖 ỦNG HỘ PHÁT TRIỂN 💖</div>
+            <div class="donate-card-body">
+              <div class="donate-creator"><span data-i18n="donate.created_by">Được tạo bởi</span> <b>RusTaio</b> 🗿</div>
+              <div class="donate-message" data-i18n="donate.message">Nếu thấy hay - Donate để có thể phát triển thêm nhé 🥺</div>
+              <div class="donate-bank-info">
+                <div class="bank-row">
+                  <span data-i18n="donate.bank_label">🏦 Ngân hàng:</span>
+                  <b class="bank-name" data-i18n="donate.bank_name">VCB (Vietcombank)</b>
+                </div>
+                <div class="bank-row">
+                  <span data-i18n="donate.stk_label">💳 Số tài khoản:</span>
+                  <b class="bank-stk">9911555414</b>
+                </div>
+                <div class="bank-row">
+                  <span data-i18n="donate.owner_label">👤 Chủ tài khoản:</span>
+                  <b class="bank-owner">NGUYEN TAN PHUOC</b>
+                </div>
+              </div>
+              <button class="btn-copy-stk" type="button" onclick="copyDonateSTK()" data-i18n="donate.copy_btn">
+                📋 Sao Chép Số Tài Khoản 🐸
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1072,9 +1072,9 @@
       </div>
     </div>
 
-    <div id="miniGameModal" class="name-modal-overlay">
-      <div class="name-modal-content mini-game">
-        <h3 class="modal-title" data-i18n="minigame.title">🎲 ĐẤU TRƯỜNG CÁ SIÊU BỰA</h3>
+    <div id="miniGameModal" class="name-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="miniGameModalTitle">
+      <div class="name-modal-content mini-game" tabindex="-1">
+        <h3 id="miniGameModalTitle" class="modal-title" data-i18n="minigame.title">🎲 ĐẤU TRƯỜNG CÁ SIÊU BỰA</h3>
         <p class="modal-desc" data-i18n="minigame.desc">
           Bỏ 30đ vào cược, chọn 1 trong 3 rương thần bí. Thắng gói về vàng, mồi
           may mắn, hoặc item bá đạo!
@@ -1115,8 +1115,8 @@
       </div>
     </div>
     <!-- Catch Reveal Modal (Hiện khi câu được cá xịn) -->
-    <div id="catchRevealModal" class="name-modal-overlay">
-      <div class="name-modal-content catch-reveal-content">
+    <div id="catchRevealModal" class="name-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="catchModalTitle">
+      <div class="name-modal-content catch-reveal-content" tabindex="-1">
         <h3 class="modal-title catch-reveal-title" id="catchModalTitle">🎉 CÂU ĐƯỢC CÁ XỊN!</h3>
         <p class="catch-reveal-zone" id="catchModalZone">tại Đầm Lầy Ăn Vạ</p>
 
@@ -1149,8 +1149,8 @@
           </button>
         </div>
     <!-- Newbie Tutorial Modal -->
-    <div id="newbieTutorialModal" class="tutorial-overlay">
-      <div class="tutorial-content">
+    <div id="newbieTutorialModal" class="tutorial-overlay" role="dialog" aria-modal="true" aria-labelledby="tutorialStepTitle">
+      <div class="tutorial-content" tabindex="-1">
         <button class="tutorial-skip-btn" type="button" onclick="skipTutorial()">Bỏ qua ✖️</button>
         <div id="tutorialStepEmoji" class="tutorial-emoji">🎣🌊⛵</div>
         <h2 id="tutorialStepTitle" class="tutorial-title">Chào mừng Ngư Ông!</h2>

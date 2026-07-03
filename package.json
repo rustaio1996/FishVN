@@ -1,6 +1,6 @@
 {
   "name": "ngu-ong-bat-on",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Ngư Ông Bất Ổn - fishing idle game desktop build",
   "main": "electron/main.js",
   "private": true,
