@@ -11,11 +11,15 @@
       rel="stylesheet"
     >
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/pixel-art.css">
-    <link rel="stylesheet" href="css/sprites.css">
 
   </head>
   <body>
+    <noscript>
+      <div style="background-color: #ff3d00; color: #fff; padding: 20px; text-align: center; font-weight: bold; font-size: 16px; position: fixed; top: 0; left: 0; right: 0; z-index: 99999;">
+        ⚠️ Trò chơi này yêu cầu bật JavaScript để hoạt động. Vui lòng kích hoạt JavaScript trong trình duyệt của bạn!
+      </div>
+    </noscript>
+
     <!-- Screen flash overlay for high-tier catches -->
     <div id="catch-flash-overlay"></div>
 
@@ -53,27 +57,27 @@
 
     <!-- Mobile Bottom Navigation Bar -->
     <div class="mobile-nav-bar">
-      <div class="nav-item active" id="nav-fishing" onclick="switchMobileTab('fishing')">
+      <div class="nav-item active" id="nav-fishing" onclick="switchMobileTab('fishing')" role="button" tabindex="0" aria-label="Mở tab Câu Cá">
         <span class="nav-icon">🎣</span>
         <span class="nav-text" data-i18n="nav.fishing">Câu Cá</span>
       </div>
-      <div class="nav-item" id="nav-bag" onclick="switchMobileTab('bag')">
+      <div class="nav-item" id="nav-bag" onclick="switchMobileTab('bag')" role="button" tabindex="0" aria-label="Mở tab Hành Trang">
         <span class="nav-icon">🎒</span>
         <span class="nav-text" data-i18n="nav.bag">Hành Trang</span>
       </div>
-      <div class="nav-item" id="nav-pet" onclick="switchMobileTab('pet')">
+      <div class="nav-item" id="nav-pet" onclick="switchMobileTab('pet')" role="button" tabindex="0" aria-label="Mở tab Bể Báo Thủ">
         <span class="nav-icon">🏠</span>
         <span class="nav-text" data-i18n="nav.pet">Bể Báo</span>
       </div>
-      <div class="nav-item" id="nav-shop" onclick="switchMobileTab('shop')">
+      <div class="nav-item" id="nav-shop" onclick="switchMobileTab('shop')" role="button" tabindex="0" aria-label="Mở tab Cửa Hàng">
         <span class="nav-icon">🛒</span>
         <span class="nav-text" data-i18n="nav.shop">Cửa Hàng</span>
       </div>
-      <div class="nav-item" id="nav-records" onclick="switchMobileTab('records')">
+      <div class="nav-item" id="nav-records" onclick="switchMobileTab('records')" role="button" tabindex="0" aria-label="Mở tab Kỷ Lục">
         <span class="nav-icon">🏆</span>
         <span class="nav-text" data-i18n="nav.records">Kỷ Lục</span>
       </div>
-      <div class="nav-item" id="nav-settings" onclick="switchMobileTab('settings')">
+      <div class="nav-item" id="nav-settings" onclick="switchMobileTab('settings')" role="button" tabindex="0" aria-label="Mở tab Cài Đặt">
         <span class="nav-icon">⚙️</span>
         <span class="nav-text" data-i18n="nav.settings">Cài Đặt</span>
       </div>
@@ -275,22 +279,6 @@
             </div>
           </div>
 
-          <!-- QR Code Backup Section -->
-          <div class="audio-control-panel settings-mt-15">
-            <span class="audio-title"> 📱 SAO LƯU OFFLINE (QR CODE) </span>
-            <div class="qr-backup-container" id="qrBackupContainer">
-              <div id="qrCodeDisplay" class="qr-code-display"></div>
-            </div>
-            <div class="audio-buttons-container qr-buttons-container">
-              <input type="text" id="qrRestoreInput" class="qr-restore-input" placeholder="Dán mã QR khôi phục vào đây..." title="Nhập mã QR khôi phục">
-              <div class="qr-actions-row">
-                <button id="btnGenerateQR" type="button" class="audio-btn qr-action-btn">📱 Tạo QR Save</button>
-                <button id="btnShowQR" type="button" class="audio-btn qr-action-btn">👁️ Hiển Thị QR</button>
-                <button id="btnRestoreQR" type="button" class="audio-btn audio-btn-import qr-action-btn">🔃 Khôi Phục</button>
-              </div>
-            </div>
-          </div>
-
           <div class="donate-card">
             <div class="donate-card-title" data-i18n="donate.title">💖 ỦNG HỘ PHÁT TRIỂN 💖</div>
             <div class="donate-card-body">
@@ -363,6 +351,7 @@
           <button class="sub-tab-btn" id="btn-rec-help" type="button" onclick="selectRecordsSubTab('help')" data-i18n="subtab.help">❓ Trợ Giúp</button>
           <button class="sub-tab-btn" id="btn-rec-zone" type="button" onclick="selectRecordsSubTab('zone')" data-i18n="subtab.zone">🗺️ Bản Đồ</button>
           <button class="sub-tab-btn" id="btn-rec-season" type="button" onclick="selectRecordsSubTab('season')">🏆 Mùa</button>
+          <button class="sub-tab-btn" id="btn-rec-roadmap" type="button" onclick="selectRecordsSubTab('roadmap')">🗺️ Lộ Trình</button>
         </div>
 
         <div class="game-left-column">
@@ -473,6 +462,12 @@
               </div>
               <div id="sysBuffActiveList" class="sys-buff-list"></div>
             </div>
+            <!-- Buff Multiplier Stacking & Combo Panel -->
+            <div class="stats-row buff-summary-panel" id="buffSummaryPanel">
+              <div class="buff-summary-header">🚀 PHÂN TÍCH BUFF & COMBO:</div>
+              <div id="buffSummaryMetrics" class="buff-summary-metrics"></div>
+              <div id="buffSummaryCombo" class="buff-summary-combo"></div>
+            </div>
             <div class="mt-6">
               <div class="stats-row mb-3">
                 <span>EXP:</span>
@@ -544,6 +539,7 @@
                 <span>👑 Tối Cao: <b id="logSupremeStat">0</b></span>
               </div>
             </div>
+            <div class="log-event-hub inactive" id="logEventHub"></div>
             <div class="log-box" id="logBox"></div>
           </div>
 
@@ -796,6 +792,9 @@
                 </div>
                 <div id="leaderboardTab" class="guide-tab">
                   <div id="leaderboardTabContent"></div>
+                </div>
+                <div id="roadmapTab" class="guide-tab">
+                  <div id="roadmapTabContent"></div>
                 </div>
 
 
@@ -1069,30 +1068,7 @@
                 <button class="audio-btn audio-btn-reset" type="button" onclick="resetSaveData()" data-i18n="settings.resetSave">🧹 XÓA SAVE</button>
               </div>
 
-              <div class="donate-card">
-                <div class="donate-card-title" data-i18n="donate.title">💖 ỦNG HỘ PHÁT TRIỂN 💖</div>
-                <div class="donate-card-body">
-                  <div class="donate-creator"><span data-i18n="donate.created_by">Được tạo bởi</span> <b>RusTaio</b> 🗿</div>
-                  <div class="donate-message" data-i18n="donate.message">Nếu thấy hay - Donate để có thể phát triển thêm nhé 🥺</div>
-                  <div class="donate-bank-info">
-                    <div class="bank-row">
-                      <span data-i18n="donate.bank_label">🏦 Ngân hàng:</span>
-                      <b class="bank-name" data-i18n="donate.bank_name">VCB (Vietcombank)</b>
-                    </div>
-                    <div class="bank-row">
-                      <span data-i18n="donate.stk_label">💳 Số tài khoản:</span>
-                      <b class="bank-stk">9911555414</b>
-                    </div>
-                    <div class="bank-row">
-                      <span data-i18n="donate.owner_label">👤 Chủ tài khoản:</span>
-                      <b class="bank-owner">NGUYEN TAN PHUOC</b>
-                    </div>
-                  </div>
-                  <button class="btn-copy-stk" type="button" onclick="copyDonateSTK()" data-i18n="donate.copy_btn">
-                    📋 Sao Chép Số Tài Khoản 🐸
-                  </button>
-                </div>
-              </div>
+              <div id="mobileDonateCardContainer"></div>
             </div>
           </div>
         </div>

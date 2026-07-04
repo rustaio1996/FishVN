@@ -47,6 +47,7 @@ let gameState = "idle";
       let pityPeak = 0;
 
       let currentTitle = "Dân Chơi Hệ Cần Cỏ";
+      window.activeHubEvents = [];
 
       let currentWeather = "Bình Thường";
       let catchModalThreshold = localStorage.getItem("catchModalThreshold");

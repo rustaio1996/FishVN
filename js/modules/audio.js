@@ -380,23 +380,8 @@
       }
 
       // Tiếng sét đánh quả báo vang dội
-      function playLightning() {
-        if (!sfxEnabled) return;
-        initAudio();
-        if (!audioCtx) return;
-
-        let t = audioCtx.currentTime;
-        let osc = audioCtx.createOscillator();
-        let gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.type = "sawtooth";
-        osc.frequency.setValueAtTime(90, t);
-        osc.frequency.linearRampToValueAtTime(10, t + 0.55);
-        gain.gain.setValueAtTime(0.4, t);
-        gain.gain.linearRampToValueAtTime(0.001, t + 0.55);
-        osc.start(t);
-        osc.stop(t + 0.55);
+      function playLightning() {
+        // Disabled lightning audio per user request
       }
 
       function startMusic() {

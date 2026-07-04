@@ -1,7 +1,7 @@
 {
   "name": "ngu-ong-bat-on",
   "version": "0.3.3",
-  "description": "Ngư Ông Bất Ổn - fishing idle game desktop build",
+  "description": "New Version - fishing idle game desktop build",
   "main": "electron/main.js",
   "private": true,
   "author": "Ngu Ong Bat On Team",
@@ -16,7 +16,7 @@
   },
   "build": {
     "appId": "com.nguongbaton.game",
-    "productName": "Ngư Ông Bất Ổn - Vá Mùa",
+    "productName": "New Version",
     "directories": {
       "buildResources": "build"
     },
@@ -43,8 +43,5 @@
     "@capacitor/core": "^8.4.1",
     "electron": "^31.7.7",
     "electron-builder": "^24.13.3"
-  },
-  "dependencies": {
-    "react": "^19.2.7"
   }
 }

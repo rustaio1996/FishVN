@@ -1211,20 +1211,7 @@ function spendPityOnCatch(fish) {
 }
 
 function triggerScreenShake() {
-  const els = [
-    document.getElementById("pixelFishingScene"),
-    document.getElementById("catchRevealModal"),
-  ];
-  els.forEach((el) => {
-    if (el) {
-      el.classList.remove("screen-shake");
-      void el.offsetWidth;
-      el.classList.add("screen-shake");
-      setTimeout(() => {
-        el.classList.remove("screen-shake");
-      }, 500);
-    }
-  });
+  // Disabled screen shake per user request
 }
 
 function addCatchFlavorLog(fish, stars, isNewDiscover) {
@@ -1469,25 +1456,21 @@ function initPixelCanvasScene() {
     lastPixelEventTime = t;
 
     if (selected === "ufo") {
-      addLog(
-        "🛸 [BIẾN CỐ] Đĩa bay người ngoài hành tinh cố gắng hút trộm cá trong kho! Nhưng thất bại vì cá quá nặng và bốc mùi...",
-        "warning",
-      );
+      if (typeof window.addHubEvent === "function") {
+        window.addHubEvent("pixel_ufo", "🛸", "Đĩa Bay Xuất Hiện", "Hút trộm cá thất bại vì cá quá nặng và bốc mùi...", 6);
+      }
     } else if (selected === "kraken") {
-      addLog(
-        "🐙 [BIẾN CỐ] Thủy quái Kraken ngoi lên vẫy chào ngư ông. Sóng đánh dữ dội suýt lật thuyền!",
-        "warning",
-      );
+      if (typeof window.addHubEvent === "function") {
+        window.addHubEvent("pixel_kraken", "🐙", "Thủy Quái Kraken", "Ngoi lên vẫy chào, sóng đánh dữ dội suýt lật thuyền!", 5);
+      }
     } else if (selected === "submarine") {
-      addLog(
-        "⚓ [BIẾN CỐ] Tàu ngầm thám hiểm đi lạc nhô lên thăm dò địa bàn câu cá của bạn.",
-        "info",
-      );
+      if (typeof window.addHubEvent === "function") {
+        window.addHubEvent("pixel_submarine", "⚓", "Tàu Ngầm Đi Lạc", "Nhô lên thăm dò địa bàn câu cá của bạn.", 5);
+      }
     } else if (selected === "meteor") {
-      addLog(
-        "☄️ [BIẾN CỐ] Một mảnh thiên thạch nhỏ rơi sát mạn thuyền bốc khói nghi ngút. Suýt chút nữa là có món ngư ông nướng!",
-        "warning",
-      );
+      if (typeof window.addHubEvent === "function") {
+        window.addHubEvent("pixel_meteor", "☄️", "Thiên Thạch Rơi", "Rơi sát mạn thuyền bốc khói nghi ngút. Suýt nướng chín ngư ông!", 3);
+      }
     }
   }
 
@@ -4240,6 +4223,9 @@ function switchTab(tab, btn) {
   } else if (tab === "leaderboard") {
     getEl("leaderboardTab").style.display = "block";
     renderLeaderboard();
+  } else if (tab === "roadmap") {
+    getEl("roadmapTab").style.display = "block";
+    renderRoadmapTab();
   } else {
     getEl("encyclopediaTab").style.display = "block";
   }
@@ -4386,6 +4372,10 @@ window.setActivePet = function (slotIndex) {
 window.pokeActivePet = function (slotIndex) {
   if (!petTank || !petTank.slots[slotIndex]) return;
   const pet = petTank.slots[slotIndex];
+  if (pet.expedition && pet.expedition.status === "running") {
+    addLog(`❌ <b>${pet.name}</b> đang đi viễn chinh, không thể tương tác lúc này!`, "error");
+    return;
+  }
   const now = Date.now();
   if (now - lastPokeTime < 10000) {
     const waitTime = Math.ceil((10000 - (now - lastPokeTime)) / 1000);
@@ -4536,13 +4526,14 @@ function renderPetTankTab() {
       const isOnExp = pet.expedition && pet.expedition.status === "running";
       const isExpCompleted =
         pet.expedition && Date.now() >= pet.expedition.endTime;
+      const isDimmed = isOnExp && !isExpCompleted;
       const expTextStatus = isOnExp
         ? isExpCompleted
           ? " (🎁 Xong)"
           : " (⛵ Đi)"
         : "";
       html += `
-              <div class="pet-slot occupied ${isActive ? "active" : ""}" style="--rarity-color: ${borderColor};" onclick="selectFeedPet(${i})">
+              <div class="pet-slot occupied ${isActive ? "active" : ""} ${isDimmed ? "on-expedition" : ""}" style="--rarity-color: ${borderColor};" onclick="selectFeedPet(${i})">
                 <div class="pet-slot-header">
                   <span class="pet-slot-badge">${pet.rarity}</span>
                   ${isActive ? '<span class="pet-slot-active-icon">👑</span>' : ""}
@@ -4599,14 +4590,15 @@ function renderPetTankTab() {
       const zoneName = zones[expState.zoneId]
         ? zones[expState.zoneId].name
         : expState.zoneId;
+
       expeditionHtml = `
-              <div style="background-color: #0d1b2a; padding: 10px; border-radius: 6px; margin-top: 12px; border: 1px solid #519aba;">
-                  <div style="font-size: 11px; font-weight: bold; color: #519aba; margin-bottom: 6px;">⛵ TRẠNG THÁI VIỄN CHINH:</div>
-                  <div style="font-size: 11.5px; color: #fff; line-height: 1.4;">
+              <div class="pet-expedition-panel">
+                  <div class="pet-expedition-title">⛵ TRẠNG THÁI VIỄN CHINH:</div>
+                  <div class="pet-expedition-text">
                     Bé cưng đang thám hiểm tại:<br><b>${zoneName}</b><br>
                     Thời gian còn lại: <b style="color: #ff9800;">${timeString}</b>
                   </div>
-                  <button class="shop-btn" style="padding: 6px 12px; font-size: 11px; margin-top: 8px; font-weight: bold; width: 100%; background-color: ${isDone ? "#ffd600" : "#444"}; color: ${isDone ? "#000" : "#aaa"};" ${isDone ? "" : "disabled"} onclick="event.stopPropagation(); claimPetExpedition(${selectedFeedPetIndex})">
+                  <button class="pet-expedition-button ${isDone ? "claim" : "running"}" ${isDone ? "" : "disabled"} onclick="event.stopPropagation(); claimPetExpedition(${selectedFeedPetIndex})">
                     ${isDone ? "🎁 THU HOẠCH QUÀ VIỄN CHINH" : "⛵ Đang thám hiểm..."}
                   </button>
               </div>
@@ -4621,38 +4613,31 @@ function renderPetTankTab() {
             `<option value="${zoneId}">${zones[zoneId].emoji} ${zones[zoneId].name} (Lv${zones[zoneId].level})</option>`,
         )
         .join("");
+
+      const fee1 = Math.round(50 * (1 + (selectedPet.level - 1) * 0.15));
+      const fee2 = Math.round(100 * (1 + (selectedPet.level - 1) * 0.15));
+      const fee4 = Math.round(200 * (1 + (selectedPet.level - 1) * 0.15));
+
       expeditionHtml = `
-              <div style="background-color: #0d1b2a; padding: 10px; border-radius: 6px; margin-top: 12px; border: 1px solid #519aba;">
-                  <div style="font-size: 11px; font-weight: bold; color: #519aba; margin-bottom: 6px;">⛵ CỬ PET ĐI VIỄN CHINH PHÁT TÀI:</div>
-                  <div style="font-size: 9.5px; color: #ccc; margin-bottom: 8px; line-height: 1.3;">Gửi pet thám hiểm các vùng đã mở khóa để lượm quà mang về.</div>
+              <div class="pet-expedition-panel">
+                  <div class="pet-expedition-title">⛵ CỬ PET ĐI VIỄN CHINH PHÁT TÀI:</div>
+                  <div class="pet-expedition-desc">Gửi pet thám hiểm các vùng đã mở khóa để lượm quà mang về.</div>
                   <div style="display: flex; gap: 6px; margin-bottom: 8px; align-items: center;">
                     <select id="expeditionZoneSelect" class="inv-select-filter" style="flex: 1; padding: 4px; font-size: 10px; background-color: #12121e; color: #fff; border: 1px solid #333;" title="Chọn khu vực viễn chinh">
                       ${zoneOptions}
                     </select>
                     <select id="expeditionDurationSelect" class="inv-select-filter" style="width: 80px; padding: 4px; font-size: 10px; background-color: #12121e; color: #fff; border: 1px solid #333;" title="Chọn thời gian viễn chinh">
-                      <option value="1">1 giờ (10đ)</option>
-                      <option value="2">2 giờ (20đ)</option>
-                      <option value="4">4 giờ (35đ)</option>
+                      <option value="1">50s (${fee1}đ)</option>
+                      <option value="2">100s (${fee2}đ)</option>
+                      <option value="4">200s (${fee4}đ)</option>
                     </select>
                   </div>
-                  <button class="shop-btn" style="padding: 6px 12px; font-size: 11px; font-weight: bold; width: 100%; background-color: #519aba; color: #fff;" onclick="event.stopPropagation(); startPetExpedition(${selectedFeedPetIndex})">
+                  <button class="pet-expedition-button start" onclick="event.stopPropagation(); startPetExpedition(${selectedFeedPetIndex})">
                     ⛵ BẮT ĐẦU THÁM HIỂM
                   </button>
               </div>
             `;
     }
-  }
-
-  if (!selectedPet) {
-    container.innerHTML =
-      html +
-      `
-            <div class="empty-text" style="padding: 20px; text-align: center; color: #888; font-size: 12px; line-height: 1.6;">
-                🏠 Bể đang trống không có bóng dáng sinh vật nào.<br>
-                Hãy vào tab <b>🎒 Bách Khoa / Túi Đồ</b> và nhấn nút <b>"🏠 Nuôi"</b> trên một con cá để bắt đầu báo hại!
-            </div>
-          `;
-    return;
   }
 
   let xpNeeded = selectedPet.level * 50;
@@ -4664,17 +4649,17 @@ function renderPetTankTab() {
   let evolutionSelectionHtml = "";
   if (selectedPet.level >= 5 && !selectedPet.class) {
     evolutionSelectionHtml = `
-            <div style="background-color: #1a1a2e; padding: 10px; border-radius: 6px; margin-top: 12px; border: 1px solid #ffd600;">
-                <div style="font-size: 11px; font-weight: bold; color: #ffd600; margin-bottom: 6px; text-align: center;">🔥 TIẾN HÓA HỆ BÁO THỦ (LV5+) 🔥</div>
-                <div style="font-size: 10px; color: #ccc; margin-bottom: 8px; text-align: center;">Bé cưng đã sẵn sàng chọn hệ báo đạo. Chọn 1 trong 3 hệ dưới đây:</div>
+            <div class="pet-evo-panel">
+                <div class="pet-expedition-title evo">🔥 TIẾN HÓA HỆ BÁO THỦ (LV5+) 🔥</div>
+                <div class="pet-expedition-desc evo">Bé cưng đã sẵn sàng chọn hệ báo đạo. Chọn 1 trong 3 hệ dưới đây:</div>
                 <div style="display: flex; flex-direction: column; gap: 6px;">
-                  <button class="shop-btn" style="background-color: #e65100; font-size: 10.5px; padding: 6px 4px; text-align: left;" onclick="choosePetClassSpecific('fire', ${selectedFeedPetIndex})">
+                  <button class="pet-evo-button" style="background-color: #e65100;" ${isOnExp ? "disabled" : ""} onclick="choosePetClassSpecific('fire', ${selectedFeedPetIndex})">
                     🔥 <b>Báo Lửa</b>: Tốc độ câu +20%, 30% cơ hội đốt rác thành vàng lậu (15đ-30đ) không tăng Nghiệp.
                   </button>
-                  <button class="shop-btn" style="background-color: #311b92; font-size: 10.5px; padding: 6px 4px; text-align: left;" onclick="choosePetClassSpecific('lightning', ${selectedFeedPetIndex})">
+                  <button class="pet-evo-button" style="background-color: #311b92;" ${isOnExp ? "disabled" : ""} onclick="choosePetClassSpecific('lightning', ${selectedFeedPetIndex})">
                     ⚡ <b>Báo Sét</b>: Giảm 25% tỷ lệ sét đánh, khi bị sét đánh sẽ nạp 100% nghiệp lực và nhận x2 giá bán cá trong 60s tiếp theo.
                   </button>
-                  <button class="shop-btn" style="background-color: #004d40; font-size: 10.5px; padding: 6px 4px; text-align: left;" onclick="choosePetClassSpecific('money', ${selectedFeedPetIndex})">
+                  <button class="pet-evo-button" style="background-color: #004d40;" ${isOnExp ? "disabled" : ""} onclick="choosePetClassSpecific('money', ${selectedFeedPetIndex})">
                     💵 <b>Báo Tiền</b>: 40% cơ hội cướp thêm 15%-30% vàng lậu sau mỗi lần bán cá, nhưng có 5% làm sổng cá do mải đếm tiền.
                   </button>
                 </div>
@@ -4687,9 +4672,9 @@ function renderPetTankTab() {
       money: "💵 Báo Tiền",
     };
     evolutionSelectionHtml = `
-            <div style="background-color: #12121e; padding: 8px; border-radius: 4px; margin-top: 8px; border-left: 3px solid #ffd600;">
-                <div style="font-size: 10px; color: #ffd600; font-weight: bold;">🧬 HỆ BÁO THỦ ĐÃ CHỌN:</div>
-                <div style="font-size: 11px; color: #fff; margin-top: 2px; font-weight: bold;">${classNames[selectedPet.class]}</div>
+            <div class="pet-active-evo-display">
+                <div class="pet-active-evo-label">🧬 HỆ BÁO THỦ ĐÃ CHỌN:</div>
+                <div class="pet-active-evo-value">${classNames[selectedPet.class]}</div>
             </div>
           `;
   }
@@ -4715,7 +4700,7 @@ function renderPetTankTab() {
           `;
   } else {
     feedHtml = `
-            <div style="display: flex; flex-direction: column; gap: 6px; max-height: 150px; overflow-y: auto; padding-right: 4px;">
+            <div class="pet-feed-panel">
               ${lowTierItems
                 .map((item) => {
                   let xpVal = 10;
@@ -4724,11 +4709,10 @@ function renderPetTankTab() {
                   else if (item.fish.rarity === "Bất Ổn") xpVal = 45;
 
                   return `
-                  <div style="display: flex; align-items: center; justify-content: space-between; background: #0f0f18; padding: 6px 8px; border-radius: 6px; border: 1px solid #2a2a3f;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
+                  <div class="pet-feed-item">
+                    <div class="pet-feed-item-info">
                       <span style="font-size: 16px;">${item.fish.emoji}</span>
                       <div>
-                        <div style="font-size: 11px; font-weight: bold; color: #fff;">${item.fish.name}</div>
                         <div style="font-size: 9px; color: #aaa;">${item.fish.rarity} | SL: ${item.count}</div>
                       </div>
                     </div>
@@ -4744,38 +4728,38 @@ function renderPetTankTab() {
   }
 
   html += `
-          <div style="background-color: #1b1b2a; padding: 12px; border-radius: 8px; border: 1px solid #ff9800; margin-top: 10px;">
-              <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div class="pet-details-container">
+              <div class="pet-details-header">
                   <span class="fish-sprite" data-rarity="${selectedPet.rarity || "Thường"}" style="font-size: 24px; width: 36px; height: 36px; line-height: 36px; display: inline-flex; justify-content: center; align-items: center;">${selectedPet.emoji}</span>
                   <div style="flex-grow: 1; margin-left: 12px;">
                       <div style="font-weight: bold; color: #ffeb3b; font-size: 14px;">${selectedPet.name}</div>
                       <div style="font-size: 11px; color: #bbb; margin-top: 2px;">Cấp Độ: <b style="color: #ff9800;">Lv${selectedPet.level}</b> (${selectedPet.level >= 10 ? "Tối Thượng" : selectedPet.level >= 5 ? "Bất Ổn" : "Báo Thủ"})</div>
                   </div>
-                  <button class="shop-btn" style="padding: 6px 10px; background-color: #ab47bc; color: #fff; font-weight: bold; font-size: 11px;" onclick="pokeActivePet(${selectedFeedPetIndex})">
+                  <button class="pet-poke-button" ${isOnExp ? "disabled" : ""} onclick="pokeActivePet(${selectedFeedPetIndex})">
                     👋 Chọc Ghẹo
                   </button>
               </div>
 
               <div style="margin-top: 10px;">
-                  <div style="display: flex; justify-content: space-between; font-size: 10px; color: #aaa; margin-bottom: 2px;">
+                  <div class="pet-progress-label">
                       <span>Độ Báo Hại (Kinh Nghiệm)</span>
                       <span>${xpDisplay}</span>
                   </div>
-                  <div style="background-color: #0f0f18; border-radius: 4px; height: 10px; overflow: hidden; border: 1px solid #333;">
-                      <div style="background-color: #ff9800; height: 100%; width: ${progressPercent}%;"></div>
+                  <div class="pet-progress-container">
+                      <div class="pet-progress-fill" style="width: ${progressPercent}%;"></div>
                   </div>
               </div>
 
-              <div style="background-color: #12121e; padding: 8px; border-radius: 4px; margin-top: 12px; border-left: 3px solid #ff5722;">
-                  <div style="font-size: 10px; color: #ff5722; font-weight: bold;">⚡ HIỆU ỨNG BÁO HẠI:</div>
-                  <div style="font-size: 11px; color: #fff; margin-top: 2px; line-height: 1.4;">${petEffect}</div>
+              <div class="pet-effect-display">
+                  <div class="pet-effect-label">⚡ HIỆU ỨNG BÁO HẠI:</div>
+                  <div class="pet-effect-value">${petEffect}</div>
               </div>
               
               ${evolutionSelectionHtml}
 
-              <div style="background-color: #12121e; padding: 10px; border-radius: 6px; margin-top: 12px; border: 1px solid #2a2a3f;">
-                  <div style="font-size: 11px; font-weight: bold; color: #4caf50; margin-bottom: 8px;">🍲 CHO PET ĂN CÁ CẤP THẤP:</div>
-                  ${feedHtml}
+              <div class="pet-active-evo-display" style="border-left-color: #4caf50;">
+                  <div class="pet-active-evo-label" style="color: #4caf50;">🍲 CHO PET ĂN CÁ CẤP THẤP:</div>
+                  <div style="margin-top: 8px;">${feedHtml}</div>
               </div>
               ${expeditionHtml}
           </div>
@@ -4843,6 +4827,10 @@ window.feedPetSpecific = function (bagKey, slotIndex) {
   }
   if (!petTank || !petTank.slots[slotIndex]) return;
   const pet = petTank.slots[slotIndex];
+  if (pet.expedition && pet.expedition.status === "running") {
+    addLog(`❌ <b>${pet.name}</b> đang bận đi viễn chinh, không thể cho ăn lúc này!`, "error");
+    return;
+  }
 
   let isMaxLevel = pet.level >= 10;
   if (isMaxLevel) {
@@ -4989,8 +4977,12 @@ window.startPetExpedition = function (slotIndex) {
   if (!zoneSelect || !durationSelect) return;
   const zoneId = zoneSelect.value;
   const durationHours = parseInt(durationSelect.value);
-  const feeMap = { 1: 10, 2: 20, 4: 35 };
-  const fee = feeMap[durationHours] || 10;
+
+  // Phí viễn chinh: 50đ base cho 1h (50s), tỷ lệ nhân theo cấp pet
+  const baseFeeMap = { 1: 50, 2: 100, 4: 200 };
+  const baseFee = baseFeeMap[durationHours] || 50;
+  const fee = Math.round(baseFee * (1 + (pet.level - 1) * 0.15));
+
   if (gold < fee) {
     addLog(`❌ Không đủ vàng! Cần <b>${fee}đ</b>.`, "error");
     return;
@@ -5000,15 +4992,22 @@ window.startPetExpedition = function (slotIndex) {
     petTank.activeIndex = -1;
     currentPet = null;
   }
+
+  // Thời gian thám hiểm: 50 giây base mỗi mốc, giảm theo cấp pet (tối thiểu 15 giây mỗi mốc)
+  const baseSecMap = { 1: 50, 2: 100, 4: 200 };
+  const baseSec = baseSecMap[durationHours] || 50;
+  const durationSeconds = Math.max(15 * durationHours, baseSec - (pet.level - 1) * 2 * durationHours);
+  const durationMs = durationSeconds * 1000;
+
   pet.expedition = {
     zoneId: zoneId,
     durationHours: durationHours,
     startTime: Date.now(),
-    endTime: Date.now() + durationHours * 3600000,
+    endTime: Date.now() + durationMs,
     status: "running",
   };
   addLog(
-    `⛵ <b style="color: #00e5ff;">[VIỄN CHINH]</b> <b>${pet.name}</b> đi thám hiểm <b>${zones[zoneId].name}</b> trong <b>${durationHours}h</b>. Phí: <b>${fee}đ</b>.`,
+    `⛵ <b style="color: #00e5ff;">[VIỄN CHINH]</b> <b>${pet.name}</b> đi thám hiểm <b>${zones[zoneId].name}</b> trong <b>${durationSeconds} giây</b>. Phí: <b>${fee}đ</b>.`,
     "success",
   );
   if (typeof playSwoosh === "function") playSwoosh();
@@ -7360,58 +7359,45 @@ function triggerRandomEvent() {
   setTimeout(() => {
     if (eventId === 0) {
       let fine = Math.round(Math.min(gold, 10 + playerLevel * 5));
-
       gold -= fine;
-
-      addLog(
-        `🚓 <b style='color: #ff3d00;'>[BIẾN CỐ]</b> Gặp CSGT! Bị phạt vì tội phóng nhanh vượt ẩu: <b style='color: #ff3d00;'>-${fine}đ</b>.`,
-      );
+      if (typeof window.addHubEvent === "function") {
+        window.addHubEvent("csgt", "🚓", "Gặp CSGT", `Bị phạt vì tội phóng nhanh vượt ẩu: -${fine}đ.`, 5);
+      }
     } else if (eventId === 1) {
       let bonus = Math.round(
-        Math.random() * (10 + playerLevel * 4) + (5 + playerLevel * 2),
+        Math.random() * (10 + playerLevel * 4) + (5 + playerLevel * 2)
       );
-
       gold += bonus;
-
-      addLog(
-        `🍻 <b style='color: #00e5ff;'>[BIẾN CỐ]</b> Ní trúng thưởng bia hơi khuyến mãi: nhận ngay <b style='color: #ffeb3b;'>+${bonus}đ</b>!`,
-      );
+      if (typeof window.addHubEvent === "function") {
+        window.addHubEvent("bia_hoi", "🍻", "Bia Hơi Khuyến Mãi", `Ní trúng thưởng bia hơi khuyến mãi: nhận ngay +${bonus}đ!`, 5);
+      }
     } else if (eventId === 2) {
       let expBonus = Math.max(5, Math.round(expNeeded * 0.2));
-
-      addLog(
-        `✨ <span style='color: #ffea00; font-weight: bold;'>[BIẾN CỐ] Tổ tiên hiển linh chỉ bảo! Nhận thêm +${expBonus} EXP!</span>`,
-      );
-
+      if (typeof window.addHubEvent === "function") {
+        window.addHubEvent("to_tien", "✨", "Tổ Tiên Hiển Linh", `Tổ tiên hiển linh chỉ bảo! Nhận thêm +${expBonus} EXP!`, 5);
+      }
       gainExp(expBonus);
     } else if (eventId === 3) {
       let loss = Math.round(Math.min(gold, 5 + playerLevel * 3));
-
       gold -= loss;
-
-      addLog(
-        `🦅 <b style='color: #ff5722;'>[BIẾN CỐ]</b> Quạ đen bay qua cướp mất tiền tiêu vặt của ní: <b style='color: #ff3d00;'>-${loss}đ</b>!`,
-      );
+      if (typeof window.addHubEvent === "function") {
+        window.addHubEvent("qua_den", "🦅", "Quạ Đen Cướp Vàng", `Quạ đen bay qua cướp mất tiền tiêu vặt của ní: -${loss}đ!`, 5);
+      }
     } else if (eventId === 4) {
       let bonusExp = Math.round(Math.random() * (playerLevel * 2) + 5);
-
-      addLog(
-        `🍍 <b style='color: #4caf50;'>[BIẾN CỐ]</b> Nhặt được khế ngọt của chim thần: nhận <b style='color: #00e5ff;'>+${bonusExp} EXP</b>!`,
-      );
-
+      if (typeof window.addHubEvent === "function") {
+        window.addHubEvent("khe_ngot", "🍍", "Khế Ngọt Chim Thần", `Nhặt được khế ngọt của chim thần: nhận +${bonusExp} EXP!`, 5);
+      }
       gainExp(bonusExp);
     } else if (eventId === 5) {
       currentLotteryCost = 15 + playerLevel * 5;
-
       currentLotteryPrize = currentLotteryCost * 10;
-
-      addLog(
-        `🐋 <b style='color: #00e5ff;'>[ĐA CẤP VŨ TRỤ]</b> <b>Cá Voi Đa Cấp</b> bơi tới gạ gẫm: "Đầu tư làm giàu không khó! Bỏ ${currentLotteryCost}đ mua Vé Số Kiến Thiết, 3 lượt sau nổ hũ x10 nhận ngay ${currentLotteryPrize}đ!". <button class="shop-btn" style="padding: 2px 6px; min-width: 50px; background-color: #00e5ff; color: #0d0d11;" id="btnBuyLottery" type="button" onclick="buyLottery()">Mua Ngay</button>`,
-      );
+      if (typeof window.addHubEvent === "function") {
+        window.addHubEvent("da_cap", "🐋", "Cá Voi Đa Cấp", `Đầu tư làm giàu không khó! Bỏ ${currentLotteryCost}đ mua Vé Số Kiến Thiết, nổ hũ x10 nhận ngay ${currentLotteryPrize}đ! <button class="shop-btn pet-feed-item-button" type="button" onclick="buyLottery()">Mua</button>`, 12);
+      }
     }
 
     goldText.innerText = gold;
-
     updateShopButtons();
   }, 100);
 }
@@ -7484,6 +7470,8 @@ function gainExp(amount) {
 }
 
 function updateStatsPanel() {
+  if (typeof updateBuffSummary === "function") updateBuffSummary();
+
   if (goldText) goldText.innerText = gold;
   const mshGold = document.getElementById("mshGoldText");
   if (mshGold) mshGold.innerText = gold;
@@ -9696,7 +9684,7 @@ const tutorialSteps = [
   {
     emoji: "🎣🌊⛵",
     title: "Chào mừng Ngư Ông!",
-    text: "Chào mừng bạn đến với <b>Ngư Ông Bất Ổn</b>! Nơi bạn sẽ bắt đầu sự nghiệp câu cá báo đời, flex nhân phẩm và sưu tầm hơn 259+ loài cá siêu vô tri.",
+    text: "Chào mừng bạn đến với <b>Ngư Ông Bất Ổn</b>! Mục tiêu chính của bạn là nâng cấp Cấp Ngư Ông, tích lũy Vàng, sưu tập đầy đủ hơn 130+ loài cá vô tri trong <b>Bách Khoa</b> và tranh hạng trên Bảng Xếp Hạng!",
   },
   {
     emoji: "🎣⚡🐟",
@@ -9705,23 +9693,23 @@ const tutorialSteps = [
   },
   {
     emoji: "🎒📖💎",
-    title: "Hành Trang & Bách Khoa",
-    text: "Cá câu được sẽ nằm trong <b>🎒 Túi Đồ</b>. Bạn có thể bán chúng lấy vàng, giữ lại để làm nguyên liệu chế tạo, hoặc xem các kỷ lục hài hước trong <b>📖 Bách Khoa</b>.",
+    title: "Hành Trang & Sưu Tập",
+    text: "Cá câu được nằm trong <b>🎒 Túi Đồ</b>. Bán chúng lấy vàng, hoặc giữ lại làm nguyên liệu chế tạo trang bị cần câu. Mỗi loài cá mới câu được sẽ thắp sáng trang <b>📖 Bách Khoa</b> của bạn!",
   },
   {
     emoji: "🏠🍲⛵",
-    title: "Nuôi Cá & Bể Báo Thủ",
-    text: "Nhấn <b>Nuôi</b> trên một con cá để đưa vào <b>Bể Báo</b>. Cho chúng ăn để tăng cấp độ báo hại, tiến hóa thành các Pet siêu đỉnh và cử chúng đi <b>Viễn Chinh (Expedition)</b> mang quà quý về!",
+    title: "Nuôi Cá & Viễn Chinh",
+    text: "Nuôi cá trong <b>Bể Báo</b> để làm Pet. Cho chúng ăn để tăng cấp báo hại, tiến hóa thành Pet hệ chuyên biệt và cử đi <b>Viễn Chinh (Expedition)</b> lượm phế liệu về chế trang bị!",
   },
   {
-    emoji: "🛠️🪝🧵",
-    title: "Nâng Cấp Cần Câu & Chế Đồ",
-    text: "Ghé <b>🛒 Cửa Hàng</b> để nâng cấp cần câu và Auto-fishing. Sử dụng phế liệu từ viễn chinh để <b>Chế tạo Trang Bị Cần Câu</b> (Lưỡi câu, Dây câu, Phao câu) và nấu lẩu để nhận Buff cực mạnh!",
+    emoji: "🛠️🔒🔑",
+    title: "Mốc Mở Khóa Tính Năng",
+    text: "Hãy lên cấp để mở khóa các khu vực mới. Đặc biệt: mở khóa <b>Bể Nuôi Pet</b> ở cấp 5, <b>Chế Tạo Trang Bị</b> và <b>Đấu Trường Cá</b> ở cấp 15+ để gia tăng thực lực!",
   },
   {
-    emoji: "⛈️🌫️🌌",
-    title: "Thời Tiết & Nhân Phẩm",
-    text: "Thời tiết thay đổi liên tục sẽ mang lại hiệu ứng độc đáo (như Bão Tuyết, Bão Táp, Sương Mù). Đặc biệt, game có <b>Bảo hiểm Nhân Phẩm</b> (Pity) bảo vệ bạn khỏi những chuỗi ngày xui xẻo kéo rác!",
+    emoji: "🏆⛈️🌌",
+    title: "Hệ Thống Mùa & Nhân Phẩm",
+    text: "Mỗi mùa giải kéo dài 30 ngày, câu cá để tích lũy EXP Mùa nâng cấp Season Pass (tối đa cấp 30) nhận Danh hiệu & Vàng độc quyền! Game còn có bảo hiểm <b>Nhân Phẩm (Pity)</b> giúp bạn vượt qua chuỗi ngày xui xẻo kéo rác.",
   },
 ];
 
@@ -9899,17 +9887,7 @@ function triggerCatchFlash(color, stars) {
 
   flash.style.transition = "none";
 
-  // Screen/container shake
-
-  const container = document.querySelector(".game-container");
-
-  if (container) {
-    container.classList.remove("shake-anim");
-
-    void container.offsetWidth; // force reflow
-
-    container.classList.add("shake-anim");
-  }
+  // Screen/container shake disabled per user request
 
   setTimeout(() => {
     flash.style.transition = "opacity 0.55s ease-out";
@@ -10140,6 +10118,12 @@ function selectRecordsSubTab(sub) {
       if (btn) btn.classList.add("active");
 
       switchTab("leaderboard");
+    } else if (sub === "roadmap") {
+      const btn = document.getElementById("btn-rec-roadmap");
+
+      if (btn) btn.classList.add("active");
+
+      switchTab("roadmap");
     }
   }
 }
@@ -10381,4 +10365,347 @@ if (typeof eventBus !== "undefined") {
       renderGearCraftingTab();
     }
   });
+}
+
+// ===== HỆ THỐNG MỚI: ROADMAP, BUFF ANALYZER & EVENT HUB =====
+
+window.addHubEvent = function (id, emoji, title, desc, durationSec) {
+  if (!window.activeHubEvents) window.activeHubEvents = [];
+  
+  // Xóa sự kiện cũ trùng ID nếu có
+  window.activeHubEvents = window.activeHubEvents.filter((e) => e.id !== id);
+
+  const event = {
+    id: id,
+    emoji: emoji,
+    title: title,
+    desc: desc,
+    startTime: Date.now(),
+    endTime: Date.now() + durationSec * 1000,
+    fading: false,
+  };
+
+  window.activeHubEvents.push(event);
+  if (typeof updateTimeEventsUI === "function") updateTimeEventsUI();
+
+  // Đặt bộ hẹn giờ tự động mờ dần
+  setTimeout(() => {
+    event.fading = true;
+    if (typeof updateTimeEventsUI === "function") updateTimeEventsUI();
+    
+    // Sau khi hiệu ứng mờ dần hoàn tất, xóa hẳn khỏi danh sách
+    setTimeout(() => {
+      window.activeHubEvents = window.activeHubEvents.filter((e) => e.id !== id);
+      if (typeof updateTimeEventsUI === "function") updateTimeEventsUI();
+    }, 1000);
+  }, durationSec * 1000);
+};
+
+function getExpRequiredToLevel(targetLvl) {
+  let exp = 0;
+  for (let l = playerLevel; l < targetLvl; l++) {
+    if (l === playerLevel) {
+      exp += Math.max(0, expNeeded - playerExp);
+    } else {
+      exp += getExpNeededForLevel(l);
+    }
+  }
+  return exp;
+}
+
+function getCurrentZoneRarityRates() {
+  const nowTs = Date.now();
+  const hasDragonEye1 =
+    systemBuffs["dragon_eye_1"] > nowTs ||
+    systemBuffs["dragon_eye_2"] > nowTs ||
+    systemBuffs["dragon_eye_3"] > nowTs;
+  const hasDragonEye2 =
+    systemBuffs["dragon_eye_2"] > nowTs || systemBuffs["dragon_eye_3"] > nowTs;
+
+  const fishInZone = fishList.filter((f) =>
+    isFishEligibleForZone(f, currentZone, hasDragonEye1, hasDragonEye2, false)
+  );
+
+  if (fishInZone.length === 0) return {};
+
+  const pityBonus = getPityBonus();
+  let totalWeight = 0;
+  const rarityWeights = {};
+
+  fishInZone.forEach((fish) => {
+    let w = getFishDynamicWeight(fish, pityBonus);
+    w = applyGachaAndWeatherMods(fish, w, false);
+    totalWeight += w;
+    rarityWeights[fish.rarity] = (rarityWeights[fish.rarity] || 0) + w;
+  });
+
+  const rates = {};
+  for (const [rarity, w] of Object.entries(rarityWeights)) {
+    rates[rarity] = (w / totalWeight) * 100;
+  }
+  return rates;
+}
+
+window.renderRoadmapTab = function () {
+  const container = document.getElementById("roadmapTabContent");
+  if (!container) return;
+
+  // 1. Time-to-next-unlock
+  let nextUnlockHtml = "";
+  const lockedZones = Object.entries(zones)
+    .filter(([id, z]) => z.level > playerLevel)
+    .sort((a, b) => a[1].level - b[1].level);
+
+  if (lockedZones.length === 0) {
+    nextUnlockHtml = `
+      <div class="roadmap-next-unlock unlocked-all">
+        🎉 <b>Chúc mừng!</b> Bạn đã mở khóa tất cả các khu vực câu cá của Ngư Ông Bất Ổn!
+      </div>
+    `;
+  } else {
+    const nextZone = lockedZones[0][1];
+    const lvlDiff = nextZone.level - playerLevel;
+    const expRequired = getExpRequiredToLevel(nextZone.level);
+
+    // Tính tốc độ câu cá trung bình
+    let speedReduction = (speedLevel - 1) * 28;
+    let baseWaitTime = Math.max(1200, 4000 - speedReduction);
+    if (activeBuff === "speed") baseWaitTime *= 0.88;
+    if (activeBuff === "speed_trash") baseWaitTime *= 0.75;
+    if (Date.now() < speedBoostUntil) baseWaitTime *= 0.88;
+
+    const avgExpPerCatch = 22;
+    const avgSecPerCatch = Math.round(baseWaitTime / 1000) || 3;
+    const catchesNeeded = Math.ceil(expRequired / avgExpPerCatch);
+    const estTimeSec = catchesNeeded * avgSecPerCatch;
+
+    let timeText = "";
+    if (estTimeSec < 60) {
+      timeText = `${estTimeSec} giây`;
+    } else if (estTimeSec < 3600) {
+      timeText = `${Math.round(estTimeSec / 60)} phút`;
+    } else {
+      timeText = `${Math.round(estTimeSec / 3600)} giờ ${Math.round((estTimeSec % 3600) / 60)} phút`;
+    }
+
+    nextUnlockHtml = `
+      <div class="roadmap-next-unlock">
+        🔒 <b>Mốc Mở Khóa Tiếp Theo:</b> <b>${nextZone.name}</b> (Yêu cầu Lv ${nextZone.level})<br>
+        - Cần thêm: <b style="color:#ff9800;">+${lvlDiff} Cấp</b> (${expRequired.toLocaleString()} EXP)<br>
+        - Dự kiến: khoảng <b style="color:#ffeb3b;">${catchesNeeded} lượt câu thành công</b> (~${timeText} chơi tay)<br>
+        <span style="font-size:9.5px; color:#aaa;">*Ước tính dựa trên tốc độ câu hiện tại và EXP trung bình mỗi loài cá.</span>
+      </div>
+    `;
+  }
+
+  // 2. Rarity Acquisition Rates
+  let rarityRatesHtml = "";
+  const rates = getCurrentZoneRarityRates();
+  if (Object.keys(rates).length === 0) {
+    rarityRatesHtml = `<div class="buff-summary-combo-empty">Không có dữ liệu tỷ lệ độ hiếm tại khu vực này.</div>`;
+  } else {
+    const rarityColors = {
+      "Rác": "#9e9e9e",
+      "Phế Liệu": "#757575",
+      "Thường": "#81c784",
+      "Bất Ổn": "#64b5f6",
+      "Hiếm": "#ba68c8",
+      "Siêu Bựa": "#f06292",
+      "Cực Hiếm": "#4db6ac",
+      "Đột Biến": "#ff8a65",
+      "Huyền Thoại": "#ffd54f",
+      "Thần Thoại": "#ea80fc",
+      "Tối Cao": "#ff5252",
+      "Vô Tri": "#00e5ff",
+      "Ảo Lòi": "#f06292",
+      "Đáy Xã Hội": "#8e8e8e",
+      "Cảm Lạnh": "#b2ebf2",
+      "Kiếp Nạn": "#ffb74d",
+    };
+
+    const sortedRates = Object.entries(rates).sort((a, b) => b[1] - a[1]);
+    let ratesBars = sortedRates
+      .map(([rarity, pct]) => {
+        const color = rarityColors[rarity] || "#e2e8f0";
+        return `
+        <div class="rates-bar-row">
+          <div class="rates-bar-header">
+            <span style="color:${color}; font-weight:bold;">${rarity}</span>
+            <span style="color:#ffd54f;">${pct.toFixed(2)}%</span>
+          </div>
+          <div class="rates-bar-container">
+            <div class="rates-bar-fill" style="background:${color}; width:${pct}%;"></div>
+          </div>
+        </div>
+      `;
+      })
+      .join("");
+
+    rarityRatesHtml = `
+      <div class="roadmap-rarities">
+        <div style="font-size:11px; font-weight:bold; color:#00e5ff; margin-bottom:8px;">📊 TỶ LỆ CẮN CÂU THEO ĐỘ HIẾM (Hiện Tại):</div>
+        ${ratesBars}
+      </div>
+    `;
+  }
+
+  // 3. Zone Difficulty Curve
+  let zonesCurveHtml = "";
+  const sortedZones = Object.entries(zones).sort((a, b) => a[1].level - b[1].level);
+  let zonesRows = sortedZones
+    .map(([id, z]) => {
+      const isUnlocked = playerLevel >= z.level;
+      const fishCount = fishList.filter(
+        (f) => f.zones && f.zones.includes(id),
+      ).length;
+      let stars = "⭐";
+      if (z.level > 5) stars = "⭐⭐";
+      if (z.level > 12) stars = "⭐⭐⭐";
+      if (z.level > 22) stars = "⭐⭐⭐⭐";
+      if (z.level > 35) stars = "⭐⭐⭐⭐⭐";
+
+      return `
+      <div class="roadmap-curve-item" style="opacity:${isUnlocked ? 1 : 0.55};">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span>${isUnlocked ? "🔓" : "🔒"}</span>
+          <span style="color:${isUnlocked ? "#fff" : "#888"}; font-weight:${isUnlocked ? "bold" : "normal"};">${z.name}</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="color:#ffb74d;">${stars}</span>
+          <span style="color:#9e9e9e;">Lv ${z.level}</span>
+          <span style="color:#4fc3f7; min-width:32px; text-align:right;">${fishCount} loài</span>
+        </div>
+      </div>
+    `;
+    })
+    .join("");
+
+  zonesCurveHtml = `
+    <div class="roadmap-curve">
+      <div style="font-size:11px; font-weight:bold; color:#a5b4fc; margin-bottom:8px;">🗺️ ĐỒ THỊ KHÓ KHĂN & KHU VỰC CÂU:</div>
+      <div class="roadmap-curve-list">
+        ${zonesRows}
+      </div>
+    </div>
+  `;
+
+  container.innerHTML = `
+    <div class="encyclopedia-header tab-header-orange" style="margin-bottom:10px;">
+      <div class="ency-title">🗺️ LỘ TRÌNH NGƯ ÔNG</div>
+    </div>
+    <div style="padding:4px;">
+      ${nextUnlockHtml}
+      ${rarityRatesHtml}
+      ${zonesCurveHtml}
+    </div>
+  `;
+};
+
+window.updateBuffSummary = function () {
+  const container = document.getElementById("buffSummaryMetrics");
+  const comboContainer = document.getElementById("buffSummaryCombo");
+  if (!container || !comboContainer) return;
+
+  const now = Date.now();
+  let luckBonus = 0;
+  let speedMult = 1.0;
+  let expMult = 1.0;
+  let goldMult = 1.0;
+
+  // 1. Lẩu Buff
+  if (activeBuff === "luck") luckBonus += 0.08;
+  else if (activeBuff === "supreme_luck") luckBonus += 0.20;
+  else if (activeBuff === "speed") speedMult *= 0.88;
+  else if (activeBuff === "speed_trash") speedMult *= 0.75;
+  else if (activeBuff === "exp") expMult *= 1.5;
+  else if (activeBuff === "day_xa_hoi_exp" && currentZone === "day_xa_hoi") expMult *= 1.8;
+
+  // 2. Thuốc (Potion)
+  if (now < speedBoostUntil) speedMult *= 0.88;
+
+  // 3. Hệ thống (System Buffs)
+  if (systemBuffs["luck_1"] > now) luckBonus += 0.02;
+  if (systemBuffs["luck_2"] > now) luckBonus += 0.035;
+  if (systemBuffs["luck_3"] > now) luckBonus += 0.05;
+
+  if (systemBuffs["exp_1"] > now) expMult *= 1.02;
+  if (systemBuffs["exp_2"] > now) expMult *= 1.04;
+  if (systemBuffs["exp_3"] > now) expMult *= 1.06;
+
+  if (systemBuffs["gold_1"] > now) goldMult *= 1.05;
+  if (systemBuffs["gold_2"] > now) goldMult *= 1.10;
+  if (systemBuffs["gold_3"] > now) goldMult *= 1.15;
+
+  // 4. Achievement Buff
+  if (equippedAchievementId === "max_tier") luckBonus += 0.5;
+  else if (equippedAchievementId === "first_huyenthoai") luckBonus += 0.2;
+  else if (equippedAchievementId === "first_sieubua" && currentZone === "suoi_doc") speedMult *= 0.9;
+  else if (equippedAchievementId === "first_dayxahoi" && currentZone === "day_xa_hoi") goldMult *= 1.1;
+
+  // 5. Pet Wait Time reduction
+  if (currentPet && (currentPet.name.includes("Cá Phóng Lợn") || currentPet.name.includes("Nẹt Pô"))) {
+    let isBuffed = equippedAchievementId === "pet_master";
+    let mult = getPetStatMultiplier();
+    let speedReductionPct = (isBuffed ? 0.225 : 0.15) * mult;
+    speedMult *= (1 - Math.min(0.5, speedReductionPct));
+  }
+
+  // 6. Zone mastery speed reduction
+  const mastery = getZoneMasteryBonus(currentZone);
+  speedMult *= (mastery.waitMultiplier || 1.0);
+
+  let luckText = luckBonus > 0 ? `+${luckBonus.toFixed(2)}` : "Không";
+  let speedText = speedMult < 1.0 ? `Giảm ${Math.round((1 - speedMult) * 100)}%` : "Không";
+  let expText = expMult > 1.0 ? `x${expMult.toFixed(2)}` : "Không";
+  let goldText = goldMult > 1.0 ? `x${goldMult.toFixed(2)}` : "Không";
+
+  container.innerHTML = `
+    <div class="buff-summary-metrics-grid">
+      <div>🍀 May mắn: <b style="color:#81c784;">${luckText}</b></div>
+      <div>⏱️ Tốc độ: <b style="color:#4fc3f7;">${speedText}</b></div>
+      <div>🎓 EXP: <b style="color:#ffd54f;">${expText}</b></div>
+      <div>💰 Giá bán: <b style="color:#ffb74d;">${goldText}</b></div>
+    </div>
+  `;
+
+  // Combo detection
+  let combos = [];
+  const hasSpeedLau = activeBuff === "speed" || activeBuff === "speed_trash";
+  const hasSpeedChili = now < speedBoostUntil;
+  if (hasSpeedLau && hasSpeedChili) {
+    combos.push("<span style='color:#00e5ff;'>🏎️ Siêu Tốc Cần Thủ:</span> Lẩu Tốc Độ + Ớt Siêu Tốc giúp quăng kéo siêu nhanh!");
+  }
+
+  const hasLuckLau = activeBuff === "luck" || activeBuff === "supreme_luck";
+  const hasLuckSystem = (systemBuffs["luck_1"] > now || systemBuffs["luck_2"] > now || systemBuffs["luck_3"] > now);
+  if (hasLuckLau && hasLuckSystem) {
+    combos.push("<span style='color:#a7ffeb;'>🍀 Nhân Phẩm Đột Biến:</span> Lẩu May Mắn + Bùa May Mắn tăng tỷ lệ cá hiếm cực cao!");
+  }
+
+  const hasExpLau = activeBuff === "exp" || activeBuff === "day_xa_hoi_exp";
+  const hasExpSystem = (systemBuffs["exp_1"] > now || systemBuffs["exp_2"] > now || systemBuffs["exp_3"] > now);
+  if (hasExpLau && hasExpSystem) {
+    combos.push("<span style='color:#ffd700;'>🎓 Học Giả Đại Dương:</span> Lẩu EXP + Bùa Kinh Nghiệm thăng cấp nhanh gấp đôi!");
+  }
+
+  if (combos.length === 0) {
+    comboContainer.innerHTML = `<span class="buff-summary-combo-empty">💡 Mẹo Combo: Thử ăn <b>Lẩu Tốc Độ</b> kết hợp sử dụng <b>Bình Nước Siêu Tốc</b> để giảm tối đa thời gian chờ câu!</span>`;
+  } else {
+    comboContainer.innerHTML = combos.map(c => `<div class="buff-summary-combo-text">${c}</div>`).join("");
+  }
+};
+
+window.initDonateCardCloning = function () {
+  const desktopDonate = document.querySelector(".donate-card");
+  const mobileDonateContainer = document.getElementById("mobileDonateCardContainer");
+  if (desktopDonate && mobileDonateContainer) {
+    mobileDonateContainer.innerHTML = "";
+    mobileDonateContainer.appendChild(desktopDonate.cloneNode(true));
+  }
+};
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", window.initDonateCardCloning);
+} else {
+  window.initDonateCardCloning();
 }

@@ -269,6 +269,7 @@ const timeEvents = [
       function updateTimeEventsUI() {
         const listEl = document.getElementById("timeEventList");
         const clockEl = document.getElementById("timeEventClock");
+        const logHubEl = document.getElementById("logEventHub");
         if (!listEl || !clockEl) return;
 
         const now = new Date();
@@ -280,54 +281,82 @@ const timeEvents = [
 
         const active = timeEvents.filter((ev) => ev.check());
         const newIds = active.map((e) => e.id).join(",");
+        const hubEvents = window.activeHubEvents || [];
+
+        if (logHubEl) {
+          if (active.length === 0 && hubEvents.length === 0) {
+            logHubEl.classList.add("inactive");
+          } else {
+            logHubEl.classList.remove("inactive");
+            
+            const timeEventsHtml = active
+              .map((ev) => {
+                const name = typeof t === "function" ? t("event." + ev.id + ".name") : ev.name;
+                const desc = typeof t === "function" ? t("event." + ev.id + ".desc") : ev.desc;
+                const timerLabel = typeof t === "function" ? t("event.ends_in", { time: formatSeconds(Math.round(ev.timeLeft() / 1000)) }) : "⏳ Kết thúc trong: " + formatSeconds(Math.round(ev.timeLeft() / 1000));
+                return `
+                  <div class="log-event-item ev-${ev.id}">
+                      <div class="log-event-item-main">
+                        <span class="log-event-item-emoji">${ev.emoji}</span>
+                        <b class="log-event-item-name" style="color: ${ev.color};">${name}</b>:
+                        <span class="log-event-item-desc">${desc}</span>
+                      </div>
+                      <span class="log-event-item-timer" id="log-tei-timer-${ev.id}">${timerLabel}</span>
+                  </div>
+                `;
+              });
+
+            const hubEventsHtml = hubEvents
+              .map((ev) => {
+                const remaining = Math.max(0, Math.round((ev.endTime - Date.now()) / 1000));
+                const timerLabel = ev.fading ? "🏁 Kết thúc" : `⏳ Hết hạn trong: ${remaining}s`;
+                return `
+                  <div class="log-event-item ${ev.fading ? "fading-out" : ""}" style="border-left: 3px solid #ff3d00; transition: opacity 1s ease-out; opacity: ${ev.fading ? 0 : 1};">
+                      <div class="log-event-item-main">
+                        <span class="log-event-item-emoji">${ev.emoji}</span>
+                        <b class="log-event-item-name">${ev.title}</b>:
+                        <span class="log-event-item-desc">${ev.desc}</span>
+                      </div>
+                      <span class="log-event-item-timer">${timerLabel}</span>
+                  </div>
+                `;
+              });
+
+            logHubEl.innerHTML = [...timeEventsHtml, ...hubEventsHtml].join("");
+          }
+        }
 
         // Chỉ render lại khi danh sách thay đổi
-        if (newIds === _lastActiveEventIds && active.length > 0) {
+        if (newIds === _lastActiveEventIds && active.length > 0 && hubEvents.length === 0) {
           // Chỉ cập nhật countdown
           active.forEach((ev) => {
+            const label = typeof t === "function" ? t("event.ends_in", { time: formatSeconds(Math.round(ev.timeLeft() / 1000)) }) : "⏳ Kết thúc trong: " + formatSeconds(Math.round(ev.timeLeft() / 1000));
             const timerEl = document.getElementById("tei-timer-" + ev.id);
             if (timerEl) {
-              const label = typeof t === 'function' ? t('event.ends_in', {time: formatSeconds(Math.round(ev.timeLeft() / 1000))}) : "⏳ Kết thúc trong: " + formatSeconds(Math.round(ev.timeLeft() / 1000));
               timerEl.innerText = label;
+            }
+            const logTimerEl = document.getElementById("log-tei-timer-" + ev.id);
+            if (logTimerEl) {
+              logTimerEl.innerText = label;
             }
           });
           return;
         }
 
-        const previousIds = _lastActiveEventIds ? _lastActiveEventIds.split(",") : [];
         _lastActiveEventIds = newIds;
 
-        // Gửi log khi sự kiện mới bắt đầu
-        if (
-          active.length > 0 &&
-          newIds !== "" &&
-          typeof addLog === "function"
-        ) {
-          active.forEach((ev) => {
-            if (!previousIds.includes(ev.id)) {
-              const name = typeof t === 'function' ? t('event.' + ev.id + '.name') : ev.name;
-              const desc = typeof t === 'function' ? t('event.' + ev.id + '.desc') : ev.desc;
-              const startLabel = typeof t === 'function' && t('event.ends_in', {time: ''}).includes('Ends') ? 'EVENT STARTED' : 'SỰ KIỆN BẮT ĐẦU';
-              addLog(
-                `✨ <b style="color:${ev.color};">[${startLabel}]</b> ${ev.emoji} <b>${name}</b> ${desc}`,
-              );
-            }
-          });
-        }
-
         if (active.length === 0) {
-          const emptyText = typeof t === 'function' ? t('event.empty') : 'Không có sự kiện nào... Thời buổi bình thường như bao giờ.';
+          const emptyText = typeof t === "function" ? t("event.empty") : "Không có sự kiện nào... Thời buổi bình thường như bao giờ.";
           listEl.innerHTML = `<div class="time-event-empty">${emptyText}</div>`;
           return;
         }
 
         listEl.innerHTML = active
-          .map(
-            (ev) => {
-              const name = typeof t === 'function' ? t('event.' + ev.id + '.name') : ev.name;
-              const desc = typeof t === 'function' ? t('event.' + ev.id + '.desc') : ev.desc;
-              const timerLabel = typeof t === 'function' ? t('event.ends_in', {time: formatSeconds(Math.round(ev.timeLeft() / 1000))}) : "⏳ Kết thúc trong: " + formatSeconds(Math.round(ev.timeLeft() / 1000));
-              return `
+          .map((ev) => {
+            const name = typeof t === "function" ? t("event." + ev.id + ".name") : ev.name;
+            const desc = typeof t === "function" ? t("event." + ev.id + ".desc") : ev.desc;
+            const timerLabel = typeof t === "function" ? t("event.ends_in", { time: formatSeconds(Math.round(ev.timeLeft() / 1000)) }) : "⏳ Kết thúc trong: " + formatSeconds(Math.round(ev.timeLeft() / 1000));
+            return `
               <div class="time-event-item" style="border-left-color: ${ev.color};">
                   <div class="tei-emoji">${ev.emoji}</div>
                   <div class="tei-info">
@@ -337,7 +366,6 @@ const timeEvents = [
                   </div>
               </div>
             `;
-            }
-          )
+          })
           .join("");
       }
