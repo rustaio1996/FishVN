@@ -25,8 +25,16 @@ function getPlayerId() {
   return id;
 }
 
+const domCache = {};
 function getEl(id) {
-    return document.getElementById(id);
+    if (!domCache[id]) {
+        const el = document.getElementById(id);
+        if (el) {
+            domCache[id] = el;
+        }
+        return el;
+    }
+    return domCache[id];
 }
 
 // Hybrid Database Wrapper (Hỗ trợ lưu trữ local dự phòng + Đồng bộ MongoDB Atlas)
@@ -397,14 +405,35 @@ function addLog(msg, logType = "") {
     // Escape everything first
     let s = escapeHtml(input);
 
-    // Restore safe tags and their specific safe attributes
-    // 1. Restore <span class="log-time">
-    s = s.replace(/&lt;span class=(?:&quot;|&#039;|"|')log-time(?:&quot;|&#039;|"|')&gt;/gi, '<span class="log-time">');
+    // 1. Restore <span class="[safe-class]">
+    s = s.replace(/&lt;span class=(?:&quot;|&#039;|"|')([a-zA-Z0-9_\-\s]+)(?:&quot;|&#039;|"|')&gt;/gi, (match, classVal) => {
+      return `<span class="${classVal.trim()}">`;
+    });
 
-    // 2. Restore style="color:..." for <b> and <span>
-    s = s.replace(/&lt;(b|span) style=(?:&quot;|&#039;|"|')color:\s*([^&;'"\s]+);?(?:&quot;|&#039;|"|')&gt;/gi, (match, tag, colorVal) => {
-      const cleanColor = colorVal.trim().replace(/[^a-zA-Z0-9#]/g, "");
-      return `<${tag} style="color:${cleanColor};">`;
+    // 2. Restore style="..." safely for b and span tags
+    s = s.replace(/&lt;(span|b)\s+style=(?:&quot;|&#039;|"|')([^&'"<>]+)(?:&quot;|&#039;|"|')&gt;/gi, (match, tag, styleStr) => {
+      const props = styleStr.split(';');
+      const safeProps = [];
+      props.forEach(prop => {
+        const parts = prop.split(':');
+        if (parts.length === 2) {
+          const name = parts[0].trim().toLowerCase();
+          const val = parts[1].trim().toLowerCase();
+          if (name === 'color' && (/^#[0-9a-f]{3,6}$/.test(val) || /^[a-z]+$/.test(val))) {
+            safeProps.push(`color:${val}`);
+          } else if (name === 'font-weight' && (val === 'bold' || /^[0-9]+$/.test(val))) {
+            safeProps.push(`font-weight:${val}`);
+          } else if (name === 'font-size' && /^[0-9.]{1,5}(px|em)$/.test(val)) {
+            safeProps.push(`font-size:${val}`);
+          } else if (name === 'margin-left' && /^[0-9.]{1,5}(px|em)$/.test(val)) {
+            safeProps.push(`margin-left:${val}`);
+          }
+        }
+      });
+      if (safeProps.length > 0) {
+        return `<${tag} style="${safeProps.join('; ')}">`;
+      }
+      return `<${tag}>`;
     });
 
     // 3. Restore simple allowed tags (without attributes)
@@ -417,6 +446,42 @@ function addLog(msg, logType = "") {
 
     // 4. Restore <br> tags
     s = s.replace(/&lt;br\s*\/?&gt;/gi, "<br>");
+
+    // 5. Restore <button> tags safely
+    s = s.replace(/&lt;button\s+(.+?)&gt;/gi, (match, attrStr) => {
+      const attrs = {};
+      const regex = /([a-zA-Z\-]+)=&quot;(.*?)&quot;/gi;
+      let m;
+      while ((m = regex.exec(attrStr)) !== null) {
+        attrs[m[1].toLowerCase()] = m[2];
+      }
+      
+      const parts = [];
+      if (attrs['class']) parts.push(`class="${attrs['class']}"`);
+      if (attrs['id']) parts.push(`id="${attrs['id']}"`);
+      if (attrs['type']) parts.push(`type="${attrs['type']}"`);
+      if (attrs['onclick']) parts.push(`onclick="${attrs['onclick']}"`);
+      
+      if (attrs['style']) {
+        const props = attrs['style'].split(';');
+        const safeProps = [];
+        props.forEach(prop => {
+          const p = prop.split(':');
+          if (p.length === 2) {
+            const name = p[0].trim().toLowerCase();
+            const val = p[1].trim().toLowerCase();
+            if (['color', 'background-color', 'padding', 'min-width', 'font-size'].includes(name)) {
+              safeProps.push(`${name}:${val}`);
+            }
+          }
+        });
+        if (safeProps.length > 0) {
+          parts.push(`style="${safeProps.join('; ')}"`);
+        }
+      }
+      return `<button ${parts.join(' ')}>`;
+    });
+    s = s.replace(/&lt;\/button&gt;/gi, "</button>");
 
     return s;
   }
@@ -2939,11 +3004,7 @@ function closeMiniGame() {
 }
 
 function openSettings() {
-  const modal = document.getElementById("desktopSettingsModal");
-  if (!modal) return;
-  modal.style.display = "flex";
-  // Activate focus trap on modal
-  activateFocusTrap(modal);
+  showModalById("desktopSettingsModal");
   const cloudInput = document.getElementById("cloudPlayerIdInput");
   if (cloudInput) {
     cloudInput.value = getPlayerId();
@@ -2955,11 +3016,7 @@ function openSettings() {
 }
 
 function closeSettings() {
-  const modal = document.getElementById("desktopSettingsModal");
-  if (modal) {
-    modal.style.display = "none";
-    deactivateFocusTrap(modal);
-  }
+  hideModalById("desktopSettingsModal");
 }
 
 window.scrollSettings = function (direction) {
@@ -3512,6 +3569,24 @@ function calculateCurrentPrice(fish, stars) {
   // Sự kiện thời gian
 
   finalPrice = Math.round(finalPrice * getTimeEventBonuses().goldMultiplier);
+
+  if (
+    equippedGear &&
+    equippedGear.bobber &&
+    equippedGear.bobber.buff &&
+    equippedGear.bobber.buff.gold_gain_bonus
+  ) {
+    finalPrice = Math.round(finalPrice * (1 + equippedGear.bobber.buff.gold_gain_bonus));
+  }
+
+  if (
+    equippedGear &&
+    equippedGear.line &&
+    equippedGear.line.buff &&
+    equippedGear.line.buff.extra_gold_mult
+  ) {
+    finalPrice = Math.round(finalPrice * equippedGear.line.buff.extra_gold_mult);
+  }
 
   return finalPrice;
 }
@@ -4088,7 +4163,7 @@ function toggleGuideSection() {
 }
 
 function toggleQuestSection() {
-  const container = document.querySelector(".quest-container");
+  const container = document.getElementById("dailyQuestPanel");
 
   if (!container) return;
 
@@ -4102,13 +4177,13 @@ function toggleQuestSection() {
 }
 
 function toggleInventorySection() {
+  const panel = document.querySelector(".inventory-panel");
   const collapsible = document.getElementById("inventoryCollapsible");
-
   const icon = document.getElementById("inventoryToggleIcon");
 
-  collapsible.classList.toggle("collapsed");
-
-  icon.classList.toggle("collapsed");
+  if (panel) panel.classList.toggle("collapsed");
+  if (collapsible) collapsible.classList.toggle("collapsed");
+  if (icon) icon.classList.toggle("collapsed");
 }
 
 function switchTab(tab, btn) {
@@ -4162,6 +4237,9 @@ function switchTab(tab, btn) {
     seasonEl.style.display = "block";
     if (typeof initSeason === "function") initSeason();
     if (typeof renderSeasonTab === "function") renderSeasonTab();
+  } else if (tab === "leaderboard") {
+    getEl("leaderboardTab").style.display = "block";
+    renderLeaderboard();
   } else {
     getEl("encyclopediaTab").style.display = "block";
   }
@@ -4169,6 +4247,85 @@ function switchTab(tab, btn) {
   if (btn) {
     btn.classList.add("active");
   }
+}
+
+function renderLeaderboard() {
+  const container = getEl("leaderboardTabContent");
+  if (!container) return;
+
+  const bots = [
+    { name: "Thánh Bú Mồi", baseLevel: 95, baseGold: 2500000, title: "Linh Vật Bất Tử" },
+    { name: "Cụ Rùa Hồ Gươm", baseLevel: 88, baseGold: 1800000, title: "Cổ Thụ Đáy Hồ" },
+    { name: "Lão Hạc Câu Cá", baseLevel: 72, baseGold: 850000, title: "Kẻ Độc Hành Cô Độc" },
+    { name: "Ngư Tặc Vùng Ven", baseLevel: 45, baseGold: 340000, title: "Trùm Rạch Nước" },
+    { name: "Báo Thủ Mương Lộ", baseLevel: 38, baseGold: 220000, title: "Chiến Thần Tông Xe" },
+    { name: "Khỉ Trộm Mồi", baseLevel: 29, baseGold: 140000, title: "Đạo Tặc Rừng Sác" },
+    { name: "Cần Cỏ Chân Nhân", baseLevel: 22, baseGold: 80000, title: "Tiên Nhân Gõ Mõ" },
+    { name: "Ngư Ông Tập Sự", baseLevel: 12, baseGold: 25000, title: "Cần Thủ Nhập Môn" },
+    { name: "Mới Mất Cần", baseLevel: 3, baseGold: 500, title: "Dưới Đáy Xã Hội" }
+  ];
+
+  const playerLvl = playerLevel || 1;
+  const scaledBots = bots.map(b => {
+    let level = b.baseLevel;
+    if (playerLvl > 20) {
+      level = Math.round(b.baseLevel * (1 + (playerLvl - 20) * 0.005));
+    }
+    const goldBonus = Math.round((level * level) * 250 + (level * 1500));
+    return {
+      name: b.name,
+      level: level,
+      gold: b.baseGold + goldBonus,
+      title: b.title,
+      isBot: true
+    };
+  });
+
+  scaledBots.push({
+    name: (playerName || "Ngư Ông Vô Danh") + " (Bạn)",
+    level: playerLvl,
+    gold: gold || 0,
+    title: currentTitle || "Dân Chơi Hệ Cần Cỏ",
+    isPlayer: true
+  });
+
+  scaledBots.sort((a, b) => {
+    if (b.level !== a.level) return b.level - a.level;
+    return b.gold - a.gold;
+  });
+
+  let html = `
+    <div style="background: rgba(30, 30, 50, 0.5); padding: 12px; border-radius: 8px; border: 1px solid #333; margin-bottom: 12px;">
+      <h4 style="margin: 0 0 5px 0; color: #00e5ff;">🏆 BẢNG XẾP HẠNG CẦN THỦ BẤT ỔN</h4>
+      <p style="margin: 0; font-size: 11px; color: #aaa;">Đọ trình độ và tài sản cùng các bậc tiền bối giới cần thủ!</p>
+    </div>
+  `;
+  scaledBots.forEach((item, index) => {
+    const rank = index + 1;
+    let rankBadge = `${rank}`;
+    if (rank === 1) rankBadge = "🥇";
+    else if (rank === 2) rankBadge = "🥈";
+    else if (rank === 3) rankBadge = "🥉";
+
+    const rowClass = item.isPlayer ? "leaderboard-row-player" : "leaderboard-row-bot";
+    const goldStr = item.gold.toLocaleString("vi-VN");
+
+    html += `
+      <div class="leaderboard-item ${rowClass}" style="display:flex; align-items:center; padding:10px; margin-bottom:8px; border-radius:6px; background:${item.isPlayer ? 'rgba(0, 229, 255, 0.15)' : 'rgba(20, 20, 35, 0.7)'}; border: 1px solid ${item.isPlayer ? '#00e5ff' : '#222'};">
+        <div style="font-size:18px; width:30px; text-align:center; font-weight:bold; color:${item.isPlayer ? '#00e5ff' : '#fff'};">${rankBadge}</div>
+        <div style="flex:1; margin-left:10px;">
+          <div style="font-weight:bold; color:${item.isPlayer ? '#00e5ff' : '#fff'};">${item.name}</div>
+          <div style="font-size:11px; color:#a0a5c0;">${item.title}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-weight:bold; color:#ffb900;">💵 ${goldStr}đ</div>
+          <div style="font-size:11px; color:#888;">Cấp ${item.level}</div>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
 }
 
 let selectedFeedPetIndex = 0;
@@ -6427,6 +6584,14 @@ function catchFish() {
         karmaAdd = Math.round(karmaAdd * 0.94);
 
       karmaAdd = Math.round(karmaAdd * getTimeEventBonuses().karmaMultiplier);
+      if (
+        equippedGear &&
+        equippedGear.bobber &&
+        equippedGear.bobber.buff &&
+        equippedGear.bobber.buff.karma_reduct
+      ) {
+        karmaAdd = Math.round(karmaAdd * (1 - equippedGear.bobber.buff.karma_reduct));
+      }
 
       karma = Math.min(100, karma + karmaAdd);
 
@@ -6518,9 +6683,17 @@ function catchFish() {
     karmaAdd = Math.round(karmaAdd * teb.karmaMultiplier); // sự kiện thời gian
 
     // Tăng 30% Nghiệp lực nếu đang có Bão Táp
-
     if (currentWeather === "Bão Táp") {
       karmaAdd = Math.round(karmaAdd * 1.3);
+    }
+
+    if (
+      equippedGear &&
+      equippedGear.bobber &&
+      equippedGear.bobber.buff &&
+      equippedGear.bobber.buff.karma_reduct
+    ) {
+      karmaAdd = Math.round(karmaAdd * (1 - equippedGear.bobber.buff.karma_reduct));
     }
 
     karma = Math.min(100, karma + karmaAdd);
@@ -6672,7 +6845,7 @@ function catchFish() {
   }
 
   addLog(
-    `🎒 <span style="color: #00ffff; font-weight: bold;">${rn("Rác") === "Rác" ? "✓ Cất vào túi đồ!" : "✓ Stashed in bag!"}</span> Số lượng: <b style="color: #ffeb3b;">+1</b> | <span style="color: ${starCol};">${starDisp}</span> | ${getTierBadgeHtml(selectedFish)} | Mở Túi Đồ để xả hàng nhé!`,
+    `🎒 <span class="log-highlight-cyan">${rn("Rác") === "Rác" ? "✓ Cất vào túi đồ!" : "✓ Stashed in bag!"}</span> Số lượng: <b style="color: #ffeb3b;">+1</b> | <span style="color: ${starCol};">${starDisp}</span> | ${getTierBadgeHtml(selectedFish)} | Mở Túi Đồ để xả hàng nhé!`,
 
     "highlight",
   );
@@ -6853,6 +7026,117 @@ function catchFish() {
       seasonData.stats.totalFishCaught++;
       seasonData.stats.totalCasts++;
     }
+  }
+
+  // === MULTI-CATCH RESOLUTION (BA TIÊU HOOKS) ===
+  if (
+    equippedGear &&
+    equippedGear.hook &&
+    equippedGear.hook.buff &&
+    equippedGear.hook.buff.multi_catch_chance
+  ) {
+    let finalChance = equippedGear.hook.buff.multi_catch_chance;
+    if (
+      equippedGear.bobber &&
+      equippedGear.bobber.buff &&
+      equippedGear.bobber.buff.double_catch_chance_buff
+    ) {
+      finalChance += equippedGear.bobber.buff.double_catch_chance_buff;
+    }
+
+    if (Math.random() < finalChance) {
+    const maxExtra = equippedGear.hook.buff.max_extra_fish || 1;
+    const extraCount = Math.floor(Math.random() * maxExtra) + 1;
+    const extraExpMult = equippedGear.hook.buff.extra_exp_mult || 1.0;
+
+    for (let i = 0; i < extraCount; i++) {
+      let extraFish = rollFish();
+      let extraStars = rollFishStars(extraFish.rarity);
+      let extraBagKey = getBagKey(extraFish.name, extraStars);
+      
+      if (!playerBag[extraBagKey]) {
+        playerBag[extraBagKey] = {
+          fish: extraFish,
+          stars: extraStars,
+          count: 0
+        };
+      }
+      playerBag[extraBagKey].count++;
+      fishInventory[extraFish.rarity] = (fishInventory[extraFish.rarity] || 0) + 1;
+      fishCount++;
+      addZoneMasteryProgress(currentZone, extraFish);
+      discoveredFishMap[extraFish.name] = true;
+
+      let extraStarDisp = getStarDisplay(extraStars);
+      let extraStarCol = getStarColor(extraStars);
+      
+      addLog(
+        `🎯 <b style="color: #00e5ff;">[CÂU CHÙM BA TIÊU]</b> Bạn giật chùm dính thêm: ${extraFish.emoji} <b>${fn(extraFish.name)}</b> <span style="color: ${extraStarCol};">${extraStarDisp}</span> (${rn(extraFish.rarity)})!`,
+        "success"
+      );
+
+      recordFishCollectionMilestones(extraFish);
+      rollFishingBuff(extraFish);
+      rollPotionDrop(extraFish);
+
+      if (typeof addSeasonExp === "function") {
+        const seasonExpTable = {
+          Rác: 2,
+          "Phế Liệu": 3,
+          Thường: 5,
+          "Bất Ổn": 8,
+          Hiếm: 12,
+          "Siêu Bựa": 18,
+          "Cực Hiếm": 25,
+          "Đột Biến": 35,
+          "Huyền Thoại": 50,
+          "Thần Thoại": 80,
+          "Tối Cao": 120,
+          "Vô Tri": 200,
+        };
+        let extraSExp = seasonExpTable[extraFish.rarity] || 5;
+        addSeasonExp(extraSExp, "catch");
+        if (typeof seasonData !== "undefined") {
+          seasonData.stats.totalFishCaught++;
+        }
+      }
+
+      let extraExp = Math.round(extraFish.exp * petExpBonus * (starExpMultiplier[extraStars] || 1));
+      if (activeBuff === "exp") extraExp *= 2;
+      if (activeBuff === "day_xa_hoi_exp" && currentZone === "day_xa_hoi") extraExp = Math.round(extraExp * 1.3);
+      if (systemBuffs["exp_1"] > nowTs) extraExp = Math.round(extraExp * 1.02);
+      if (systemBuffs["exp_2"] > nowTs) extraExp = Math.round(extraExp * 1.04);
+      if (systemBuffs["exp_3"] > nowTs) extraExp = Math.round(extraExp * 1.06);
+      
+      extraExp = Math.round(extraExp * teb.expMultiplier);
+      extraExp = Math.round(extraExp * zoneMasteryBonus.expMultiplier);
+      extraExp = Math.round(extraExp * cleanStreakBonus.expMultiplier);
+      
+      if (
+        currentPet &&
+        !currentPet.name.includes("Cá Voi") &&
+        !currentPet.name.includes("Cá Trê") &&
+        !currentPet.name.includes("Cá Phóng Lợn") &&
+        !currentPet.name.includes("Cá Mập") &&
+        !currentPet.name.includes("Bạch Tuộc")
+      ) {
+        let mult = getPetStatMultiplier();
+        extraExp += Math.round(currentPet.level * 2 * mult);
+      }
+
+      extraExp = Math.round(extraExp * extraExpMult);
+
+      addLog(
+        `⭐ <b style="color: #ffeb3b;">+${extraExp} EXP</b> | ${extraFish.emoji} ${extraFish.name} tặng ${extraFish.exp} exp (Câu chùm)`,
+        "success"
+      );
+      
+      gainExp(extraExp);
+    }
+    }
+
+    eventBus.emit("inventoryChanged");
+    eventBus.emit("fishInventoryChanged");
   }
 
   saveGameState(); // Fix: save after catching fish
@@ -7408,6 +7692,15 @@ function fishEscapes() {
       karmaAdd = Math.round(karmaAdd * 0.94);
 
     karmaAdd = Math.round(karmaAdd * getTimeEventBonuses().karmaMultiplier); // sự kiện
+
+    if (
+      equippedGear &&
+      equippedGear.bobber &&
+      equippedGear.bobber.buff &&
+      equippedGear.bobber.buff.karma_reduct
+    ) {
+      karmaAdd = Math.round(karmaAdd * (1 - equippedGear.bobber.buff.karma_reduct));
+    }
 
     karma = Math.min(100, karma + karmaAdd);
 
@@ -8025,9 +8318,147 @@ function renderAchievementsTab() {
   }
 }
 
+async function rotateLocalBackups(state) {
+  try {
+    let bak2 = null;
+    let bak1 = null;
+    if (window.gameDatabase) {
+      bak2 = await window.gameDatabase.loadData("fish_game_state_bak_2");
+      bak1 = await window.gameDatabase.loadData("fish_game_state_bak_1");
+      if (bak2) await window.gameDatabase.saveData("fish_game_state_bak_3", bak2);
+      if (bak1) await window.gameDatabase.saveData("fish_game_state_bak_2", bak1);
+      await window.gameDatabase.saveData("fish_game_state_bak_1", state);
+    } else {
+      bak2 = localStorage.getItem("fish_game_state_bak_2");
+      bak1 = localStorage.getItem("fish_game_state_bak_1");
+      if (bak2) localStorage.setItem("fish_game_state_bak_3", bak2);
+      if (bak1) localStorage.setItem("fish_game_state_bak_2", bak1);
+      localStorage.setItem("fish_game_state_bak_1", JSON.stringify(state));
+    }
+    console.log("Xoay vòng backup lưu trữ local thành công.");
+  } catch (e) {
+    console.error("Lỗi khi xoay vòng backup local:", e);
+  }
+}
+
+function compressSaveState(state) {
+  try {
+    const mini = {
+      v: state.version || "0.4.1",
+      n: state.playerName || "Ngư Ông Vô Danh",
+      g: state.gold || 0,
+      l: state.playerLevel || 1,
+      e: state.playerExp || 0,
+      rl: state.rodLevel || 1,
+      sl: state.speedLevel || 1,
+      lol: state.locLevel || 1,
+      pl: state.petLevel || 1,
+      al: state.autoLevel || 1,
+      z: state.currentZone || "ao_lang",
+      t: state.currentTitle || "Dân Chơi Hệ Cần Cỏ",
+      i: state.fishInventory || {},
+      tS: Date.now()
+    };
+    return btoa(unescape(encodeURIComponent(JSON.stringify(mini))));
+  } catch (e) {
+    console.error("Lỗi nén tiến trình:", e);
+    return "";
+  }
+}
+
+function decompressSaveState(str) {
+  try {
+    const json = decodeURIComponent(escape(atob(str)));
+    const mini = JSON.parse(json);
+    const state = {
+      version: mini.v || "0.4.1",
+      playerName: mini.n || "Ngư Ông Vô Danh",
+      gold: Number(mini.g) || 0,
+      playerLevel: Number(mini.l) || 1,
+      playerExp: Number(mini.e) || 0,
+      expNeeded: (Number(mini.l) || 1) * 45,
+      rodLevel: Number(mini.rl) || 1,
+      speedLevel: Number(mini.sl) || 1,
+      locLevel: Number(mini.lol) || 1,
+      petLevel: Number(mini.pl) || 1,
+      autoLevel: Number(mini.al) || 1,
+      currentZone: mini.z || "ao_lang",
+      totalTrashCount: Number(mini.i["Rác"] || 0) + Number(mini.i["Phế Liệu"] || 0),
+      totalCatfishCount: Number(mini.i["Thường"] || 0),
+      totalSupremeCount: Number(mini.i["Tối Cao"] || 0),
+      cleanCatchStreak: 0,
+      bestCleanCatchStreak: 0,
+      pityMeter: 0,
+      pityPeak: 30,
+      currentTitle: mini.t || "Dân Chơi Hệ Cần Cỏ",
+      fishInventory: mini.i || {},
+      playerBag: {},
+      discoveredFishMap: {},
+      systemBuffs: [],
+      currentPet: null,
+      seasonData: null,
+      lightningRageEnd: 0,
+      dailyQuests: [],
+      questResetDate: null,
+      dailyQuestCounters: {
+        casts: 0, sold: 0, buffs: 0, cooked: 0, gold: 0, rare: 0, level: 0, levelStart: Number(mini.l) || 1
+      },
+      marketOrders: [],
+      marketResetDate: null,
+      consumables: { luckyBait: 0, karmaCleanser: 0, speedChili: 0 },
+      speedBoostUntil: 0,
+      zoneMastery: {},
+      equippedGear: { hook: null, line: null, bobber: null },
+      lastSaved: mini.tS || Date.now()
+    };
+    return state;
+  } catch (e) {
+    console.error("Lỗi giải nén tiến trình:", e);
+    return null;
+  }
+}
+
+function migrateSaveState(state) {
+  if (!state) return state;
+  if (!state.version) {
+    state.version = "0.4.1";
+  }
+  if (!state.equippedGear) {
+    state.equippedGear = { hook: null, line: null, bobber: null };
+  }
+  if (!state.consumables) {
+    state.consumables = { luckyBait: 0, karmaCleanser: 0, speedChili: 0 };
+  }
+  if (!state.dailyQuestCounters) {
+    state.dailyQuestCounters = {
+      casts: 0, sold: 0, buffs: 0, cooked: 0, gold: 0, rare: 0, level: 0, levelStart: state.playerLevel || 1
+    };
+  }
+  if (!state.fishInventory) {
+    state.fishInventory = {};
+  }
+  if (state.fishInventory["Ảo Lòi"] === undefined) state.fishInventory["Ảo Lòi"] = 0;
+  if (state.fishInventory["Đáy Xã Hội"] === undefined) state.fishInventory["Đáy Xã Hội"] = 0;
+  
+  state.lastSaved = state.lastSaved || Date.now();
+  return state;
+}
+
+// ponytail: simple validation helper for save state schema
+function validateSaveSchema(state) {
+  return (
+    state &&
+    typeof state === "object" &&
+    typeof state.playerName === "string" &&
+    typeof state.gold === "number" &&
+    typeof state.playerLevel === "number"
+  );
+}
+
 async function saveGameState() {
   try {
     let state = {
+      version: "0.4.1",
       playerName: playerName,
       language: getLanguage(),
       gold: gold,
@@ -8065,18 +8496,64 @@ async function saveGameState() {
       speedBoostUntil: speedBoostUntil,
       zoneMastery: zoneMastery,
       equippedGear: equippedGear,
+      lastSaved: Date.now()
     };
     await db.save("fish_game_state", state);
+    await rotateLocalBackups(state);
   } catch (e) {
     console.error("Error auto-saving game state:", e);
   }
 }
 
 async function loadGameState() {
-  let saved = await db.load("fish_game_state");
+  let saved = null;
+  try {
+    saved = await db.load("fish_game_state");
+  } catch (e) {
+    console.error("Lỗi tải bản lưu chính:", e);
+  }
+
+  let state = null;
   if (saved) {
     try {
-      let state = typeof saved === "string" ? JSON.parse(saved) : saved;
+      state = typeof saved === "string" ? JSON.parse(saved) : saved;
+      if (!validateSaveSchema(state)) {
+        throw new Error("Dữ liệu save chính không hợp lệ.");
+      }
+    } catch (e) {
+      console.error("Bản lưu chính bị lỗi. Đang thử khôi phục từ backup...", e);
+      state = null;
+    }
+  }
+
+  // Khôi phục tự động từ backups
+  if (!state) {
+    const backupKeys = ["fish_game_state_bak_1", "fish_game_state_bak_2", "fish_game_state_bak_3"];
+    for (let key of backupKeys) {
+      try {
+        let bakVal = null;
+        if (window.gameDatabase) {
+          bakVal = await window.gameDatabase.loadData(key);
+        } else {
+          let localVal = localStorage.getItem(key);
+          if (localVal) bakVal = JSON.parse(localVal);
+        }
+        if (bakVal && validateSaveSchema(bakVal)) {
+          state = bakVal;
+          const dateStr = state.lastSaved ? new Date(state.lastSaved).toLocaleString("vi-VN") : "không rõ";
+          alert(`⚠️ Tự động khôi phục dữ liệu thành công từ bản sao lưu dự phòng lúc ${dateStr}!`);
+          await db.save("fish_game_state", state);
+          break;
+        }
+      } catch (err) {
+        console.error(`Lỗi đọc backup ${key}:`, err);
+      }
+    }
+  }
+
+  if (state) {
+    try {
+      state = migrateSaveState(state);
 
       if (state.playerName !== undefined)
         playerName = normalizePlayerName(state.playerName) || "Ngư Ông Vô Danh";
@@ -9087,6 +9564,7 @@ function refreshLocalizedGameText() {
   updateShopButtons();
   updateStatsPanel();
   renderInventoryTab();
+  renderGearCraftingTab();
   updateEncyclopedia();
 
   if (
@@ -9128,32 +9606,56 @@ function renderGearCraftingTab() {
     equippedDiv.innerHTML = eqHtml;
   }
 
-  // Render recipes
-  let html = "";
+  // Group recipes by type with color categories
+  const groups = {
+    hook: { title: "🪝 LƯỠI CÂU / HOOKS", color: "#ff7043", items: [] },
+    line: { title: "🧵 DÂY CÂU / LINES", color: "#26a69a", items: [] },
+    bobber: { title: "🧪 PHAO CÂU / BOBBERS", color: "#ab47bc", items: [] }
+  };
+
   gearRecipes.forEach((recipe) => {
-    let canCraft = true;
-    let reqHtml = "";
-    for (const [rarity, needed] of Object.entries(recipe.req)) {
-      const have = fishInventory[rarity] || 0;
-      const ok = have >= needed;
-      if (!ok) canCraft = false;
-      reqHtml += `<span style="color: ${ok ? "#4caf50" : "#ef5350"};">${rarity}: ${have}/${needed}</span> `;
+    if (groups[recipe.type]) {
+      groups[recipe.type].items.push(recipe);
     }
-
-    const isEquipped =
-      equippedGear[recipe.type] && equippedGear[recipe.type].id === recipe.id;
-
-    html += `<div class="shop-row" style="border-left: 3px solid ${isEquipped ? "#ffd600" : "#519aba"};">
-            <div class="shop-info">
-              <div><b style="color: #ffd600;">${recipe.name}</b>${isEquipped ? ' <span style="color: #4caf50; font-size: 9px;">✅ ĐANG ĐEO</span>' : ""}</div>
-              <div class="shop-desc">${recipe.desc}</div>
-              <div style="font-size: 9px; margin-top: 3px;">${reqHtml}</div>
-            </div>
-            <button class="shop-btn" type="button" ${!canCraft || isEquipped ? "disabled" : ""} onclick="craftGear('${recipe.id}')">
-              ${isEquipped ? "Đã Đeo" : canCraft ? "🛠️ Chế" : "❌"}
-            </button>
-          </div>`;
   });
+
+  let html = "";
+  for (const [type, group] of Object.entries(groups)) {
+    if (group.items.length === 0) continue;
+
+    html += `<div style="font-size: 11.5px; font-weight: bold; color: ${group.color}; margin: 18px 0 8px 0; border-bottom: 2px dashed rgba(255,255,255,0.08); padding-bottom: 4px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+              ${group.title}
+             </div>`;
+
+    group.items.forEach((recipe) => {
+      let canCraft = true;
+      let reqHtml = "";
+      for (const [rarity, needed] of Object.entries(recipe.req)) {
+        const have = fishInventory[rarity] || 0;
+        const ok = have >= needed;
+        if (!ok) canCraft = false;
+        reqHtml += `<span style="color: ${ok ? "#4caf50" : "#ef5350"}; font-weight: 500;">${rarity}: ${have}/${needed}</span> `;
+      }
+
+      const isEquipped =
+        equippedGear[recipe.type] && equippedGear[recipe.type].id === recipe.id;
+
+      const borderStyle = isEquipped
+        ? `border-left: 4px solid #ffd600; background: linear-gradient(90deg, rgba(255, 214, 0, 0.04) 0%, transparent 100%);`
+        : `border-left: 3px solid ${group.color};`;
+
+      html += `<div class="shop-row" style="${borderStyle}">
+              <div class="shop-info">
+                <div><b style="color: ${isEquipped ? "#ffd600" : "#fff"};">${recipe.name}</b>${isEquipped ? ' <span style="color: #4caf50; font-size: 9px; font-weight: bold;">[ĐANG ĐEO]</span>' : ""}</div>
+                <div class="shop-desc">${recipe.desc}</div>
+                <div style="font-size: 9px; margin-top: 3px; display: flex; gap: 8px; flex-wrap: wrap;">${reqHtml}</div>
+              </div>
+              <button class="shop-btn" type="button" ${!canCraft || isEquipped ? "disabled" : ""} onclick="craftGear('${recipe.id}')">
+                ${isEquipped ? "Đeo" : canCraft ? "🛠️ Chế" : "❌"}
+              </button>
+            </div>`;
+    });
+  }
   recipesDiv.innerHTML = html;
 }
 
@@ -9329,6 +9831,7 @@ async function initGame() {
     updateEncyclopedia();
 
     renderInventoryTab();
+    renderGearCraftingTab();
 
     refreshLocalizedGameText();
     await loadAchievements();
@@ -9580,7 +10083,7 @@ function selectRecordsSubTab(sub) {
     .querySelectorAll("#mobile-records-subtabs .sub-tab-btn")
     .forEach((btn) => btn.classList.remove("active"));
 
-  const questContainer = document.querySelector(".quest-container");
+  const questContainer = document.getElementById("dailyQuestPanel");
 
   const guideContainer = document.querySelector(".guide-container");
 
@@ -9631,6 +10134,12 @@ function selectRecordsSubTab(sub) {
       if (btn) btn.classList.add("active");
 
       switchTab("season");
+    } else if (sub === "leaderboard") {
+      const btn = document.getElementById("btn-rec-leaderboard");
+
+      if (btn) btn.classList.add("active");
+
+      switchTab("leaderboard");
     }
   }
 }
@@ -9856,3 +10365,20 @@ window.continueExistingGame = function () {
     if (typeof checkShowTutorial === "function") checkShowTutorial();
   }
 };
+
+window.toggleGearCraftingSection = function () {
+  const collapsible = document.getElementById("gearCraftingCollapsible");
+  const icon = document.getElementById("gearCraftingToggleIcon");
+  if (collapsible && icon) {
+    collapsible.classList.toggle("collapsed");
+    icon.classList.toggle("collapsed");
+  }
+};
+
+if (typeof eventBus !== "undefined") {
+  eventBus.on("inventoryChanged", function() {
+    if (typeof renderGearCraftingTab === "function") {
+      renderGearCraftingTab();
+    }
+  });
+}

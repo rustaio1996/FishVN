@@ -49,10 +49,10 @@ let gameState = "idle";
       let currentTitle = "Dân Chơi Hệ Cần Cỏ";
 
       let currentWeather = "Bình Thường";
-      let catchModalThreshold = localStorage.getItem("catchModalThreshold") || "Thần Thoại";
-      if (localStorage.getItem("catchModalThreshold") === "Hiếm" || !localStorage.getItem("catchModalThreshold")) {
-        localStorage.setItem("catchModalThreshold", "Thần Thoại");
+      let catchModalThreshold = localStorage.getItem("catchModalThreshold");
+      if (!catchModalThreshold) {
         catchModalThreshold = "Thần Thoại";
+        localStorage.setItem("catchModalThreshold", "Thần Thoại");
       }
       let fishInventory = {
         Rác: 0,
@@ -115,3 +115,5 @@ let gameState = "idle";
         line: null,
         bobber: null
       };
+
+      let equippedAchievementId = null;

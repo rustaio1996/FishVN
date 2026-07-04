@@ -275,6 +275,22 @@
             </div>
           </div>
 
+          <!-- QR Code Backup Section -->
+          <div class="audio-control-panel settings-mt-15">
+            <span class="audio-title"> 📱 SAO LƯU OFFLINE (QR CODE) </span>
+            <div class="qr-backup-container" id="qrBackupContainer">
+              <div id="qrCodeDisplay" class="qr-code-display"></div>
+            </div>
+            <div class="audio-buttons-container qr-buttons-container">
+              <input type="text" id="qrRestoreInput" class="qr-restore-input" placeholder="Dán mã QR khôi phục vào đây..." title="Nhập mã QR khôi phục">
+              <div class="qr-actions-row">
+                <button id="btnGenerateQR" type="button" class="audio-btn qr-action-btn">📱 Tạo QR Save</button>
+                <button id="btnShowQR" type="button" class="audio-btn qr-action-btn">👁️ Hiển Thị QR</button>
+                <button id="btnRestoreQR" type="button" class="audio-btn audio-btn-import qr-action-btn">🔃 Khôi Phục</button>
+              </div>
+            </div>
+          </div>
+
           <div class="donate-card">
             <div class="donate-card-title" data-i18n="donate.title">💖 ỦNG HỘ PHÁT TRIỂN 💖</div>
             <div class="donate-card-body">
@@ -567,9 +583,23 @@
             <div class="zone-grid" id="zoneGrid"></div>
           </div>
 
+          <div class="quest-container gear-crafting-panel" id="gearCraftingPanel">
+            <div class="pet-tank-toggle-header" onclick="toggleGearCraftingSection()">
+              <div class="inventory-header-title" id="gearCraftingHeaderTitle">
+                🛠️ CHẾ TẠO TRANG BỊ
+              </div>
+              <span class="toggle-icon" id="gearCraftingToggleIcon">▼</span>
+            </div>
+            <div class="pet-tank-collapsible" id="gearCraftingCollapsible">
+              <div class="crafting-header equipped-gear-display-container">🛠️ TRANG BỊ CẦN CÂU HIỆN TẠI:</div>
+              <div id="equippedGearDisplay" class="equipped-gear-display equipped-gear-display-slots"></div>
+              <div id="gearCraftingRecipes"></div>
+            </div>
+          </div>
 
 
-          <div class="quest-container">
+
+          <div class="quest-container daily-quest-panel" id="dailyQuestPanel">
             <div class="quest-header">
               <div>
                 <div class="quest-title" data-i18n="quest.title">🧾 NHIỆM VỤ NGÀY &amp; THỬ THÁCH</div>
@@ -634,13 +664,7 @@
                 >
                   🍲 Bếp Ăn
                 </button>
-                <button
-                  class="tab-btn"
-                  type="button"
-                  onclick="switchTab('gearcrafting', this)"
-                >
-                  🛠️ Chế Đồ
-                </button>
+
                 <button
                   class="tab-btn"
                   type="button"
@@ -654,6 +678,13 @@
                   onclick="switchTab('achievements', this)"
                 >
                   🏆 Thành Tựu
+                </button>
+                <button
+                  class="tab-btn"
+                  type="button"
+                  data-tab="leaderboard"
+                >
+                  📊 Xếp Hạng
                 </button>
               </div>
               <div class="guide-content">
@@ -737,14 +768,7 @@
                   </div>
                   <div id="craftingRecipes"></div>
                 </div>
-                <div id="gearcraftingTab" class="guide-tab">
-                  <div class="crafting-header">
-                    🛠️ TRANG BỊ CẦN CÂU HIỆN TẠI:
-                    <div id="equippedGearDisplay" class="equipped-gear-display"></div>
-                  </div>
-                  <div class="crafting-header">🛠️ CÔNG THỨC CHẾ TẠO TRANG BỊ:</div>
-                  <div id="gearCraftingRecipes"></div>
-                </div>
+
                 <div
                   id="encyclopediaTab"
                   class="guide-tab"
@@ -769,6 +793,9 @@
                     id="playerAchievementsList"
                     class="achievements-list"
                   ></div>
+                </div>
+                <div id="leaderboardTab" class="guide-tab">
+                  <div id="leaderboardTabContent"></div>
                 </div>
 
 

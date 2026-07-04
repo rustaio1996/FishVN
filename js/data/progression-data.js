@@ -210,7 +210,6 @@ let achievements = {
 
       let karmaWithoutLightning = 0;
       let consecutiveCatGacha = 0;
-      let equippedAchievementId = null;
       let currentPet = null;
       let petTank = { slots: [null, null, null], unlockedSlots: 1, activeIndex: -1 };
 
@@ -671,6 +670,86 @@ const rodTiers = [
           buff: { luck: 0.15, legendary_chance: 0.05 }
         },
         {
+          id: "hook_batieu_1",
+          type: "hook",
+          name: "🪝 Lưỡi Câu Ba Tiêu Sắt Rỉ",
+          desc: "Lưỡi câu 3 ngạnh hoen rỉ. Có 10% cơ hội câu được thêm 1 con cá cùng lúc.",
+          req: { "Phế Liệu": 10, "Rác": 5 },
+          buff: { luck: 0.02, multi_catch_chance: 0.10, max_extra_fish: 1 }
+        },
+        {
+          id: "hook_batieu_2",
+          type: "hook",
+          name: "🪝 Lưỡi Câu Ba Tiêu Sắt Rèn",
+          desc: "Thép rèn thủ công tốt hơn. Có 13% cơ hội câu được thêm 1-2 con cá cùng lúc.",
+          req: { "Phế Liệu": 25, "Rác": 15, "Thường": 10 },
+          buff: { luck: 0.04, multi_catch_chance: 0.13, max_extra_fish: 2 }
+        },
+        {
+          id: "hook_batieu_3",
+          type: "hook",
+          name: "🪝 Lưỡi Câu Ba Tiêu Báo Thù",
+          desc: "Tẩm độc nhẹ để trừng trị loài cá. Có 16% cơ hội câu được thêm 1-3 con cá cùng lúc.",
+          req: { "Phế Liệu": 40, "Bất Ổn": 5, "Hiếm": 2 },
+          buff: { luck: 0.06, multi_catch_chance: 0.16, max_extra_fish: 3 }
+        },
+        {
+          id: "hook_batieu_4",
+          type: "hook",
+          name: "🪝 Lưỡi Câu Ba Tiêu Báo Thủ",
+          desc: "Chế tạo chuyên báo hại. Có 19% cơ hội câu được thêm 1-4 con cá cùng lúc.",
+          req: { "Phế Liệu": 60, "Hiếm": 10, "Đột Biến": 1 },
+          buff: { luck: 0.08, multi_catch_chance: 0.19, max_extra_fish: 4 }
+        },
+        {
+          id: "hook_batieu_5",
+          type: "hook",
+          name: "🪝 Lưỡi Câu Ba Tiêu Thủy Thần",
+          desc: "Thấm đẫm sức mạnh dòng sông. Có 22% cơ hội câu được thêm 1-5 con cá cùng lúc (+5% EXP câu chùm).",
+          req: { "Phế Liệu": 80, "Cực Hiếm": 3, "Đột Biến": 2 },
+          buff: { luck: 0.11, multi_catch_chance: 0.22, max_extra_fish: 5, extra_exp_mult: 1.05 }
+        },
+        {
+          id: "hook_batieu_6",
+          type: "hook",
+          name: "🪝 Lưỡi Câu Ba Tiêu Thần Thoại",
+          desc: "Hào quang cổ xưa phát sáng. Có 25% cơ hội câu được thêm 1-6 con cá cùng lúc (+8% EXP câu chùm).",
+          req: { "Phế Liệu": 120, "Cực Hiếm": 5, "Thần Thoại": 1 },
+          buff: { luck: 0.14, multi_catch_chance: 0.25, max_extra_fish: 6, extra_exp_mult: 1.08 }
+        },
+        {
+          id: "hook_batieu_7",
+          type: "hook",
+          name: "🪝 Lưỡi Câu Ba Tiêu Càn Khôn",
+          desc: "Chứa đựng sức mạnh ngũ hành. Có 28% cơ hội câu được thêm 1-7 con cá cùng lúc (+11% EXP câu chùm).",
+          req: { "Phế Liệu": 150, "Cực Hiếm": 7, "Thần Thoại": 2 },
+          buff: { luck: 0.17, multi_catch_chance: 0.28, max_extra_fish: 7, extra_exp_mult: 1.11 }
+        },
+        {
+          id: "hook_batieu_8",
+          type: "hook",
+          name: "🪝 Lưỡi Câu Ba Tiêu Vô Cực",
+          desc: "Vượt qua giới hạn trần thế. Có 31% cơ hội câu được thêm 1-8 con cá cùng lúc (+14% EXP câu chùm).",
+          req: { "Phế Liệu": 180, "Cực Hiếm": 9, "Thần Thoại": 2, "Tối Cao": 1 },
+          buff: { luck: 0.20, multi_catch_chance: 0.31, max_extra_fish: 8, extra_exp_mult: 1.14 }
+        },
+        {
+          id: "hook_batieu_9",
+          type: "hook",
+          name: "🪝 Lưỡi Câu Ba Tiêu Hủy Diệt",
+          desc: "Càn quét mọi vùng nước đi qua. Có 34% cơ hội câu được thêm 1-9 con cá cùng lúc (+17% EXP câu chùm).",
+          req: { "Phế Liệu": 220, "Cực Hiếm": 12, "Thần Thoại": 3, "Tối Cao": 1, "Vô Tri": 1 },
+          buff: { luck: 0.24, multi_catch_chance: 0.34, max_extra_fish: 9, extra_exp_mult: 1.17 }
+        },
+        {
+          id: "hook_batieu_10",
+          type: "hook",
+          name: "🪝 Lưỡi Câu Ba Tiêu Vô Tri Tối Cao",
+          desc: "Bản thể tối thượng của dòng Ba Tiêu. Có 40% cơ hội câu được thêm 1-10 con cá cùng lúc (+25% EXP câu chùm).",
+          req: { "Phế Liệu": 300, "Cực Hiếm": 15, "Thần Thoại": 3, "Tối Cao": 2, "Vô Tri": 2, "Ảo Lòi": 1 },
+          buff: { luck: 0.30, multi_catch_chance: 0.40, max_extra_fish: 10, extra_exp_mult: 1.25 }
+        },
+        {
           id: "line_soi_chuoi",
           type: "line",
           name: "🧵 Dây Câu Sợi Chuối Dẻo Dai",
@@ -687,6 +766,30 @@ const rodTiers = [
           buff: { speed: -0.15, exp_bonus: 0.10 }
         },
         {
+          id: "line_totam",
+          type: "line",
+          name: "🧵 Dây Câu Tơ Tằm Cổ Thụ",
+          desc: "Bện từ sợi tơ thượng hạng. Giảm 22% thời gian chờ và nhận thêm +15% EXP khi câu.",
+          req: { "Phế Liệu": 50, "Hiếm": 10, "Huyền Thoại": 1 },
+          buff: { speed: -0.22, exp_bonus: 0.15 }
+        },
+        {
+          id: "line_carbon",
+          type: "line",
+          name: "🧵 Dây Câu Nanotube Carbon",
+          desc: "Sợi carbon tổng hợp bền chắc. Giảm 30% thời gian chờ và nhận thêm +22% EXP khi câu.",
+          req: { "Phế Liệu": 80, "Cực Hiếm": 5, "Thần Thoại": 1 },
+          buff: { speed: -0.30, exp_bonus: 0.22 }
+        },
+        {
+          id: "line_vocuc",
+          type: "line",
+          name: "🧵 Dây Câu Vô Tri Vô Cực",
+          desc: "Sợi dây thách thức mọi lực vật lý. Giảm 40% thời gian chờ, +35% EXP và nhận x1.10 Vàng khi bán cá.",
+          req: { "Phế Liệu": 150, "Thần Thoại": 2, "Tối Cao": 1, "Ảo Lòi": 1 },
+          buff: { speed: -0.40, exp_bonus: 0.35, extra_gold_mult: 1.10 }
+        },
+        {
           id: "bobber_ve_chai",
           type: "bobber",
           name: "🧪 Phao Ve Chai Giải Nghiệp",
@@ -701,6 +804,30 @@ const rodTiers = [
           desc: "Tích hợp AI dự đoán cá cắn. Giảm 12% tỉ lệ sổng cá khi treo máy Auto.",
           req: { "Phế Liệu": 30, "Rác": 10, "Thần Thoại": 1 },
           buff: { auto_fail_reduct: 0.12 }
+        },
+        {
+          id: "bobber_hatnhan",
+          type: "bobber",
+          name: "🧪 Phao Hạt Nhân Tự Phát Sáng",
+          desc: "Tự phát xạ thu hút cá và giải nghiệp. Giảm 30% Nghiệp lực nhận vào, giảm 20% tỉ lệ sổng cá Auto.",
+          req: { "Phế Liệu": 60, "Hiếm": 8, "Đột Biến": 2 },
+          buff: { karma_reduct: 0.30, auto_fail_reduct: 0.20 }
+        },
+        {
+          id: "bobber_luctu",
+          type: "bobber",
+          name: "🧪 Phao Lực Từ Vô Trọng Lực",
+          desc: "Kháng trọng lực, cân bằng tuyệt hảo. Giảm 45% Nghiệp lực, giảm 30% tỉ lệ sổng cá Auto, +8% Vàng bán cá.",
+          req: { "Phế Liệu": 90, "Cực Hiếm": 6, "Huyền Thoại": 2 },
+          buff: { karma_reduct: 0.45, auto_fail_reduct: 0.30, gold_gain_bonus: 0.08 }
+        },
+        {
+          id: "bobber_chandon",
+          type: "bobber",
+          name: "🧪 Phao Vô Tri Tối Cao Chấn Động",
+          desc: "Chấn động tâm thức các sinh vật biển. Giảm 60% Nghiệp lực, giảm 45% tỉ lệ sổng cá Auto, +15% Vàng, +5% cơ hội Câu Chùm.",
+          req: { "Phế Liệu": 160, "Thần Thoại": 2, "Tối Cao": 2, "Vô Tri": 1 },
+          buff: { karma_reduct: 0.60, auto_fail_reduct: 0.45, gold_gain_bonus: 0.15, double_catch_chance_buff: 0.05 }
         }
       ];
 

@@ -147,6 +147,16 @@ h1 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease-out;
+  margin-top: 0;
+}
+
+.zone-grid.expanded {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 6px;
 }
 
 .zone-btn {
@@ -480,7 +490,8 @@ h1 {
 }
 .quest-container.collapsed #dailyQuestList,
 .quest-container.collapsed .quest-footer,
-.quest-container.collapsed .consumable-panel {
+.quest-container.collapsed .consumable-panel,
+.quest-container.collapsed .quest-desc {
   display: none;
 }
 .quest-container.collapsed .collapse-btn {
@@ -894,12 +905,17 @@ h1 {
 .guide-container {
   order: 7;
 }
-
 .inventory-panel {
   background-color: #12121a;
   border-radius: 10px;
   border: 1px solid #2d2d3f;
   padding: 10px;
+  transition: max-height 0.4s ease;
+  max-height: 1200px;
+}
+.inventory-panel.collapsed {
+  max-height: 42px;
+  overflow: hidden;
 }
 
 .inventory-collapsible {
@@ -1810,18 +1826,7 @@ button:active, .zone-btn:active, .shop-btn:active, .tab-btn:active, .nav-item:ac
     flex: 1 !important;
   }
 
-  /* Collapsible zone grid styling */
-  .zone-grid {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.25s ease-out;
-    margin-top: 0;
-  }
-  .zone-grid.expanded {
-    max-height: 132px;
-    overflow-y: auto;
-    margin-top: 6px;
-  }
+  /* Collapsible zone grid styling handled globally */
 
   /* Shop section sub-titles */
   .shop-section-title {

@@ -326,13 +326,19 @@
 
 
       .zone-grid {
-
         display: grid;
-
         grid-template-columns: 1fr 1fr;
-
         gap: 8px;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.25s ease-out;
+        margin-top: 0;
+      }
 
+      .zone-grid.expanded {
+        max-height: 300px;
+        overflow-y: auto;
+        margin-top: 6px;
       }
 
 
@@ -420,6 +426,10 @@
         scroll-behavior: smooth;
 
         box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5); /* Thêm shadow bên trong */
+
+        -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.3) 8%, rgba(0, 0, 0, 1) 25%);
+
+        mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.3) 8%, rgba(0, 0, 0, 1) 25%);
 
       }
 
@@ -999,7 +1009,9 @@
 
       .quest-container.collapsed .quest-footer,
 
-      .quest-container.collapsed .consumable-panel {
+      .quest-container.collapsed .consumable-panel,
+
+      .quest-container.collapsed .quest-desc {
 
         display: none;
 
@@ -2005,11 +2017,29 @@
 
       }
 
+
+
       .inventory-panel {
 
         order: 5;
 
+        transition: max-height 0.4s ease;
+
+        max-height: 1200px;
+
       }
+
+
+
+      .inventory-panel.collapsed {
+
+        max-height: 42px;
+
+        overflow: hidden;
+
+      }
+
+
 
       #petTankPanel {
 
@@ -4046,32 +4076,6 @@
         .action-btn-auto {
 
           flex: 1 !important;
-
-        }
-
-
-
-        /* Collapsible zone grid styling */
-
-        .zone-grid {
-
-          max-height: 0;
-
-          overflow: hidden;
-
-          transition: max-height 0.25s ease-out;
-
-          margin-top: 0;
-
-        }
-
-        .zone-grid.expanded {
-
-          max-height: 132px;
-
-          overflow-y: auto;
-
-          margin-top: 6px;
 
         }
 
@@ -7255,4 +7259,94 @@
         transform: scale(0.9);
       }
 
+      /* Classes for QR Code Backup & Logs to replace inline styles */
+      .qr-backup-container {
+        display: none;
+        margin: 10px 0;
+        min-height: 200px;
+      }
 
+      .qr-code-display {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 10px;
+      }
+
+      .qr-buttons-container {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .qr-restore-input {
+        width: 100%;
+        padding: 8px;
+        background: #12121e;
+        border: 1px solid #333;
+        border-radius: 4px;
+        color: #fff;
+        font-size: 12px;
+        display: none;
+      }
+
+      .qr-actions-row {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+      }
+
+      .qr-action-btn {
+        flex: 1;
+      }
+
+      .log-highlight-cyan {
+        color: #00ffff;
+        font-weight: bold;
+      }
+
+      /* Styling for Collapsible Pet Tank */
+      .pet-tank-toggle-header {
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+
+      .pet-tank-collapsible {
+        max-height: 400px;
+        overflow-y: auto;
+        transition: max-height 0.4s ease, opacity 0.3s ease;
+        opacity: 1;
+      }
+
+      .pet-tank-collapsible.collapsed {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+      }
+
+      .toggle-icon {
+        transition: transform 0.3s ease;
+        display: inline-block;
+      }
+
+      .toggle-icon.collapsed {
+        transform: rotate(-90deg);
+      }
+
+
+
+
+      .gear-crafting-panel {
+        margin-top: 15px;
+      }
+      .equipped-gear-display-container {
+        margin-top: 10px;
+      }
+      .equipped-gear-display-slots {
+        margin-top: 5px;
+      }
+      #gearCraftingHeaderTitle {
+        color: #ff9800;
+      }
