@@ -314,7 +314,7 @@ const rodTiers = [
       const rarityConfig = {
         Rác: {
           rank: 0,
-          baseWeight: 2200,
+          baseWeight: 2600,
           minLevel: 1,
           stars: "⭐",
           starBonus: 0,
@@ -324,7 +324,7 @@ const rodTiers = [
         },
         "Phế Liệu": {
           rank: 1,
-          baseWeight: 1800,
+          baseWeight: 4200,
           minLevel: 1,
           stars: "⭐⚙️",
           starBonus: 0,
@@ -517,8 +517,8 @@ const rodTiers = [
         },
         upgradeCurve: {
           endgameStart: 20,
-          endgameScale: 0.35,
-          endgamePower: 1.35,
+          endgameScale: 0.55,
+          endgamePower: 1.42,
         },
         upgrades: {
           rod: {
@@ -526,7 +526,7 @@ const rodTiers = [
             logName: "Cần Câu Gia Truyền Dính Lời Nguyền",
             emoji: "🎣",
             baseCost: 42,
-            growth: 1.26,
+            growth: 1.34,
             maxLevel: 150,
             desc: "Tăng may mắn, mở đường săn cá hiếm.",
           },
@@ -535,7 +535,7 @@ const rodTiers = [
             logName: "Mạng WiFi Bắt Sóng Cá Cắn",
             emoji: "⚡",
             baseCost: 36,
-            growth: 1.25,
+            growth: 1.32,
             maxLevel: 150,
             desc: "Giảm thời gian chờ cá cắn.",
           },
@@ -544,7 +544,7 @@ const rodTiers = [
             logName: "Google Maps Đáy Ao Bản Crack",
             emoji: "🗺️",
             baseCost: 60,
-            growth: 1.31,
+            growth: 1.38,
             maxLevel: 150,
             desc: "Tăng xác suất gặp cá ngon theo khu.",
           },
@@ -553,7 +553,7 @@ const rodTiers = [
             logName: "Đệ Tử Báo Đời Ăn Chia",
             emoji: "🐾",
             baseCost: 54,
-            growth: 1.29,
+            growth: 1.36,
             maxLevel: 150,
             desc: "Tăng EXP và thêm may mắn phụ.",
           },
@@ -562,7 +562,7 @@ const rodTiers = [
             logName: "Thằng Em Treo Máy Có Tâm",
             emoji: "🤖",
             baseCost: 95,
-            growth: 1.34,
+            growth: 1.58,
             maxLevel: 150,
             desc: "Tăng hiệu quả AFK nên đắt hơn.",
           },
@@ -658,7 +658,7 @@ const rodTiers = [
           type: "hook",
           name: "🪝 Lưỡi Câu Sắt Lỏ",
           desc: "Chế từ phế liệu hoen rỉ. Tăng +0.05 May Mắn.",
-          req: { "Phế Liệu": 15, "Rác": 5 },
+          req: { "Phế Liệu": 10, "Rác": 5 },
           buff: { luck: 0.05 }
         },
         {
@@ -674,7 +674,7 @@ const rodTiers = [
           type: "hook",
           name: "🪝 Lưỡi Câu Ba Tiêu Sắt Rỉ",
           desc: "Lưỡi câu 3 ngạnh hoen rỉ. Có 10% cơ hội câu được thêm 1 con cá cùng lúc.",
-          req: { "Phế Liệu": 10, "Rác": 5 },
+          req: { "Phế Liệu": 12, "Rác": 5 },
           buff: { luck: 0.02, multi_catch_chance: 0.10, max_extra_fish: 1 }
         },
         {
@@ -754,7 +754,7 @@ const rodTiers = [
           type: "line",
           name: "🧵 Dây Câu Sợi Chuối Dẻo Dai",
           desc: "Dây bện từ bẹ chuối ao làng. Giảm 5% thời gian chờ cá cắn.",
-          req: { "Rác": 20, "Thường": 5 },
+          req: { "Rác": 15, "Thường": 5 },
           buff: { speed: -0.05 }
         },
         {
@@ -794,7 +794,7 @@ const rodTiers = [
           type: "bobber",
           name: "🧪 Phao Ve Chai Giải Nghiệp",
           desc: "Làm từ vỏ chai nhựa nổi. Giảm 15% Nghiệp tích tụ khi câu hụt hoặc trúng rác.",
-          req: { "Rác": 10, "Phế Liệu": 10 },
+          req: { "Rác": 8, "Phế Liệu": 8 },
           buff: { karma_reduct: 0.15 }
         },
         {

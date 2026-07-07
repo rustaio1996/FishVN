@@ -25,7 +25,7 @@ const zones = {
   khu_bi_mat: {
     name: "🤫 Khu Chứa Bí Mật",
     desc: "Khu vực ẩn, tập trung các loài sinh vật đột biến và huyền thoại",
-    level: 8,
+    level: 16,
     emoji: "🤫",
   },
   suoi_doc: {

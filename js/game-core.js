@@ -25,16 +25,8 @@ function getPlayerId() {
   return id;
 }
 
-const domCache = {};
 function getEl(id) {
-    if (!domCache[id]) {
-        const el = document.getElementById(id);
-        if (el) {
-            domCache[id] = el;
-        }
-        return el;
-    }
-    return domCache[id];
+  return document.getElementById(id);
 }
 
 // Hybrid Database Wrapper (Hỗ trợ lưu trữ local dự phòng + Đồng bộ MongoDB Atlas)
@@ -4280,10 +4272,14 @@ function renderLeaderboard() {
     return b.gold - a.gold;
   });
 
+  const playerRank = scaledBots.findIndex((item) => item.isPlayer) + 1;
   let html = `
-    <div style="background: rgba(30, 30, 50, 0.5); padding: 12px; border-radius: 8px; border: 1px solid #333; margin-bottom: 12px;">
-      <h4 style="margin: 0 0 5px 0; color: #00e5ff;">🏆 BẢNG XẾP HẠNG CẦN THỦ BẤT ỔN</h4>
-      <p style="margin: 0; font-size: 11px; color: #aaa;">Đọ trình độ và tài sản cùng các bậc tiền bối giới cần thủ!</p>
+    <div class="leaderboard-summary">
+      <div>
+        <h4>🏆 BẢNG XẾP HẠNG CẦN THỦ BẤT ỔN</h4>
+        <p>Đọ cấp, vàng và tiến độ với các bậc tiền bối giả lập theo mùa.</p>
+      </div>
+      <div class="leaderboard-player-rank">Hạng của bạn: #${playerRank}</div>
     </div>
   `;
   scaledBots.forEach((item, index) => {
@@ -4297,15 +4293,15 @@ function renderLeaderboard() {
     const goldStr = item.gold.toLocaleString("vi-VN");
 
     html += `
-      <div class="leaderboard-item ${rowClass}" style="display:flex; align-items:center; padding:10px; margin-bottom:8px; border-radius:6px; background:${item.isPlayer ? 'rgba(0, 229, 255, 0.15)' : 'rgba(20, 20, 35, 0.7)'}; border: 1px solid ${item.isPlayer ? '#00e5ff' : '#222'};">
-        <div style="font-size:18px; width:30px; text-align:center; font-weight:bold; color:${item.isPlayer ? '#00e5ff' : '#fff'};">${rankBadge}</div>
-        <div style="flex:1; margin-left:10px;">
-          <div style="font-weight:bold; color:${item.isPlayer ? '#00e5ff' : '#fff'};">${item.name}</div>
-          <div style="font-size:11px; color:#a0a5c0;">${item.title}</div>
+      <div class="leaderboard-item ${rowClass}">
+        <div class="leaderboard-rank">${rankBadge}</div>
+        <div class="leaderboard-main">
+          <div class="leaderboard-name">${item.name}</div>
+          <div class="leaderboard-title">${item.title}</div>
         </div>
-        <div style="text-align:right;">
-          <div style="font-weight:bold; color:#ffb900;">💵 ${goldStr}đ</div>
-          <div style="font-size:11px; color:#888;">Cấp ${item.level}</div>
+        <div class="leaderboard-score">
+          <div class="leaderboard-gold">💵 ${goldStr}đ</div>
+          <div class="leaderboard-level">Cấp ${item.level}</div>
         </div>
       </div>
     `;
@@ -4475,6 +4471,22 @@ function adoptPet(bagKey) {
 function renderPetTankTab() {
   let container = document.getElementById("petTankContent");
   if (!container) return;
+  if (!petTank || !Array.isArray(petTank.slots)) {
+    petTank = currentPet
+      ? { slots: [currentPet, null, null], unlockedSlots: 1, activeIndex: 0 }
+      : { slots: [null, null, null], unlockedSlots: 1, activeIndex: -1 };
+  }
+  while (petTank.slots.length < 3) petTank.slots.push(null);
+  petTank.unlockedSlots = Math.min(3, Math.max(1, Number(petTank.unlockedSlots) || 1));
+  if (
+    petTank.activeIndex === undefined ||
+    petTank.activeIndex < -1 ||
+    petTank.activeIndex >= petTank.unlockedSlots ||
+    (petTank.activeIndex !== -1 && !petTank.slots[petTank.activeIndex])
+  ) {
+    petTank.activeIndex = petTank.slots.findIndex((pet, index) => index < petTank.unlockedSlots && pet);
+  }
+  currentPet = petTank.activeIndex !== -1 ? petTank.slots[petTank.activeIndex] : null;
 
   let html = `
           <div class="pet-slots-container">
@@ -4571,11 +4583,22 @@ function renderPetTankTab() {
   }
 
   const selectedPet = petTank.slots[selectedFeedPetIndex];
+  if (!selectedPet) {
+    container.innerHTML =
+      html +
+      `
+          <div class="pet-details-container">
+              <div class="pet-slot-desc">Bể đang trống. Vào Bách Khoa -> Nuôi để thả cá vào bể.</div>
+          </div>
+        `;
+    return;
+  }
+  const isSelectedPetOnExp =
+    selectedPet.expedition && selectedPet.expedition.status === "running";
 
   let expeditionHtml = "";
-  if (selectedPet) {
-    const expState = selectedPet.expedition;
-    if (expState && expState.status === "running") {
+  const expState = selectedPet.expedition;
+  if (expState && expState.status === "running") {
       const timeLeftMs = expState.endTime - Date.now();
       const isDone = timeLeftMs <= 0;
       let timeString = "";
@@ -4603,7 +4626,7 @@ function renderPetTankTab() {
                   </button>
               </div>
             `;
-    } else {
+  } else {
       const unlockedZones = Object.keys(zones).filter(
         (zoneId) => zones[zoneId].level <= playerLevel,
       );
@@ -4622,11 +4645,11 @@ function renderPetTankTab() {
               <div class="pet-expedition-panel">
                   <div class="pet-expedition-title">⛵ CỬ PET ĐI VIỄN CHINH PHÁT TÀI:</div>
                   <div class="pet-expedition-desc">Gửi pet thám hiểm các vùng đã mở khóa để lượm quà mang về.</div>
-                  <div style="display: flex; gap: 6px; margin-bottom: 8px; align-items: center;">
-                    <select id="expeditionZoneSelect" class="inv-select-filter" style="flex: 1; padding: 4px; font-size: 10px; background-color: #12121e; color: #fff; border: 1px solid #333;" title="Chọn khu vực viễn chinh">
+                  <div class="pet-expedition-controls">
+                    <select id="expeditionZoneSelect" class="inv-select-filter pet-expedition-zone" title="Chọn khu vực viễn chinh">
                       ${zoneOptions}
                     </select>
-                    <select id="expeditionDurationSelect" class="inv-select-filter" style="width: 80px; padding: 4px; font-size: 10px; background-color: #12121e; color: #fff; border: 1px solid #333;" title="Chọn thời gian viễn chinh">
+                    <select id="expeditionDurationSelect" class="inv-select-filter pet-expedition-duration" title="Chọn thời gian viễn chinh">
                       <option value="1">50s (${fee1}đ)</option>
                       <option value="2">100s (${fee2}đ)</option>
                       <option value="4">200s (${fee4}đ)</option>
@@ -4637,7 +4660,6 @@ function renderPetTankTab() {
                   </button>
               </div>
             `;
-    }
   }
 
   let xpNeeded = selectedPet.level * 50;
@@ -4653,13 +4675,13 @@ function renderPetTankTab() {
                 <div class="pet-expedition-title evo">🔥 TIẾN HÓA HỆ BÁO THỦ (LV5+) 🔥</div>
                 <div class="pet-expedition-desc evo">Bé cưng đã sẵn sàng chọn hệ báo đạo. Chọn 1 trong 3 hệ dưới đây:</div>
                 <div style="display: flex; flex-direction: column; gap: 6px;">
-                  <button class="pet-evo-button" style="background-color: #e65100;" ${isOnExp ? "disabled" : ""} onclick="choosePetClassSpecific('fire', ${selectedFeedPetIndex})">
+                  <button class="pet-evo-button" style="background-color: #e65100;" ${isSelectedPetOnExp ? "disabled" : ""} onclick="choosePetClassSpecific('fire', ${selectedFeedPetIndex})">
                     🔥 <b>Báo Lửa</b>: Tốc độ câu +20%, 30% cơ hội đốt rác thành vàng lậu (15đ-30đ) không tăng Nghiệp.
                   </button>
-                  <button class="pet-evo-button" style="background-color: #311b92;" ${isOnExp ? "disabled" : ""} onclick="choosePetClassSpecific('lightning', ${selectedFeedPetIndex})">
+                  <button class="pet-evo-button" style="background-color: #311b92;" ${isSelectedPetOnExp ? "disabled" : ""} onclick="choosePetClassSpecific('lightning', ${selectedFeedPetIndex})">
                     ⚡ <b>Báo Sét</b>: Giảm 25% tỷ lệ sét đánh, khi bị sét đánh sẽ nạp 100% nghiệp lực và nhận x2 giá bán cá trong 60s tiếp theo.
                   </button>
-                  <button class="pet-evo-button" style="background-color: #004d40;" ${isOnExp ? "disabled" : ""} onclick="choosePetClassSpecific('money', ${selectedFeedPetIndex})">
+                  <button class="pet-evo-button" style="background-color: #004d40;" ${isSelectedPetOnExp ? "disabled" : ""} onclick="choosePetClassSpecific('money', ${selectedFeedPetIndex})">
                     💵 <b>Báo Tiền</b>: 40% cơ hội cướp thêm 15%-30% vàng lậu sau mỗi lần bán cá, nhưng có 5% làm sổng cá do mải đếm tiền.
                   </button>
                 </div>
@@ -4694,7 +4716,7 @@ function renderPetTankTab() {
 
   if (lowTierItems.length === 0) {
     feedHtml = `
-            <div style="font-size: 10.5px; color: #888; text-align: center; padding: 10px;">
+            <div class="pet-feed-empty">
               Túi đồ không có cá cấp thấp (Rác, Phế Liệu, Thường, Bất Ổn) để cho ăn!
             </div>
           `;
@@ -4711,12 +4733,12 @@ function renderPetTankTab() {
                   return `
                   <div class="pet-feed-item">
                     <div class="pet-feed-item-info">
-                      <span style="font-size: 16px;">${item.fish.emoji}</span>
+                      <span class="pet-feed-emoji">${item.fish.emoji}</span>
                       <div>
-                        <div style="font-size: 9px; color: #aaa;">${item.fish.rarity} | SL: ${item.count}</div>
+                        <div class="pet-feed-item-desc">${item.fish.rarity} | SL: ${item.count}</div>
                       </div>
                     </div>
-                    <button class="shop-btn" style="padding: 4px 8px; font-size: 9.5px; background-color: #388e3c; color: #fff;" ${isMaxLevel ? "disabled" : ""} onclick="feedPetSpecific('${item.key}', ${selectedFeedPetIndex})">
+                    <button class="shop-btn pet-feed-item-button" ${isMaxLevel ? "disabled" : ""} onclick="feedPetSpecific('${item.key}', ${selectedFeedPetIndex})">
                       Cho Ăn (+${xpVal} XP)
                     </button>
                   </div>
@@ -4730,17 +4752,17 @@ function renderPetTankTab() {
   html += `
           <div class="pet-details-container">
               <div class="pet-details-header">
-                  <span class="fish-sprite" data-rarity="${selectedPet.rarity || "Thường"}" style="font-size: 24px; width: 36px; height: 36px; line-height: 36px; display: inline-flex; justify-content: center; align-items: center;">${selectedPet.emoji}</span>
-                  <div style="flex-grow: 1; margin-left: 12px;">
-                      <div style="font-weight: bold; color: #ffeb3b; font-size: 14px;">${selectedPet.name}</div>
-                      <div style="font-size: 11px; color: #bbb; margin-top: 2px;">Cấp Độ: <b style="color: #ff9800;">Lv${selectedPet.level}</b> (${selectedPet.level >= 10 ? "Tối Thượng" : selectedPet.level >= 5 ? "Bất Ổn" : "Báo Thủ"})</div>
+                  <span class="fish-sprite pet-details-sprite" data-rarity="${selectedPet.rarity || "Thường"}">${selectedPet.emoji}</span>
+                  <div class="pet-details-main">
+                      <div class="pet-details-name">${selectedPet.name}</div>
+                      <div class="pet-details-level">Cấp Độ: <b>Lv${selectedPet.level}</b> (${selectedPet.level >= 10 ? "Tối Thượng" : selectedPet.level >= 5 ? "Bất Ổn" : "Báo Thủ"})</div>
                   </div>
-                  <button class="pet-poke-button" ${isOnExp ? "disabled" : ""} onclick="pokeActivePet(${selectedFeedPetIndex})">
+                  <button class="pet-poke-button" ${isSelectedPetOnExp ? "disabled" : ""} onclick="pokeActivePet(${selectedFeedPetIndex})">
                     👋 Chọc Ghẹo
                   </button>
               </div>
 
-              <div style="margin-top: 10px;">
+              <div class="pet-progress-block">
                   <div class="pet-progress-label">
                       <span>Độ Báo Hại (Kinh Nghiệm)</span>
                       <span>${xpDisplay}</span>
@@ -4758,8 +4780,8 @@ function renderPetTankTab() {
               ${evolutionSelectionHtml}
 
               <div class="pet-active-evo-display" style="border-left-color: #4caf50;">
-                  <div class="pet-active-evo-label" style="color: #4caf50;">🍲 CHO PET ĂN CÁ CẤP THẤP:</div>
-                  <div style="margin-top: 8px;">${feedHtml}</div>
+                  <div class="pet-active-evo-label pet-feed-label">🍲 CHO PET ĂN CÁ CẤP THẤP:</div>
+                  <div class="pet-feed-wrap">${feedHtml}</div>
               </div>
               ${expeditionHtml}
           </div>
@@ -4927,12 +4949,6 @@ window.releasePetSpecific = async function (slotIndex) {
   }
 };
 
-async function releasePet() {
-  if (petTank.activeIndex !== -1) {
-    await releasePetSpecific(petTank.activeIndex);
-  }
-}
-
 window.choosePetClassSpecific = function (className, slotIndex) {
   if (slotIndex === undefined) {
     slotIndex = petTank.activeIndex !== -1 ? petTank.activeIndex : 0;
@@ -4961,12 +4977,6 @@ window.choosePetClassSpecific = function (className, slotIndex) {
   recalculateLuck();
   updateStatsPanel();
 };
-
-function choosePetClass(className) {
-  if (petTank.activeIndex !== -1) {
-    choosePetClassSpecific(className, petTank.activeIndex);
-  }
-}
 
 window.startPetExpedition = function (slotIndex) {
   if (!petTank || !petTank.slots[slotIndex]) return;
@@ -5125,6 +5135,9 @@ window.togglePetTankSection = function () {
   const icon = document.getElementById("petTankToggleIcon");
   collapsible.classList.toggle("collapsed");
   icon.classList.toggle("collapsed");
+  if (!collapsible.classList.contains("collapsed")) {
+    renderPetTankTab();
+  }
 };
 
 function checkPetGoldStealing() {
@@ -8432,17 +8445,6 @@ function migrateSaveState(state) {
   return state;
 }
 
-// ponytail: simple validation helper for save state schema
-function validateSaveSchema(state) {
-  return (
-    state &&
-    typeof state === "object" &&
-    typeof state.playerName === "string" &&
-    typeof state.gold === "number" &&
-    typeof state.playerLevel === "number"
-  );
-}
-
 async function saveGameState() {
   try {
     let state = {
@@ -8472,6 +8474,7 @@ async function saveGameState() {
       discoveredFishMap: discoveredFishMap,
       systemBuffs: systemBuffs,
       currentPet: currentPet,
+      petTank: petTank,
       seasonData: typeof seasonData !== "undefined" ? seasonData : null,
       lightningRageEnd:
         typeof lightningRageEnd !== "undefined" ? lightningRageEnd : 0,
@@ -8632,13 +8635,30 @@ async function loadGameState() {
 
       if (state.systemBuffs !== undefined) systemBuffs = state.systemBuffs;
 
-      if (state.currentPet !== undefined) {
-        currentPet = state.currentPet;
-
-        if (currentPet) {
-          if (currentPet.level === undefined) currentPet.level = 1;
-
-          if (currentPet.xp === undefined) currentPet.xp = 0;
+      if (state.petTank !== undefined) {
+        petTank = state.petTank;
+        if (!petTank.slots) petTank.slots = [null, null, null];
+        while (petTank.slots.length < 3) petTank.slots.push(null);
+        if (petTank.unlockedSlots === undefined) petTank.unlockedSlots = 1;
+        if (petTank.activeIndex === undefined) petTank.activeIndex = -1;
+        if (petTank.activeIndex !== -1) {
+          currentPet = petTank.slots[petTank.activeIndex];
+        } else {
+          currentPet = null;
+        }
+      } else {
+        if (state.currentPet !== undefined) {
+          currentPet = state.currentPet;
+          if (currentPet) {
+            if (currentPet.level === undefined) currentPet.level = 1;
+            if (currentPet.xp === undefined) currentPet.xp = 0;
+            petTank = { slots: [currentPet, null, null], unlockedSlots: 1, activeIndex: 0 };
+          } else {
+            petTank = { slots: [null, null, null], unlockedSlots: 1, activeIndex: -1 };
+          }
+        } else {
+          petTank = { slots: [null, null, null], unlockedSlots: 1, activeIndex: -1 };
+          currentPet = null;
         }
       }
 
@@ -8768,6 +8788,7 @@ function exportSaveFile() {
     systemBuffs: systemBuffs,
 
     currentPet: currentPet,
+    petTank: petTank,
 
     seasonData: typeof seasonData !== "undefined" ? seasonData : null,
 
@@ -8925,6 +8946,7 @@ function importSaveFile(input) {
         systemBuffs: state.systemBuffs || {},
 
         currentPet: state.currentPet || null,
+        petTank: state.petTank || null,
 
         dailyQuests: state.dailyQuests || [],
 
@@ -9864,6 +9886,7 @@ async function initGame() {
     getEl("playerNameText").innerText = playerName;
 
     selectZone(currentZone);
+    renderPetTankTab();
     initPixelCanvasScene();
   } catch (e) {
     console.error("Lỗi khi khởi chạy game:", e);

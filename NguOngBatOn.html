@@ -10,12 +10,12 @@
       href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     >
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=pet-ui">
 
   </head>
   <body>
     <noscript>
-      <div style="background-color: #ff3d00; color: #fff; padding: 20px; text-align: center; font-weight: bold; font-size: 16px; position: fixed; top: 0; left: 0; right: 0; z-index: 99999;">
+      <div class="noscript-warning">
         ⚠️ Trò chơi này yêu cầu bật JavaScript để hoạt động. Vui lòng kích hoạt JavaScript trong trình duyệt của bạn!
       </div>
     </noscript>
@@ -57,30 +57,30 @@
 
     <!-- Mobile Bottom Navigation Bar -->
     <div class="mobile-nav-bar">
-      <div class="nav-item active" id="nav-fishing" onclick="switchMobileTab('fishing')" role="button" tabindex="0" aria-label="Mở tab Câu Cá">
+      <button class="nav-item active" id="nav-fishing" onclick="switchMobileTab('fishing')" type="button" aria-label="Mở tab Câu Cá">
         <span class="nav-icon">🎣</span>
         <span class="nav-text" data-i18n="nav.fishing">Câu Cá</span>
-      </div>
-      <div class="nav-item" id="nav-bag" onclick="switchMobileTab('bag')" role="button" tabindex="0" aria-label="Mở tab Hành Trang">
+      </button>
+      <button class="nav-item" id="nav-bag" onclick="switchMobileTab('bag')" type="button" aria-label="Mở tab Hành Trang">
         <span class="nav-icon">🎒</span>
         <span class="nav-text" data-i18n="nav.bag">Hành Trang</span>
-      </div>
-      <div class="nav-item" id="nav-pet" onclick="switchMobileTab('pet')" role="button" tabindex="0" aria-label="Mở tab Bể Báo Thủ">
+      </button>
+      <button class="nav-item" id="nav-pet" onclick="switchMobileTab('pet')" type="button" aria-label="Mở tab Bể Báo Thủ">
         <span class="nav-icon">🏠</span>
         <span class="nav-text" data-i18n="nav.pet">Bể Báo</span>
-      </div>
-      <div class="nav-item" id="nav-shop" onclick="switchMobileTab('shop')" role="button" tabindex="0" aria-label="Mở tab Cửa Hàng">
+      </button>
+      <button class="nav-item" id="nav-shop" onclick="switchMobileTab('shop')" type="button" aria-label="Mở tab Cửa Hàng">
         <span class="nav-icon">🛒</span>
         <span class="nav-text" data-i18n="nav.shop">Cửa Hàng</span>
-      </div>
-      <div class="nav-item" id="nav-records" onclick="switchMobileTab('records')" role="button" tabindex="0" aria-label="Mở tab Kỷ Lục">
+      </button>
+      <button class="nav-item" id="nav-records" onclick="switchMobileTab('records')" type="button" aria-label="Mở tab Kỷ Lục">
         <span class="nav-icon">🏆</span>
         <span class="nav-text" data-i18n="nav.records">Kỷ Lục</span>
-      </div>
-      <div class="nav-item" id="nav-settings" onclick="switchMobileTab('settings')" role="button" tabindex="0" aria-label="Mở tab Cài Đặt">
+      </button>
+      <button class="nav-item" id="nav-settings" onclick="switchMobileTab('settings')" type="button" aria-label="Mở tab Cài Đặt">
         <span class="nav-icon">⚙️</span>
         <span class="nav-text" data-i18n="nav.settings">Cài Đặt</span>
-      </div>
+      </button>
     </div>
 
     <!-- Game Entry Modal: Cloud Sync Login / New Game -->
@@ -165,7 +165,7 @@
     <div id="desktopSettingsModal" class="name-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="desktopSettingsTitle">
       <div class="name-modal-content settings-modal-content" tabindex="-1">
         <h3 id="desktopSettingsTitle" class="modal-title" data-i18n="settings.title">⚙️ CÀI ĐẶT HỆ THỐNG</h3>
-        
+
         <!-- Nút cuộn lên xuống cho tab Cài đặt -->
         <div class="settings-scroll-controls">
           <button type="button" class="scroll-control-btn scroll-up" onclick="scrollSettings('up')" title="Cuộn lên">▲</button>
@@ -350,6 +350,7 @@
           <button class="sub-tab-btn" id="btn-rec-ach" type="button" onclick="selectRecordsSubTab('achievement')" data-i18n="subtab.achievement">🏆 Thành Tựu</button>
           <button class="sub-tab-btn" id="btn-rec-help" type="button" onclick="selectRecordsSubTab('help')" data-i18n="subtab.help">❓ Trợ Giúp</button>
           <button class="sub-tab-btn" id="btn-rec-zone" type="button" onclick="selectRecordsSubTab('zone')" data-i18n="subtab.zone">🗺️ Bản Đồ</button>
+          <button class="sub-tab-btn" id="btn-rec-leaderboard" type="button" onclick="selectRecordsSubTab('leaderboard')">📊 Xếp Hạng</button>
           <button class="sub-tab-btn" id="btn-rec-season" type="button" onclick="selectRecordsSubTab('season')">🏆 Mùa</button>
           <button class="sub-tab-btn" id="btn-rec-roadmap" type="button" onclick="selectRecordsSubTab('roadmap')">🗺️ Lộ Trình</button>
         </div>
@@ -462,9 +463,9 @@
               </div>
               <div id="sysBuffActiveList" class="sys-buff-list"></div>
             </div>
-            <!-- Buff Multiplier Stacking & Combo Panel -->
+            <!-- Buff Multiplier Stacking &amp; Combo Panel -->
             <div class="stats-row buff-summary-panel" id="buffSummaryPanel">
-              <div class="buff-summary-header">🚀 PHÂN TÍCH BUFF & COMBO:</div>
+              <div class="buff-summary-header">🚀 PHÂN TÍCH BUFF &amp; COMBO:</div>
               <div id="buffSummaryMetrics" class="buff-summary-metrics"></div>
               <div id="buffSummaryCombo" class="buff-summary-combo"></div>
             </div>
@@ -1151,6 +1152,8 @@
             Tiếp Tục Câu 🎣
           </button>
         </div>
+      </div>
+    </div>
     <!-- Newbie Tutorial Modal -->
     <div id="newbieTutorialModal" class="tutorial-overlay" role="dialog" aria-modal="true" aria-labelledby="tutorialStepTitle">
       <div class="tutorial-content" tabindex="-1">
@@ -1158,7 +1161,7 @@
         <div id="tutorialStepEmoji" class="tutorial-emoji">🎣🌊⛵</div>
         <h2 id="tutorialStepTitle" class="tutorial-title">Chào mừng Ngư Ông!</h2>
         <p id="tutorialStepText" class="tutorial-text">Chào mừng bạn đến với Ngư Ông Bất Ổn! Nơi bạn sẽ bắt đầu sự nghiệp câu cá báo đời, flex nhân phẩm và sưu tầm hơn 259+ loài cá siêu vô tri.</p>
-        
+
         <div class="tutorial-footer">
           <div id="tutorialStepDots" class="tutorial-dots">
             <span class="tutorial-dot active"></span>

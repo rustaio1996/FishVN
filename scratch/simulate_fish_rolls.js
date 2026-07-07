@@ -165,6 +165,12 @@ for (const [zoneId, zone] of Object.entries(zones)) {
   const buckets = { trash: 0, common: 0, rare: 0, epic: 0, legendary: 0, supreme: 0 };
   const topFish = {};
 
+  if (pool.length === 0) {
+    console.log(`\n${zoneId} Lv${zone.level} pool=0`);
+    console.log("  skipped: no eligible fish at this forced level");
+    continue;
+  }
+
   for (let i = 0; i < castsPerZone; i++) {
     const fish = pickWeighted(pool, zoneId, rng);
     counts[fish.rarity] = (counts[fish.rarity] || 0) + 1;
@@ -192,4 +198,3 @@ for (const [zoneId, zone] of Object.entries(zones)) {
   console.log(`  rarity: ${rarityLine}`);
   console.log(`  top: ${topLine}`);
 }
-

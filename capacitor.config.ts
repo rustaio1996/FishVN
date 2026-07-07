@@ -2,7 +2,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
   appId: "com.nguongbaton.game",
-  appName: "New Version",
+  appName: "Ngư Ông Bất Ổn",
   webDir: "dist/web",
 };
 

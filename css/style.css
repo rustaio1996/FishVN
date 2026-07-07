@@ -3833,6 +3833,10 @@
 
         .mobile-settings-container,
 
+        .pixel-fishing-scene,
+
+        .log-panel-container,
+
         #petTankPanel {
 
           display: none !important;
@@ -3880,6 +3884,10 @@
 
 
         body.tab-fishing .time-event-panel,
+
+        body.tab-fishing .pixel-fishing-scene,
+
+        body.tab-fishing .log-panel-container,
 
         body.tab-fishing .zone-selector,
 
@@ -4698,7 +4706,7 @@
 
         }
 
-        .nav-item {
+      .nav-item {
 
           flex: 1;
 
@@ -4712,9 +4720,17 @@
 
           justify-content: center;
 
+          background: transparent;
+
+          border: 0;
+
           color: #888;
 
           cursor: pointer;
+
+          font: inherit;
+
+          padding: 0;
 
         }
 
@@ -7259,6 +7275,20 @@
         transform: scale(0.9);
       }
 
+      .noscript-warning {
+        background-color: #ff3d00;
+        color: #fff;
+        padding: 20px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 16px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 99999;
+      }
+
       /* Classes for QR Code Backup & Logs to replace inline styles */
       .qr-backup-container {
         display: none;
@@ -8332,200 +8362,6 @@
 
 .buff-summary-combo {
   font-size: 10px;
-.fish-card .rarity-badge {
-  transition: transform 0.2s ease;
-}
-
-.fish-card:hover .rarity-badge {
-  transform: scale(1.1);
-}
-
-/* ===== KEYFRAME ANIMATIONS ===== */
-
-@keyframes sprite-pulse-rare {
-  0%, 100% { box-shadow: 0 0 8px currentColor; transform: scale(1); }
-  50% { box-shadow: 0 0 14px currentColor; transform: scale(1.05); }
-}
-
-@keyframes sprite-pulse-epic {
-  0%, 100% { box-shadow: 0 0 10px currentColor; transform: scale(1); }
-  50% { box-shadow: 0 0 20px currentColor; transform: scale(1.08); }
-}
-
-@keyframes sprite-shimmer {
-  0% { filter: brightness(1) hue-rotate(0deg); }
-  50% { filter: brightness(1.3) hue-rotate(15deg); }
-  100% { filter: brightness(1) hue-rotate(0deg); }
-}
-
-@keyframes sprite-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
-}
-
-@keyframes sprite-rainbow {
-  0% { background-position: 0% 50%; filter: brightness(1); }
-  25% { filter: brightness(1.2); }
-  50% { background-position: 100% 50%; filter: brightness(1.4); }
-  75% { filter: brightness(1.2); }
-  100% { background-position: 0% 50%; filter: brightness(1); }
-}
-
-@keyframes sprite-cosmic {
-  0% { background-position: 0% 0%; }
-  50% { background-position: 100% 100%; }
-  100% { background-position: 0% 0%; }
-}
-
-@keyframes catch-pop {
-  0% { transform: scale(0) rotate(-15deg); opacity: 0; }
-  60% { transform: scale(1.3) rotate(5deg); opacity: 1; }
-  100% { transform: scale(1) rotate(0deg); opacity: 1; }
-}
-
-@keyframes legendary-entrance {
-  0% { filter: brightness(3) saturate(2); }
-  100% { filter: brightness(1) saturate(1); }
-}
-
-@keyframes supreme-entrance {
-  0% { filter: brightness(5) saturate(3); }
-  30% { filter: brightness(2) saturate(2); }
-  100% { filter: brightness(1) saturate(1); }
-}
-
-@keyframes particle-orbit {
-  0% { transform: rotate(0deg) translateX(12px) rotate(0deg) scale(1); opacity: 1; }
-  50% { opacity: 0.6; transform: rotate(180deg) translateX(12px) rotate(-180deg) scale(0.7); }
-  100% { transform: rotate(360deg) translateX(12px) rotate(-360deg) scale(1); opacity: 1; }
-}
-
-/* ===== CATCH LOG VISUAL UPGRADE ===== */
-
-.log-entry-legendary {
-  border-left: 3px solid #ffd600;
-  background: linear-gradient(90deg, rgba(255, 214, 0, 0.1) 0%, transparent 100%);
-  padding-left: 8px;
-}
-
-.log-entry-mythical {
-  border-left: 3px solid #e040fb;
-  background: linear-gradient(90deg, rgba(224, 64, 251, 0.1) 0%, transparent 100%);
-  padding-left: 8px;
-}
-
-.log-entry-supreme {
-  border-left: 3px solid #ff1744;
-  background: linear-gradient(90deg, rgba(255, 23, 68, 0.15) 0%, transparent 100%);
-  padding-left: 8px;
-  animation: log-glow-supreme 2s ease-in-out infinite;
-}
-
-.log-entry-votri {
-  border-left: 3px solid #00e5ff;
-  background: linear-gradient(90deg, rgba(0, 229, 255, 0.15) 0%, rgba(224, 64, 251, 0.05) 50%, transparent 100%);
-  padding-left: 8px;
-  animation: log-glow-votri 2s ease-in-out infinite;
-}
-
-@keyframes log-glow-supreme {
-  0%, 100% { box-shadow: inset 0 0 10px rgba(255, 23, 68, 0.1); }
-  50% { box-shadow: inset 0 0 20px rgba(255, 23, 68, 0.2); }
-}
-
-@keyframes log-glow-votri {
-  0%, 100% { box-shadow: inset 0 0 10px rgba(0, 229, 255, 0.1); }
-  50% { box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.2); }
-}
-
-/* ===== NEW CATCH REVEAL MODAL ANIMATIONS ===== */
-@keyframes catch-ray-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.catch-ray-spin {
-  position: absolute;
-  width: 180px;
-  height: 180px;
-  background: radial-gradient(circle, rgba(255, 152, 0, 0.2) 0%, rgba(255, 152, 0, 0) 70%);
-  background-size: cover;
-  animation: catch-ray-spin 10s linear infinite;
-  z-index: 1;
-}
-
-@keyframes catch-content-pop {
-  0% { transform: scale(0.7); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-.catch-reveal-content {
-  animation: catch-content-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-/* Fix broken image boxes when sprites fail to load or are loading */
-.fish-sprite-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: none;
-  vertical-align: middle;
-}
-
-.fish-sprite-img.loaded {
-  display: inline-block !important;
-}
-
-.fish-sprite-img.error {
-  display: none !important;
-}
-
-.emoji-fallback {
-  display: inline-block;
-}
-
-.emoji-fallback.hidden {
-  display: none !important;
-}
-
-/* ===== NEW STYLES FOR GAMEPLAY UPDATES ===== */
-.pet-slot.on-expedition {
-  opacity: 0.55;
-  filter: grayscale(0.7) brightness(0.65);
-  border-color: #33334d !important;
-  pointer-events: none;
-}
-
-.pet-slot-action-btn.on-exp {
-  background-color: #444 !important;
-  color: #888 !important;
-  cursor: not-allowed;
-}
-
-.buff-summary-panel {
-  display: block;
-  margin-top: 8px;
-  border: 1px solid rgba(255, 152, 0, 0.4);
-  border-radius: 8px;
-  padding: 10px;
-  background: rgba(255, 152, 0, 0.05);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.buff-summary-header {
-  font-size: 11px;
-  font-weight: bold;
-  color: #ff9800;
-  margin-bottom: 6px;
-  letter-spacing: 0.5px;
-}
-
-.buff-summary-metrics {
-  margin-bottom: 6px;
-}
-
-.buff-summary-combo {
-  font-size: 10px;
   color: #e2e8f0;
   border-top: 1px dashed rgba(255, 152, 0, 0.2);
   padding-top: 6px;
@@ -8866,4 +8702,374 @@
   line-height: 1.4;
 }
 
+/* Leaderboard */
+.leaderboard-summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  background: rgba(13, 18, 34, 0.82);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(111, 232, 255, 0.22);
+  margin-bottom: 12px;
+}
 
+.leaderboard-summary h4 {
+  margin: 0 0 5px;
+  color: var(--neo-cyan, #00e5ff);
+}
+
+.leaderboard-summary p {
+  margin: 0;
+  font-size: 11px;
+  color: var(--neo-muted, #9cacbd);
+}
+
+.leaderboard-player-rank {
+  color: var(--neo-gold, #ffd54f);
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.leaderboard-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  background: rgba(8, 12, 22, 0.72);
+  border: 1px solid rgba(111, 232, 255, 0.12);
+}
+
+.leaderboard-row-player {
+  background: rgba(0, 229, 255, 0.14);
+  border-color: rgba(0, 229, 255, 0.66);
+  box-shadow: 0 0 18px rgba(0, 229, 255, 0.13);
+}
+
+.leaderboard-rank {
+  width: 32px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--neo-text, #edf9ff);
+}
+
+.leaderboard-row-player .leaderboard-rank,
+.leaderboard-row-player .leaderboard-name {
+  color: var(--neo-cyan, #00e5ff);
+}
+
+.leaderboard-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.leaderboard-name {
+  font-weight: 800;
+  color: var(--neo-text, #edf9ff);
+  overflow-wrap: anywhere;
+}
+
+.leaderboard-title,
+.leaderboard-level {
+  color: var(--neo-muted, #9cacbd);
+  font-size: 11px;
+}
+
+.leaderboard-score {
+  text-align: right;
+  flex: 0 0 auto;
+}
+
+.leaderboard-gold {
+  color: var(--neo-gold, #ffd54f);
+  font-weight: 800;
+}
+
+@media (max-width: 520px) {
+  .leaderboard-summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* Pet tank neon refresh */
+#petTankPanel {
+  background: linear-gradient(180deg, rgba(13, 18, 34, 0.94), rgba(7, 10, 19, 0.96));
+  border: 1px solid var(--neo-line, rgba(111, 232, 255, 0.22));
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+#petTankPanel .pet-tank-toggle-header {
+  color: var(--neo-text, #edf9ff);
+  border-bottom: 1px solid rgba(111, 232, 255, 0.16);
+  padding-bottom: 8px;
+}
+
+#petTankPanel .toggle-title {
+  color: var(--neo-cyan, #00e5ff);
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  text-shadow: 0 0 12px rgba(0, 229, 255, 0.28);
+}
+
+#petTankContent {
+  color: var(--neo-text, #edf9ff);
+}
+
+#petTankContent .pet-slots-container {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 10px 0 12px;
+}
+
+#petTankContent .pet-slot {
+  min-height: 112px;
+  border-radius: 8px;
+  padding: 10px;
+  background: rgba(6, 9, 18, 0.74);
+  border: 1px dashed rgba(111, 232, 255, 0.2);
+}
+
+#petTankContent .pet-slot.empty {
+  border-color: rgba(0, 229, 255, 0.34);
+  background: radial-gradient(circle at 50% 18%, rgba(0, 229, 255, 0.12), rgba(6, 9, 18, 0.78) 58%);
+}
+
+#petTankContent .pet-slot.locked {
+  border-color: rgba(255, 213, 79, 0.28);
+  background: rgba(255, 213, 79, 0.04);
+}
+
+#petTankContent .pet-slot.occupied {
+  background: linear-gradient(180deg, rgba(18, 25, 46, 0.94), rgba(8, 12, 22, 0.95));
+  border-color: rgba(111, 232, 255, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+#petTankContent .pet-slot.occupied.active {
+  border-color: var(--rarity-color);
+  background:
+    radial-gradient(circle at 50% 18%, color-mix(in srgb, var(--rarity-color) 22%, transparent), transparent 46%),
+    linear-gradient(180deg, rgba(18, 25, 46, 0.98), rgba(8, 12, 22, 0.98));
+  box-shadow: 0 0 18px color-mix(in srgb, var(--rarity-color) 42%, transparent);
+}
+
+#petTankContent .pet-slot-badge,
+#petTankContent .pet-slot-btn.unlock,
+#petTankContent .pet-slot-action-btn,
+#petTankContent .pet-expedition-button,
+#petTankContent .pet-feed-item-button,
+#petTankContent .pet-poke-button,
+#petTankContent .pet-evo-button {
+  border: 0;
+  border-radius: 7px;
+  font-weight: 800;
+}
+
+#petTankContent .pet-slot-badge {
+  color: #06101b;
+  padding: 2px 6px;
+}
+
+#petTankContent .pet-slot-name,
+#petTankContent .pet-details-name {
+  color: var(--neo-gold, #ffd54f);
+  text-shadow: 0 0 10px rgba(255, 213, 79, 0.18);
+}
+
+#petTankContent .pet-slot-level,
+#petTankContent .pet-details-level,
+#petTankContent .pet-slot-desc,
+#petTankContent .pet-expedition-desc,
+#petTankContent .pet-feed-empty,
+#petTankContent .pet-feed-item-desc {
+  color: var(--neo-muted, #9cacbd);
+}
+
+#petTankContent .pet-details-container,
+#petTankContent .pet-expedition-panel,
+#petTankContent .pet-active-evo-display,
+#petTankContent .pet-evo-panel,
+#petTankContent .pet-effect-display {
+  border-radius: 8px;
+  background: rgba(8, 12, 22, 0.72);
+  border: 1px solid rgba(111, 232, 255, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+#petTankContent .pet-details-container {
+  margin-top: 0;
+  padding: 12px;
+}
+
+#petTankContent .pet-details-header {
+  gap: 10px;
+}
+
+#petTankContent .pet-details-sprite {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  font-size: 24px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.18), rgba(255, 61, 242, 0.12));
+  border: 1px solid rgba(111, 232, 255, 0.26);
+  flex: 0 0 auto;
+}
+
+#petTankContent .pet-details-main {
+  flex: 1;
+  min-width: 0;
+}
+
+#petTankContent .pet-details-name {
+  font-size: 14px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+#petTankContent .pet-details-level {
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+#petTankContent .pet-details-level b,
+#petTankContent .pet-progress-label span:last-child {
+  color: var(--neo-gold, #ffd54f);
+}
+
+#petTankContent .pet-progress-block {
+  margin-top: 12px;
+}
+
+#petTankContent .pet-progress-container {
+  height: 9px;
+  border: 1px solid rgba(111, 232, 255, 0.18);
+  background: rgba(3, 6, 13, 0.9);
+  border-radius: 999px;
+}
+
+#petTankContent .pet-progress-fill {
+  background: linear-gradient(90deg, var(--neo-cyan, #00e5ff), var(--neo-green, #00ff87), var(--neo-gold, #ffd54f));
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.35);
+}
+
+#petTankContent .pet-effect-display {
+  border-left: 3px solid var(--neo-gold, #ffd54f);
+}
+
+#petTankContent .pet-effect-label,
+#petTankContent .pet-expedition-title,
+#petTankContent .pet-active-evo-label {
+  color: var(--neo-cyan, #00e5ff);
+}
+
+#petTankContent .pet-effect-value,
+#petTankContent .pet-expedition-text,
+#petTankContent .pet-active-evo-value {
+  color: var(--neo-text, #edf9ff);
+}
+
+#petTankContent .pet-feed-label {
+  color: var(--neo-green, #00ff87);
+}
+
+#petTankContent .pet-feed-wrap {
+  margin-top: 8px;
+}
+
+#petTankContent .pet-feed-empty {
+  padding: 10px;
+  text-align: center;
+  font-size: 10.5px;
+}
+
+#petTankContent .pet-feed-item {
+  background: rgba(5, 8, 15, 0.76);
+  border-color: rgba(111, 232, 255, 0.14);
+}
+
+#petTankContent .pet-feed-emoji {
+  font-size: 16px;
+}
+
+#petTankContent .pet-expedition-controls {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+#petTankContent .pet-expedition-zone {
+  flex: 1;
+  min-width: 0;
+}
+
+#petTankContent .pet-expedition-duration {
+  width: 96px;
+  flex: 0 0 auto;
+}
+
+#petTankContent .pet-expedition-controls select {
+  height: 28px;
+  padding: 4px 8px;
+  font-size: 10px;
+  color: var(--neo-text, #edf9ff);
+  background-color: rgba(5, 8, 15, 0.92);
+  border: 1px solid rgba(111, 232, 255, 0.22);
+  border-radius: 7px;
+}
+
+#petTankContent .pet-poke-button,
+#petTankContent .pet-slot-action-btn.equip,
+#petTankContent .pet-expedition-button.start {
+  background: linear-gradient(135deg, var(--neo-cyan, #00e5ff), #008ba3);
+  color: #031018;
+}
+
+#petTankContent .pet-feed-item-button,
+#petTankContent .pet-expedition-button.claim {
+  background: linear-gradient(135deg, var(--neo-green, #00ff87), #9dff57);
+  color: #031018;
+}
+
+#petTankContent .pet-slot-action-btn.release {
+  background: linear-gradient(135deg, #ff4d6d, #b3133a);
+}
+
+#petTankContent .pet-slot-btn.unlock {
+  background: linear-gradient(135deg, var(--neo-gold, #ffd54f), #ff8f00);
+  color: #160f00;
+}
+
+#petTankContent .pet-slot-action-btn.equip.active,
+#petTankContent .pet-expedition-button.running,
+#petTankContent button:disabled {
+  background: rgba(78, 88, 108, 0.46) !important;
+  color: rgba(237, 249, 255, 0.52) !important;
+  cursor: not-allowed;
+}
+
+@media (max-width: 520px) {
+  #petTankContent .pet-slots-container {
+    grid-template-columns: 1fr;
+  }
+
+  #petTankContent .pet-details-header,
+  #petTankContent .pet-expedition-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  #petTankContent .pet-expedition-duration {
+    width: 100%;
+  }
+}
